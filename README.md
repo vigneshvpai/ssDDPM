@@ -1,6 +1,8 @@
-# ssDDPM: Self-Supervised Denoising Diffusion Probabilistic Models for Medical Imaging
+# ssDDPM: Self-supervised denoising diffusion probabilistic models for abdominal DW-MRI
 
-This repository contains an implementation of Self-Supervised Denoising Diffusion Probabilistic Models (ssDDPM) for medical image reconstruction and enhancement, based on the research paper published in Magnetic Resonance in Medicine.
+This repository contains an implementation of Self-Supervised Denoising Diffusion Probabilistic Models (ssDDPM) specifically designed for abdominal diffusion-weighted magnetic resonance imaging (DW-MRI) reconstruction and enhancement. This implementation is based on the research paper published in Magnetic Resonance in Medicine.
+
+## Paper Reference
 
 **Paper Reference:** [DOI: 10.1002/mrm.30536](https://doi.org/10.1002/mrm.30536)
 
