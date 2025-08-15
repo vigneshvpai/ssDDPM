@@ -1,16 +1,34 @@
 import torch
 import lightning as L
 import diffusers
-from .unet_2d import CustomUNet2D
+from diffusers.models.unet_2d import UNet2DModel
 
 
 class SSDDPM(L.LightningModule):
     def __init__(self, in_channels=3, out_channels=3, sample_size=32):
         super().__init__()
-        # Use custom UNet instead of default diffusers UNet
-        self.model = CustomUNet2D(
-            in_channels=in_channels, out_channels=out_channels, sample_size=sample_size
+        # Use a simple UNet from the diffusers library as our backbone
+        self.model = UNet2DModel(
+            sample_size=sample_size,
+            in_channels=in_channels,
+            out_channels=out_channels,
+            layers_per_block=2,  # Two layers per block as in our spec
+            block_out_channels=(64, 128, 128, 256),  # Our channel configuration
+            down_block_types=(
+                "DownBlock2D",
+                "DownBlock2D",
+                "AttnDownBlock2D",  # Attention at transition 1
+                "AttnDownBlock2D",  # Attention at transition 2
+            ),
+            up_block_types=(
+                "AttnUpBlock2D",  # Attention at transition 2
+                "AttnUpBlock2D",  # Attention at transition 1
+                "UpBlock2D",
+                "UpBlock2D",
+            ),
+            mid_block_type="UNetMidBlock2D",  # Use a standard mid block
         )
 
     def forward(self, x):
+        # Forward pass through our UNet model
         return self.model(x)
