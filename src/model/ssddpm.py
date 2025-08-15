@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import lightning as L
 import diffusers
-from diffusers.models.unet_2d import UNet2DModel
+from diffusers.models.unets.unet_2d import UNet2DModel
 
 
 class SSDDPM(L.LightningModule):
@@ -35,7 +35,6 @@ class SSDDPM(L.LightningModule):
             mid_block_type="UNetMidBlock2D",  # Use a standard mid block
             time_embedding_type="positional",  # Enable time embedding
             time_embedding_dim=128,  # Dimension of time embedding
-            time_embedding_act_fn="silu",  # Activation function for time embedding
         )
 
     def sample_timesteps(self, batch_size, device=None):
@@ -98,4 +97,4 @@ class SSDDPM(L.LightningModule):
             timesteps = self.sample_timesteps(batch_size, device=x.device)
 
         # Forward pass through our UNet model with time conditioning
-        return self.model(x, timesteps=timesteps)
+        return self.model(x, timestep=timesteps)
