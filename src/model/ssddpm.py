@@ -38,13 +38,45 @@ class SSDDPM(L.LightningModule):
             time_embedding_act_fn="silu",  # Activation function for time embedding
         )
 
-    def forward(self, x, timesteps):
+    def sample_timesteps(self, batch_size, device=None):
+        """
+        Sample timesteps from Uniform({1, ..., T})
+
+        Args:
+            batch_size: Number of timesteps to sample
+            device: Device to place the tensor on (default: same as model)
+
+        Returns:
+            timesteps: Tensor of shape (batch_size,) with values from {1, ..., T}
+        """
+        if device is None:
+            device = next(self.parameters()).device
+
+        # Sample from Uniform({1, ..., T})
+        # Note: We use 1 to T (not 0 to T-1) as per the algorithm
+        timesteps = torch.randint(
+            low=1,
+            high=self.num_timesteps + 1,  # +1 because randint high is exclusive
+            size=(batch_size,),
+            device=device,
+        )
+
+        return timesteps
+
+    def forward(self, x, timesteps=None):
         """
         Forward pass through the DDPM model
 
         Args:
             x: Input tensor of shape (batch_size, channels, height, width)
-            timesteps: Timestep tensor of shape (batch_size,) indicating noise level
+            timesteps: Timestep tensor of shape (batch_size,) indicating noise level.
+                      If None, will sample timesteps automatically.
         """
+        batch_size = x.shape[0]
+
+        # Sample timesteps if not provided
+        if timesteps is None:
+            timesteps = self.sample_timesteps(batch_size, device=x.device)
+
         # Forward pass through our UNet model with time conditioning
         return self.model(x, timesteps=timesteps)
