@@ -63,6 +63,25 @@ class SSDDPM(L.LightningModule):
 
         return timesteps
 
+    def sample_noise(self, shape, device=None):
+        """
+        Sample noise from N(0, I) - standard normal distribution
+
+        Args:
+            shape: Shape of the noise tensor (e.g., (batch_size, channels, height, width))
+            device: Device to place the tensor on (default: same as model)
+
+        Returns:
+            noise: Tensor of shape 'shape' sampled from N(0, I)
+        """
+        if device is None:
+            device = next(self.parameters()).device
+
+        # Sample from standard normal distribution N(0, I)
+        noise = torch.randn(shape, device=device)
+
+        return noise
+
     def forward(self, x, timesteps=None):
         """
         Forward pass through the DDPM model
