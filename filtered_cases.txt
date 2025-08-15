@@ -1,0 +1,1253 @@
+# DWI Dataset Filter Results
+# Target bval sequence: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+# Total matching cases: 184
+# Total case directories: 114
+# Matching case directories: 109
+
+Case: earthworm0133
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0133
+Matching files:
+  - NII: earthworm0133_ep2d_diffusion_uterus_sag_second_20250714152907_15.nii.gz
+  - BVAL: earthworm0133_ep2d_diffusion_uterus_sag_second_20250714152907_15.bval
+  - BVEC: earthworm0133_ep2d_diffusion_uterus_sag_second_20250714152907_15.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0133_ep2d_diffusion_uterus_sag_first_20250714152907_6.nii.gz
+  - BVAL: earthworm0133_ep2d_diffusion_uterus_sag_first_20250714152907_6.bval
+  - BVEC: earthworm0133_ep2d_diffusion_uterus_sag_first_20250714152907_6.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0027
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0027
+Matching files:
+  - NII: earthworm0027_ep2d_diff_sag_uterus_DRB_20250220160722_18.nii.gz
+  - BVAL: earthworm0027_ep2d_diff_sag_uterus_DRB_20250220160722_18.bval
+  - BVEC: earthworm0027_ep2d_diff_sag_uterus_DRB_20250220160722_18.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0029
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0029
+Matching files:
+  - NII: earthworm0029_ep2d_diff_sag_uterus_DRB_20250221161232_27.nii.gz
+  - BVAL: earthworm0029_ep2d_diff_sag_uterus_DRB_20250221161232_27.bval
+  - BVEC: earthworm0029_ep2d_diff_sag_uterus_DRB_20250221161232_27.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0089
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0089
+Matching files:
+  - NII: earthworm0089_ep2d_diffusion_uterus_sag_first_20250527180834_5.nii.gz
+  - BVAL: earthworm0089_ep2d_diffusion_uterus_sag_first_20250527180834_5.bval
+  - BVEC: earthworm0089_ep2d_diffusion_uterus_sag_first_20250527180834_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0089_ep2d_diffusion_uterus_sag_second_20250527180834_17.nii.gz
+  - BVAL: earthworm0089_ep2d_diffusion_uterus_sag_second_20250527180834_17.bval
+  - BVEC: earthworm0089_ep2d_diffusion_uterus_sag_second_20250527180834_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0157
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0157
+Matching files:
+  - NII: earthworm0157_ep2d_diffusion_uterus_sag_second_20250813142557_15.nii.gz
+  - BVAL: earthworm0157_ep2d_diffusion_uterus_sag_second_20250813142557_15.bval
+  - BVEC: earthworm0157_ep2d_diffusion_uterus_sag_second_20250813142557_15.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0157_ep2d_diffusion_uterus_sag_first_20250813142557_5.nii.gz
+  - BVAL: earthworm0157_ep2d_diffusion_uterus_sag_first_20250813142557_5.bval
+  - BVEC: earthworm0157_ep2d_diffusion_uterus_sag_first_20250813142557_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0088
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0088
+Matching files:
+  - NII: earthworm0088_ep2d_diffusion_uterus_sag_second_20250527165035_18.nii.gz
+  - BVAL: earthworm0088_ep2d_diffusion_uterus_sag_second_20250527165035_18.bval
+  - BVEC: earthworm0088_ep2d_diffusion_uterus_sag_second_20250527165035_18.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0088_ep2d_diffusion_uterus_sag_first_20250527165035_5.nii.gz
+  - BVAL: earthworm0088_ep2d_diffusion_uterus_sag_first_20250527165035_5.bval
+  - BVEC: earthworm0088_ep2d_diffusion_uterus_sag_first_20250527165035_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0028
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0028
+Matching files:
+  - NII: earthworm0028_ep2d_diff_sag_uterus_DRB_20250220175540_28.nii.gz
+  - BVAL: earthworm0028_ep2d_diff_sag_uterus_DRB_20250220175540_28.bval
+  - BVEC: earthworm0028_ep2d_diff_sag_uterus_DRB_20250220175540_28.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0028_ep2d_diff_sag_uterus_DRB_20250220175540_26.nii.gz
+  - BVAL: earthworm0028_ep2d_diff_sag_uterus_DRB_20250220175540_26.bval
+  - BVEC: earthworm0028_ep2d_diff_sag_uterus_DRB_20250220175540_26.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0115
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0115
+Matching files:
+  - NII: earthworm0115_ep2d_diffusion_uterus_sag_first_20250625153806_5.nii.gz
+  - BVAL: earthworm0115_ep2d_diffusion_uterus_sag_first_20250625153806_5.bval
+  - BVEC: earthworm0115_ep2d_diffusion_uterus_sag_first_20250625153806_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0115_ep2d_diffusion_uterus_sag_second_20250625153806_17.nii.gz
+  - BVAL: earthworm0115_ep2d_diffusion_uterus_sag_second_20250625153806_17.bval
+  - BVEC: earthworm0115_ep2d_diffusion_uterus_sag_second_20250625153806_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0011_1
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0011_1
+Matching files:
+  - NII: earthworm0011_1_ep2d_diff_3mm_trueax_brain_20241204182321_11.nii.gz
+  - BVAL: earthworm0011_1_ep2d_diff_3mm_trueax_brain_20241204182321_11.bval
+  - BVEC: earthworm0011_1_ep2d_diff_3mm_trueax_brain_20241204182321_11.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0032
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0032
+Matching files:
+  - NII: earthworm0032_ep2d_diff_sag_uterus_DRB_20250305150512_32.nii.gz
+  - BVAL: earthworm0032_ep2d_diff_sag_uterus_DRB_20250305150512_32.bval
+  - BVEC: earthworm0032_ep2d_diff_sag_uterus_DRB_20250305150512_32.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0018
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0018
+Matching files:
+  - NII: earthworm0018_ep2d_diff_3mm_trueax_brain_20250116174031_15.nii.gz
+  - BVAL: earthworm0018_ep2d_diff_3mm_trueax_brain_20250116174031_15.bval
+  - BVEC: earthworm0018_ep2d_diff_3mm_trueax_brain_20250116174031_15.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0018_ep2d_diff_3mm_trueax_brain_20250116174031_13.nii.gz
+  - BVAL: earthworm0018_ep2d_diff_3mm_trueax_brain_20250116174031_13.bval
+  - BVEC: earthworm0018_ep2d_diff_3mm_trueax_brain_20250116174031_13.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0018_ep2d_diff_uterus_DRB_20250116174031_17.nii.gz
+  - BVAL: earthworm0018_ep2d_diff_uterus_DRB_20250116174031_17.bval
+  - BVEC: earthworm0018_ep2d_diff_uterus_DRB_20250116174031_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0038
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0038
+Matching files:
+  - NII: earthworm0038_ep2d_diffusion_uterus_sag_first_20250416132256_6.nii.gz
+  - BVAL: earthworm0038_ep2d_diffusion_uterus_sag_first_20250416132256_6.bval
+  - BVEC: earthworm0038_ep2d_diffusion_uterus_sag_first_20250416132256_6.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0112
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0112
+Matching files:
+  - NII: earthworm0112_ep2d_diffusion_uterus_sag_second_20250623163109_17.nii.gz
+  - BVAL: earthworm0112_ep2d_diffusion_uterus_sag_second_20250623163109_17.bval
+  - BVEC: earthworm0112_ep2d_diffusion_uterus_sag_second_20250623163109_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0112_ep2d_diffusion_uterus_sag_first_20250623163109_5.nii.gz
+  - BVAL: earthworm0112_ep2d_diffusion_uterus_sag_first_20250623163109_5.bval
+  - BVEC: earthworm0112_ep2d_diffusion_uterus_sag_first_20250623163109_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0072
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0072
+Matching files:
+  - NII: earthworm0072_ep2d_diffusion_uterus_sag_first_20250516160549_5.nii.gz
+  - BVAL: earthworm0072_ep2d_diffusion_uterus_sag_first_20250516160549_5.bval
+  - BVEC: earthworm0072_ep2d_diffusion_uterus_sag_first_20250516160549_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0072_ep2d_diffusion_uterus_sag_second_20250516160549_17.nii.gz
+  - BVAL: earthworm0072_ep2d_diffusion_uterus_sag_second_20250516160549_17.bval
+  - BVEC: earthworm0072_ep2d_diffusion_uterus_sag_second_20250516160549_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0119
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0119
+Matching files:
+  - NII: earthworm0119_ep2d_diffusion_uterus_sag_first_20250630160309_9.nii.gz
+  - BVAL: earthworm0119_ep2d_diffusion_uterus_sag_first_20250630160309_9.bval
+  - BVEC: earthworm0119_ep2d_diffusion_uterus_sag_first_20250630160309_9.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0034
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0034
+Matching files:
+  - NII: earthworm0034_ep2d_diff_sag_uterus_DRB_20250318160955_10.nii.gz
+  - BVAL: earthworm0034_ep2d_diff_sag_uterus_DRB_20250318160955_10.bval
+  - BVEC: earthworm0034_ep2d_diff_sag_uterus_DRB_20250318160955_10.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0034_ep2d_diff_sag_uterus_DRB_20250318160955_22.nii.gz
+  - BVAL: earthworm0034_ep2d_diff_sag_uterus_DRB_20250318160955_22.bval
+  - BVEC: earthworm0034_ep2d_diff_sag_uterus_DRB_20250318160955_22.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0138
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0138
+Matching files:
+  - NII: earthworm0138_ep2d_diffusion_uterus_sag_second_20250716163346_17.nii.gz
+  - BVAL: earthworm0138_ep2d_diffusion_uterus_sag_second_20250716163346_17.bval
+  - BVEC: earthworm0138_ep2d_diffusion_uterus_sag_second_20250716163346_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0138_ep2d_diffusion_uterus_sag_first_20250716163346_5.nii.gz
+  - BVAL: earthworm0138_ep2d_diffusion_uterus_sag_first_20250716163346_5.bval
+  - BVEC: earthworm0138_ep2d_diffusion_uterus_sag_first_20250716163346_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0136
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0136
+Matching files:
+  - NII: earthworm0136_ep2d_diffusion_uterus_sag_second_20250716142926_15.nii.gz
+  - BVAL: earthworm0136_ep2d_diffusion_uterus_sag_second_20250716142926_15.bval
+  - BVEC: earthworm0136_ep2d_diffusion_uterus_sag_second_20250716142926_15.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0136_ep2d_diffusion_uterus_sag_first_20250716142926_5.nii.gz
+  - BVAL: earthworm0136_ep2d_diffusion_uterus_sag_first_20250716142926_5.bval
+  - BVEC: earthworm0136_ep2d_diffusion_uterus_sag_first_20250716142926_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0001_3
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0001_3
+Matching files:
+  - NII: earthworm0001_3_ep2d_diff_sag_uterus_DRB_20250228161150_55.nii.gz
+  - BVAL: earthworm0001_3_ep2d_diff_sag_uterus_DRB_20250228161150_55.bval
+  - BVEC: earthworm0001_3_ep2d_diff_sag_uterus_DRB_20250228161150_55.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0060
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0060
+Matching files:
+  - NII: earthworm0060_ep2d_diffusion_uterus_sag_first_20250502164255_5.nii.gz
+  - BVAL: earthworm0060_ep2d_diffusion_uterus_sag_first_20250502164255_5.bval
+  - BVEC: earthworm0060_ep2d_diffusion_uterus_sag_first_20250502164255_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0060_ep2d_diffusion_uterus_sag_second_20250502164255_17.nii.gz
+  - BVAL: earthworm0060_ep2d_diffusion_uterus_sag_second_20250502164255_17.bval
+  - BVEC: earthworm0060_ep2d_diffusion_uterus_sag_second_20250502164255_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0120
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0120
+Matching files:
+  - NII: earthworm0120_ep2d_diffusion_uterus_sag_first_20250630164130_6.nii.gz
+  - BVAL: earthworm0120_ep2d_diffusion_uterus_sag_first_20250630164130_6.bval
+  - BVEC: earthworm0120_ep2d_diffusion_uterus_sag_first_20250630164130_6.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0155
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0155
+Matching files:
+  - NII: earthworm0155_ep2d_diffusion_uterus_sag_second_20250806143409_17.nii.gz
+  - BVAL: earthworm0155_ep2d_diffusion_uterus_sag_second_20250806143409_17.bval
+  - BVEC: earthworm0155_ep2d_diffusion_uterus_sag_second_20250806143409_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0155_ep2d_diffusion_uterus_sag_first_20250806143409_5.nii.gz
+  - BVAL: earthworm0155_ep2d_diffusion_uterus_sag_first_20250806143409_5.bval
+  - BVEC: earthworm0155_ep2d_diffusion_uterus_sag_first_20250806143409_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0125
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0125
+Matching files:
+  - NII: earthworm0125_ep2d_diffusion_uterus_sag_first_20250709144037_5.nii.gz
+  - BVAL: earthworm0125_ep2d_diffusion_uterus_sag_first_20250709144037_5.bval
+  - BVEC: earthworm0125_ep2d_diffusion_uterus_sag_first_20250709144037_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0125_ep2d_diffusion_uterus_sag_second_20250709144037_18.nii.gz
+  - BVAL: earthworm0125_ep2d_diffusion_uterus_sag_second_20250709144037_18.bval
+  - BVEC: earthworm0125_ep2d_diffusion_uterus_sag_second_20250709144037_18.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0129
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0129
+Matching files:
+  - NII: earthworm0129_ep2d_diffusion_uterus_sag_first_20250711131157_6.nii.gz
+  - BVAL: earthworm0129_ep2d_diffusion_uterus_sag_first_20250711131157_6.bval
+  - BVEC: earthworm0129_ep2d_diffusion_uterus_sag_first_20250711131157_6.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0033
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0033
+Matching files:
+  - NII: earthworm0033_ep2d_diff_sag_uterus_DRB_20250313170453_28.nii.gz
+  - BVAL: earthworm0033_ep2d_diff_sag_uterus_DRB_20250313170453_28.bval
+  - BVEC: earthworm0033_ep2d_diff_sag_uterus_DRB_20250313170453_28.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0033_ep2d_diff_sag_uterus_DRB_20250313170453_38.nii.gz
+  - BVAL: earthworm0033_ep2d_diff_sag_uterus_DRB_20250313170453_38.bval
+  - BVEC: earthworm0033_ep2d_diff_sag_uterus_DRB_20250313170453_38.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0103
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0103
+Matching files:
+  - NII: earthworm0103_ep2d_diffusion_uterus_sag_first_20250616154339_5.nii.gz
+  - BVAL: earthworm0103_ep2d_diffusion_uterus_sag_first_20250616154339_5.bval
+  - BVEC: earthworm0103_ep2d_diffusion_uterus_sag_first_20250616154339_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0102
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0102
+Matching files:
+  - NII: earthworm0102_ep2d_diffusion_uterus_sag_first_20250613130431_5.nii.gz
+  - BVAL: earthworm0102_ep2d_diffusion_uterus_sag_first_20250613130431_5.bval
+  - BVEC: earthworm0102_ep2d_diffusion_uterus_sag_first_20250613130431_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0102_ep2d_diffusion_uterus_sag_second_20250613130431_16.nii.gz
+  - BVAL: earthworm0102_ep2d_diffusion_uterus_sag_second_20250613130431_16.bval
+  - BVEC: earthworm0102_ep2d_diffusion_uterus_sag_second_20250613130431_16.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0098
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0098
+Matching files:
+  - NII: earthworm0098_ep2d_diffusion_uterus_sag_first_20250604153705_5.nii.gz
+  - BVAL: earthworm0098_ep2d_diffusion_uterus_sag_first_20250604153705_5.bval
+  - BVEC: earthworm0098_ep2d_diffusion_uterus_sag_first_20250604153705_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0098_ep2d_diffusion_uterus_sag_second_20250604153705_17.nii.gz
+  - BVAL: earthworm0098_ep2d_diffusion_uterus_sag_second_20250604153705_17.bval
+  - BVEC: earthworm0098_ep2d_diffusion_uterus_sag_second_20250604153705_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0127
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0127
+Matching files:
+  - NII: earthworm0127_ep2d_diffusion_uterus_sag_second_20250709164616_21.nii.gz
+  - BVAL: earthworm0127_ep2d_diffusion_uterus_sag_second_20250709164616_21.bval
+  - BVEC: earthworm0127_ep2d_diffusion_uterus_sag_second_20250709164616_21.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0127_ep2d_diffusion_uterus_sag_first_20250709164616_6.nii.gz
+  - BVAL: earthworm0127_ep2d_diffusion_uterus_sag_first_20250709164616_6.bval
+  - BVEC: earthworm0127_ep2d_diffusion_uterus_sag_first_20250709164616_6.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0016
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0016
+Matching files:
+  - NII: earthworm0016_ep2d_diff_3mm_trueax_brain_20250115162249_14.nii.gz
+  - BVAL: earthworm0016_ep2d_diff_3mm_trueax_brain_20250115162249_14.bval
+  - BVEC: earthworm0016_ep2d_diff_3mm_trueax_brain_20250115162249_14.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0097
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0097
+Matching files:
+  - NII: earthworm0097_ep2d_diffusion_uterus_sag_first_20250602174523_5.nii.gz
+  - BVAL: earthworm0097_ep2d_diffusion_uterus_sag_first_20250602174523_5.bval
+  - BVEC: earthworm0097_ep2d_diffusion_uterus_sag_first_20250602174523_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0097_ep2d_diffusion_uterus_sag_second_20250602174523_18.nii.gz
+  - BVAL: earthworm0097_ep2d_diffusion_uterus_sag_second_20250602174523_18.bval
+  - BVEC: earthworm0097_ep2d_diffusion_uterus_sag_second_20250602174523_18.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0123
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0123
+Matching files:
+  - NII: earthworm0123_ep2d_diffusion_uterus_sag_second_20250704152236_15.nii.gz
+  - BVAL: earthworm0123_ep2d_diffusion_uterus_sag_second_20250704152236_15.bval
+  - BVEC: earthworm0123_ep2d_diffusion_uterus_sag_second_20250704152236_15.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0123_ep2d_diffusion_uterus_sag_first_20250704152236_6.nii.gz
+  - BVAL: earthworm0123_ep2d_diffusion_uterus_sag_first_20250704152236_6.bval
+  - BVEC: earthworm0123_ep2d_diffusion_uterus_sag_first_20250704152236_6.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0073
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0073
+Matching files:
+  - NII: earthworm0073_ep2d_diffusion_uterus_sag_second_20250516171646_19.nii.gz
+  - BVAL: earthworm0073_ep2d_diffusion_uterus_sag_second_20250516171646_19.bval
+  - BVEC: earthworm0073_ep2d_diffusion_uterus_sag_second_20250516171646_19.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0073_ep2d_diffusion_uterus_sag_first_20250516171646_7.nii.gz
+  - BVAL: earthworm0073_ep2d_diffusion_uterus_sag_first_20250516171646_7.bval
+  - BVEC: earthworm0073_ep2d_diffusion_uterus_sag_first_20250516171646_7.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0013
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0013
+Matching files:
+  - NII: earthworm0013_ep2d_diff_3mm_trueax_brain_20241121161306_22.nii.gz
+  - BVAL: earthworm0013_ep2d_diff_3mm_trueax_brain_20241121161306_22.bval
+  - BVEC: earthworm0013_ep2d_diff_3mm_trueax_brain_20241121161306_22.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0144
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0144
+Matching files:
+  - NII: earthworm0144_ep2d_diffusion_uterus_sag_first_20250723143759_5.nii.gz
+  - BVAL: earthworm0144_ep2d_diffusion_uterus_sag_first_20250723143759_5.bval
+  - BVEC: earthworm0144_ep2d_diffusion_uterus_sag_first_20250723143759_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0144_ep2d_diffusion_uterus_sag_second_20250723143759_17.nii.gz
+  - BVAL: earthworm0144_ep2d_diffusion_uterus_sag_second_20250723143759_17.bval
+  - BVEC: earthworm0144_ep2d_diffusion_uterus_sag_second_20250723143759_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0096
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0096
+Matching files:
+  - NII: earthworm0096_ep2d_diffusion_uterus_sag_second_20250602164404_17.nii.gz
+  - BVAL: earthworm0096_ep2d_diffusion_uterus_sag_second_20250602164404_17.bval
+  - BVEC: earthworm0096_ep2d_diffusion_uterus_sag_second_20250602164404_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0096_ep2d_diffusion_uterus_sag_first_20250602164404_5.nii.gz
+  - BVAL: earthworm0096_ep2d_diffusion_uterus_sag_first_20250602164404_5.bval
+  - BVEC: earthworm0096_ep2d_diffusion_uterus_sag_first_20250602164404_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0082
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0082
+Matching files:
+  - NII: earthworm0082_ep2d_diffusion_uterus_sag_first_20250521184831_5.nii.gz
+  - BVAL: earthworm0082_ep2d_diffusion_uterus_sag_first_20250521184831_5.bval
+  - BVEC: earthworm0082_ep2d_diffusion_uterus_sag_first_20250521184831_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0137
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0137
+Matching files:
+  - NII: earthworm0137_ep2d_diffusion_uterus_sag_second_20250716153505_17.nii.gz
+  - BVAL: earthworm0137_ep2d_diffusion_uterus_sag_second_20250716153505_17.bval
+  - BVEC: earthworm0137_ep2d_diffusion_uterus_sag_second_20250716153505_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0137_ep2d_diffusion_uterus_sag_first_20250716153505_5.nii.gz
+  - BVAL: earthworm0137_ep2d_diffusion_uterus_sag_first_20250716153505_5.bval
+  - BVEC: earthworm0137_ep2d_diffusion_uterus_sag_first_20250716153505_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0054
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0054
+Matching files:
+  - NII: earthworm0054_ep2d_diffusion_uterus_sag_second_20250428153803_17.nii.gz
+  - BVAL: earthworm0054_ep2d_diffusion_uterus_sag_second_20250428153803_17.bval
+  - BVEC: earthworm0054_ep2d_diffusion_uterus_sag_second_20250428153803_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0054_ep2d_diffusion_uterus_sag_first_20250428153803_5.nii.gz
+  - BVAL: earthworm0054_ep2d_diffusion_uterus_sag_first_20250428153803_5.bval
+  - BVEC: earthworm0054_ep2d_diffusion_uterus_sag_first_20250428153803_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0130
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0130
+Matching files:
+  - NII: earthworm0130_ep2d_diffusion_uterus_sag_first_20250711153636_5.nii.gz
+  - BVAL: earthworm0130_ep2d_diffusion_uterus_sag_first_20250711153636_5.bval
+  - BVEC: earthworm0130_ep2d_diffusion_uterus_sag_first_20250711153636_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0130_ep2d_diffusion_uterus_sag_second_20250711153636_18.nii.gz
+  - BVAL: earthworm0130_ep2d_diffusion_uterus_sag_second_20250711153636_18.bval
+  - BVEC: earthworm0130_ep2d_diffusion_uterus_sag_second_20250711153636_18.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0036
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0036
+Matching files:
+  - NII: earthworm0036_ep2d_diff_sag_uterus_DRB_20250319161710_21.nii.gz
+  - BVAL: earthworm0036_ep2d_diff_sag_uterus_DRB_20250319161710_21.bval
+  - BVEC: earthworm0036_ep2d_diff_sag_uterus_DRB_20250319161710_21.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0065
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0065
+Matching files:
+  - NII: earthworm0065_ep2d_diffusion_uterus_sag_second_20250506173235_17.nii.gz
+  - BVAL: earthworm0065_ep2d_diffusion_uterus_sag_second_20250506173235_17.bval
+  - BVEC: earthworm0065_ep2d_diffusion_uterus_sag_second_20250506173235_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0065_ep2d_diffusion_uterus_sag_first_20250506173235_5.nii.gz
+  - BVAL: earthworm0065_ep2d_diffusion_uterus_sag_first_20250506173235_5.bval
+  - BVEC: earthworm0065_ep2d_diffusion_uterus_sag_first_20250506173235_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0139
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0139
+Matching files:
+  - NII: earthworm0139_ep2d_diffusion_uterus_sag_first_20250716174933_7.nii.gz
+  - BVAL: earthworm0139_ep2d_diffusion_uterus_sag_first_20250716174933_7.bval
+  - BVEC: earthworm0139_ep2d_diffusion_uterus_sag_first_20250716174933_7.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0111
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0111
+Matching files:
+  - NII: earthworm0111_ep2d_diffusion_uterus_sag_second_20250623152859_17.nii.gz
+  - BVAL: earthworm0111_ep2d_diffusion_uterus_sag_second_20250623152859_17.bval
+  - BVEC: earthworm0111_ep2d_diffusion_uterus_sag_second_20250623152859_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0111_ep2d_diffusion_uterus_sag_first_20250623152859_5.nii.gz
+  - BVAL: earthworm0111_ep2d_diffusion_uterus_sag_first_20250623152859_5.bval
+  - BVEC: earthworm0111_ep2d_diffusion_uterus_sag_first_20250623152859_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0081
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0081
+Matching files:
+  - NII: earthworm0081_ep2d_diffusion_uterus_sag_second_20250521174346_18.nii.gz
+  - BVAL: earthworm0081_ep2d_diffusion_uterus_sag_second_20250521174346_18.bval
+  - BVEC: earthworm0081_ep2d_diffusion_uterus_sag_second_20250521174346_18.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0081_ep2d_diffusion_uterus_sag_first_20250521174346_5.nii.gz
+  - BVAL: earthworm0081_ep2d_diffusion_uterus_sag_first_20250521174346_5.bval
+  - BVEC: earthworm0081_ep2d_diffusion_uterus_sag_first_20250521174346_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0057
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0057
+Matching files:
+  - NII: earthworm0057_ep2d_diffusion_uterus_sag_second_20250430164719_17.nii.gz
+  - BVAL: earthworm0057_ep2d_diffusion_uterus_sag_second_20250430164719_17.bval
+  - BVEC: earthworm0057_ep2d_diffusion_uterus_sag_second_20250430164719_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0057_ep2d_diffusion_uterus_sag_first_20250430164719_5.nii.gz
+  - BVAL: earthworm0057_ep2d_diffusion_uterus_sag_first_20250430164719_5.bval
+  - BVEC: earthworm0057_ep2d_diffusion_uterus_sag_first_20250430164719_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0014
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0014
+Matching files:
+  - NII: earthworm0014_ep2d_diff_3mm_trueax_brain_20241121172654_31.nii.gz
+  - BVAL: earthworm0014_ep2d_diff_3mm_trueax_brain_20241121172654_31.bval
+  - BVEC: earthworm0014_ep2d_diff_3mm_trueax_brain_20241121172654_31.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0093
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0093
+Matching files:
+  - NII: earthworm0093_ep2d_diffusion_uterus_sag_second_20250528175744_17.nii.gz
+  - BVAL: earthworm0093_ep2d_diffusion_uterus_sag_second_20250528175744_17.bval
+  - BVEC: earthworm0093_ep2d_diffusion_uterus_sag_second_20250528175744_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0093_ep2d_diffusion_uterus_sag_first_20250528175744_5.nii.gz
+  - BVAL: earthworm0093_ep2d_diffusion_uterus_sag_first_20250528175744_5.bval
+  - BVEC: earthworm0093_ep2d_diffusion_uterus_sag_first_20250528175744_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0109
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0109
+Matching files:
+  - NII: earthworm0109_ep2d_diffusion_uterus_sag_second_20250620153202_17.nii.gz
+  - BVAL: earthworm0109_ep2d_diffusion_uterus_sag_second_20250620153202_17.bval
+  - BVEC: earthworm0109_ep2d_diffusion_uterus_sag_second_20250620153202_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0109_ep2d_diffusion_uterus_sag_first_20250620153202_5.nii.gz
+  - BVAL: earthworm0109_ep2d_diffusion_uterus_sag_first_20250620153202_5.bval
+  - BVEC: earthworm0109_ep2d_diffusion_uterus_sag_first_20250620153202_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0083
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0083
+Matching files:
+  - NII: earthworm0083_ep2d_diffusion_uterus_sag_first_20250523125621_5.nii.gz
+  - BVAL: earthworm0083_ep2d_diffusion_uterus_sag_first_20250523125621_5.bval
+  - BVEC: earthworm0083_ep2d_diffusion_uterus_sag_first_20250523125621_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0066
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0066
+Matching files:
+  - NII: earthworm0066_ep2d_diffusion_uterus_sag_second_20250509152936_17.nii.gz
+  - BVAL: earthworm0066_ep2d_diffusion_uterus_sag_second_20250509152936_17.bval
+  - BVEC: earthworm0066_ep2d_diffusion_uterus_sag_second_20250509152936_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0066_ep2d_diffusion_uterus_sag_first_20250509152936_5.nii.gz
+  - BVAL: earthworm0066_ep2d_diffusion_uterus_sag_first_20250509152936_5.bval
+  - BVEC: earthworm0066_ep2d_diffusion_uterus_sag_first_20250509152936_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0023
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0023
+Matching files:
+  - NII: earthworm0023_ep2d_diff_sag_uterus_DRB_20250213161738_17.nii.gz
+  - BVAL: earthworm0023_ep2d_diff_sag_uterus_DRB_20250213161738_17.bval
+  - BVEC: earthworm0023_ep2d_diff_sag_uterus_DRB_20250213161738_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0094
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0094
+Matching files:
+  - NII: earthworm0094_ep2d_diffusion_uterus_sag_first_20250530101919_5.nii.gz
+  - BVAL: earthworm0094_ep2d_diffusion_uterus_sag_first_20250530101919_5.bval
+  - BVEC: earthworm0094_ep2d_diffusion_uterus_sag_first_20250530101919_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0107
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0107
+Matching files:
+  - NII: earthworm0107_ep2d_diffusion_uterus_sag_second_20250618163426_17.nii.gz
+  - BVAL: earthworm0107_ep2d_diffusion_uterus_sag_second_20250618163426_17.bval
+  - BVEC: earthworm0107_ep2d_diffusion_uterus_sag_second_20250618163426_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0107_ep2d_diffusion_uterus_sag_first_20250618163426_5.nii.gz
+  - BVAL: earthworm0107_ep2d_diffusion_uterus_sag_first_20250618163426_5.bval
+  - BVEC: earthworm0107_ep2d_diffusion_uterus_sag_first_20250618163426_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0132
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0132
+Matching files:
+  - NII: earthworm0132_ep2d_diffusion_uterus_sag_first_20250711175216_5.nii.gz
+  - BVAL: earthworm0132_ep2d_diffusion_uterus_sag_first_20250711175216_5.bval
+  - BVEC: earthworm0132_ep2d_diffusion_uterus_sag_first_20250711175216_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0132_ep2d_diffusion_uterus_sag_second_20250711175216_17.nii.gz
+  - BVAL: earthworm0132_ep2d_diffusion_uterus_sag_second_20250711175216_17.bval
+  - BVEC: earthworm0132_ep2d_diffusion_uterus_sag_second_20250711175216_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0118
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0118
+Matching files:
+  - NII: earthworm0118_ep2d_diffusion_uterus_sag_first_20250627152257_5.nii.gz
+  - BVAL: earthworm0118_ep2d_diffusion_uterus_sag_first_20250627152257_5.bval
+  - BVEC: earthworm0118_ep2d_diffusion_uterus_sag_first_20250627152257_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0118_ep2d_diffusion_uterus_sag_second_20250627152257_17.nii.gz
+  - BVAL: earthworm0118_ep2d_diffusion_uterus_sag_second_20250627152257_17.bval
+  - BVEC: earthworm0118_ep2d_diffusion_uterus_sag_second_20250627152257_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0015
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0015
+Matching files:
+  - NII: earthworm0015_ep2d_diff_3mm_trueax_brain_20241206160507_12.nii.gz
+  - BVAL: earthworm0015_ep2d_diff_3mm_trueax_brain_20241206160507_12.bval
+  - BVEC: earthworm0015_ep2d_diff_3mm_trueax_brain_20241206160507_12.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0151
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0151
+Matching files:
+  - NII: earthworm0151_ep2d_diffusion_uterus_sag_first_20250801143945_5.nii.gz
+  - BVAL: earthworm0151_ep2d_diffusion_uterus_sag_first_20250801143945_5.bval
+  - BVEC: earthworm0151_ep2d_diffusion_uterus_sag_first_20250801143945_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0151_ep2d_diffusion_uterus_sag_second_20250801143945_19.nii.gz
+  - BVAL: earthworm0151_ep2d_diffusion_uterus_sag_second_20250801143945_19.bval
+  - BVEC: earthworm0151_ep2d_diffusion_uterus_sag_second_20250801143945_19.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0041
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0041
+Matching files:
+  - NII: earthworm0041_ep2d_diffusion_uterus_sag_first_20250424153631_5.nii.gz
+  - BVAL: earthworm0041_ep2d_diffusion_uterus_sag_first_20250424153631_5.bval
+  - BVEC: earthworm0041_ep2d_diffusion_uterus_sag_first_20250424153631_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0041_ep2d_diffusion_uterus_sag_second_20250424153631_17.nii.gz
+  - BVAL: earthworm0041_ep2d_diffusion_uterus_sag_second_20250424153631_17.bval
+  - BVEC: earthworm0041_ep2d_diffusion_uterus_sag_second_20250424153631_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0068
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0068
+Matching files:
+  - NII: earthworm0068_ep2d_diffusion_uterus_sag_second_20250509181612_16.nii.gz
+  - BVAL: earthworm0068_ep2d_diffusion_uterus_sag_second_20250509181612_16.bval
+  - BVEC: earthworm0068_ep2d_diffusion_uterus_sag_second_20250509181612_16.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0068_ep2d_diffusion_uterus_sag_first_20250509181612_5.nii.gz
+  - BVAL: earthworm0068_ep2d_diffusion_uterus_sag_first_20250509181612_5.bval
+  - BVEC: earthworm0068_ep2d_diffusion_uterus_sag_first_20250509181612_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0022
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0022
+Matching files:
+  - NII: earthworm0022_ep2d_diff_3mm_trueax_brain_20241128160502_27.nii.gz
+  - BVAL: earthworm0022_ep2d_diff_3mm_trueax_brain_20241128160502_27.bval
+  - BVEC: earthworm0022_ep2d_diff_3mm_trueax_brain_20241128160502_27.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0022_ep2d_diff_3mm_trueax_brain_20241128160502_24.nii.gz
+  - BVAL: earthworm0022_ep2d_diff_3mm_trueax_brain_20241128160502_24.bval
+  - BVEC: earthworm0022_ep2d_diff_3mm_trueax_brain_20241128160502_24.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0001_2
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0001_2
+Matching files:
+  - NII: earthworm0001_2_ep2d_diff_3mm_trueax_brain_20241129163745_26.nii.gz
+  - BVAL: earthworm0001_2_ep2d_diff_3mm_trueax_brain_20241129163745_26.bval
+  - BVEC: earthworm0001_2_ep2d_diff_3mm_trueax_brain_20241129163745_26.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0091
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0091
+Matching files:
+  - NII: earthworm0091_ep2d_diffusion_uterus_sag_first_20250528153438_8.nii.gz
+  - BVAL: earthworm0091_ep2d_diffusion_uterus_sag_first_20250528153438_8.bval
+  - BVEC: earthworm0091_ep2d_diffusion_uterus_sag_first_20250528153438_8.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0091_ep2d_diffusion_uterus_sag_second_20250528153438_22.nii.gz
+  - BVAL: earthworm0091_ep2d_diffusion_uterus_sag_second_20250528153438_22.bval
+  - BVEC: earthworm0091_ep2d_diffusion_uterus_sag_second_20250528153438_22.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0040
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0040
+Matching files:
+  - NII: earthworm0040_ep2d_diffusion_uterus_sag_first_20250423125129_6.nii.gz
+  - BVAL: earthworm0040_ep2d_diffusion_uterus_sag_first_20250423125129_6.bval
+  - BVEC: earthworm0040_ep2d_diffusion_uterus_sag_first_20250423125129_6.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0040_ep2d_diffusion_uterus_sag_second_20250423125129_18.nii.gz
+  - BVAL: earthworm0040_ep2d_diffusion_uterus_sag_second_20250423125129_18.bval
+  - BVEC: earthworm0040_ep2d_diffusion_uterus_sag_second_20250423125129_18.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0106
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0106
+Matching files:
+  - NII: earthworm0106_ep2d_diffusion_uterus_sag_second_20250618153507_17.nii.gz
+  - BVAL: earthworm0106_ep2d_diffusion_uterus_sag_second_20250618153507_17.bval
+  - BVEC: earthworm0106_ep2d_diffusion_uterus_sag_second_20250618153507_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0106_ep2d_diffusion_uterus_sag_first_20250618153507_5.nii.gz
+  - BVAL: earthworm0106_ep2d_diffusion_uterus_sag_first_20250618153507_5.bval
+  - BVEC: earthworm0106_ep2d_diffusion_uterus_sag_first_20250618153507_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0034_1
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0034_1
+Matching files:
+  - NII: earthworm0034_1_ep2d_diffusion_uterus_sag_20250409091553_16.nii.gz
+  - BVAL: earthworm0034_1_ep2d_diffusion_uterus_sag_20250409091553_16.bval
+  - BVEC: earthworm0034_1_ep2d_diffusion_uterus_sag_20250409091553_16.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0087
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0087
+Matching files:
+  - NII: earthworm0087_ep2d_diffusion_uterus_sag_first_20250527154001_6.nii.gz
+  - BVAL: earthworm0087_ep2d_diffusion_uterus_sag_first_20250527154001_6.bval
+  - BVEC: earthworm0087_ep2d_diffusion_uterus_sag_first_20250527154001_6.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0087_ep2d_diffusion_uterus_sag_second_20250527154001_20.nii.gz
+  - BVAL: earthworm0087_ep2d_diffusion_uterus_sag_second_20250527154001_20.bval
+  - BVEC: earthworm0087_ep2d_diffusion_uterus_sag_second_20250527154001_20.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0039
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0039
+Matching files:
+  - NII: earthworm0039_ep2d_diffusion_uterus_sag_second_20250417152358_22.nii.gz
+  - BVAL: earthworm0039_ep2d_diffusion_uterus_sag_second_20250417152358_22.bval
+  - BVEC: earthworm0039_ep2d_diffusion_uterus_sag_second_20250417152358_22.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0039_ep2d_diffusion_uterus_sag_first_20250417152358_6.nii.gz
+  - BVAL: earthworm0039_ep2d_diffusion_uterus_sag_first_20250417152358_6.bval
+  - BVEC: earthworm0039_ep2d_diffusion_uterus_sag_first_20250417152358_6.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0079
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0079
+Matching files:
+  - NII: earthworm0079_ep2d_diffusion_uterus_sag_first_20250521153240_5.nii.gz
+  - BVAL: earthworm0079_ep2d_diffusion_uterus_sag_first_20250521153240_5.bval
+  - BVEC: earthworm0079_ep2d_diffusion_uterus_sag_first_20250521153240_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0079_ep2d_diffusion_uterus_sag_second_20250521153240_17.nii.gz
+  - BVAL: earthworm0079_ep2d_diffusion_uterus_sag_second_20250521153240_17.bval
+  - BVEC: earthworm0079_ep2d_diffusion_uterus_sag_second_20250521153240_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0110
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0110
+Matching files:
+  - NII: earthworm0110_ep2d_diffusion_uterus_sag_second_20250620164331_18.nii.gz
+  - BVAL: earthworm0110_ep2d_diffusion_uterus_sag_second_20250620164331_18.bval
+  - BVEC: earthworm0110_ep2d_diffusion_uterus_sag_second_20250620164331_18.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0110_ep2d_diffusion_uterus_sag_first_20250620164331_6.nii.gz
+  - BVAL: earthworm0110_ep2d_diffusion_uterus_sag_first_20250620164331_6.bval
+  - BVEC: earthworm0110_ep2d_diffusion_uterus_sag_first_20250620164331_6.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0147
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0147
+Matching files:
+  - NII: earthworm0147_ep2d_diffusion_uterus_sag_second_20250730154007_17.nii.gz
+  - BVAL: earthworm0147_ep2d_diffusion_uterus_sag_second_20250730154007_17.bval
+  - BVEC: earthworm0147_ep2d_diffusion_uterus_sag_second_20250730154007_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0147_ep2d_diffusion_uterus_sag_first_20250730154007_5.nii.gz
+  - BVAL: earthworm0147_ep2d_diffusion_uterus_sag_first_20250730154007_5.bval
+  - BVEC: earthworm0147_ep2d_diffusion_uterus_sag_first_20250730154007_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0080
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0080
+Matching files:
+  - NII: earthworm0080_ep2d_diffusion_uterus_sag_second_20250521164445_17.nii.gz
+  - BVAL: earthworm0080_ep2d_diffusion_uterus_sag_second_20250521164445_17.bval
+  - BVEC: earthworm0080_ep2d_diffusion_uterus_sag_second_20250521164445_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0080_ep2d_diffusion_uterus_sag_first_20250521164445_5.nii.gz
+  - BVAL: earthworm0080_ep2d_diffusion_uterus_sag_first_20250521164445_5.bval
+  - BVEC: earthworm0080_ep2d_diffusion_uterus_sag_first_20250521164445_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0104
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0104
+Matching files:
+  - NII: earthworm0104_ep2d_diffusion_uterus_sag_first_20250616164656_5.nii.gz
+  - BVAL: earthworm0104_ep2d_diffusion_uterus_sag_first_20250616164656_5.bval
+  - BVEC: earthworm0104_ep2d_diffusion_uterus_sag_first_20250616164656_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0104_ep2d_diffusion_uterus_sag_second_20250616164656_17.nii.gz
+  - BVAL: earthworm0104_ep2d_diffusion_uterus_sag_second_20250616164656_17.bval
+  - BVEC: earthworm0104_ep2d_diffusion_uterus_sag_second_20250616164656_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0095
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0095
+Matching files:
+  - NII: earthworm0095_ep2d_diffusion_uterus_sag_first_20250602153828_5.nii.gz
+  - BVAL: earthworm0095_ep2d_diffusion_uterus_sag_first_20250602153828_5.bval
+  - BVEC: earthworm0095_ep2d_diffusion_uterus_sag_first_20250602153828_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0017
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0017
+Matching files:
+  - NII: earthworm0017_ep2d_diff_3mm_trueax_brain_20250115173328_19.nii.gz
+  - BVAL: earthworm0017_ep2d_diff_3mm_trueax_brain_20250115173328_19.bval
+  - BVEC: earthworm0017_ep2d_diff_3mm_trueax_brain_20250115173328_19.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0152
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0152
+Matching files:
+  - NII: earthworm0152_ep2d_diffusion_uterus_sag_first_20250804154758_5.nii.gz
+  - BVAL: earthworm0152_ep2d_diffusion_uterus_sag_first_20250804154758_5.bval
+  - BVEC: earthworm0152_ep2d_diffusion_uterus_sag_first_20250804154758_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0152_ep2d_diffusion_uterus_sag_second_20250804154758_17.nii.gz
+  - BVAL: earthworm0152_ep2d_diffusion_uterus_sag_second_20250804154758_17.bval
+  - BVEC: earthworm0152_ep2d_diffusion_uterus_sag_second_20250804154758_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0121
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0121
+Matching files:
+  - NII: earthworm0121_ep2d_diffusion_uterus_sag_first_20250630181113_5.nii.gz
+  - BVAL: earthworm0121_ep2d_diffusion_uterus_sag_first_20250630181113_5.bval
+  - BVEC: earthworm0121_ep2d_diffusion_uterus_sag_first_20250630181113_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0121_ep2d_diffusion_uterus_sag_second_20250630181113_13.nii.gz
+  - BVAL: earthworm0121_ep2d_diffusion_uterus_sag_second_20250630181113_13.bval
+  - BVEC: earthworm0121_ep2d_diffusion_uterus_sag_second_20250630181113_13.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0011
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0011
+Matching files:
+  - NII: earthworm0011_ep2d_diff_sag_uterus_DRB_20250319171558_22.nii.gz
+  - BVAL: earthworm0011_ep2d_diff_sag_uterus_DRB_20250319171558_22.bval
+  - BVEC: earthworm0011_ep2d_diff_sag_uterus_DRB_20250319171558_22.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0006_1
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0006_1
+Matching files:
+  - NII: earthworm0006_1_ep2d_diff_sag_uterus_DRB_20250319171558_22.nii.gz
+  - BVAL: earthworm0006_1_ep2d_diff_sag_uterus_DRB_20250319171558_22.bval
+  - BVEC: earthworm0006_1_ep2d_diff_sag_uterus_DRB_20250319171558_22.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0153
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0153
+Matching files:
+  - NII: earthworm0153_ep2d_diffusion_uterus_sag_first_20250804163938_5.nii.gz
+  - BVAL: earthworm0153_ep2d_diffusion_uterus_sag_first_20250804163938_5.bval
+  - BVEC: earthworm0153_ep2d_diffusion_uterus_sag_first_20250804163938_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0153_ep2d_diffusion_uterus_sag_second_20250804163938_17.nii.gz
+  - BVAL: earthworm0153_ep2d_diffusion_uterus_sag_second_20250804163938_17.bval
+  - BVEC: earthworm0153_ep2d_diffusion_uterus_sag_second_20250804163938_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0071
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0071
+Matching files:
+  - NII: earthworm0071_ep2d_diffusion_uterus_sag_second_20250514182624_17.nii.gz
+  - BVAL: earthworm0071_ep2d_diffusion_uterus_sag_second_20250514182624_17.bval
+  - BVEC: earthworm0071_ep2d_diffusion_uterus_sag_second_20250514182624_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0071_ep2d_diffusion_uterus_sag_first_20250514182624_5.nii.gz
+  - BVAL: earthworm0071_ep2d_diffusion_uterus_sag_first_20250514182624_5.bval
+  - BVEC: earthworm0071_ep2d_diffusion_uterus_sag_first_20250514182624_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0055
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0055
+Matching files:
+  - NII: earthworm0055_ep2d_diffusion_uterus_sag_first_20250429172743_5.nii.gz
+  - BVAL: earthworm0055_ep2d_diffusion_uterus_sag_first_20250429172743_5.bval
+  - BVEC: earthworm0055_ep2d_diffusion_uterus_sag_first_20250429172743_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0131
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0131
+Matching files:
+  - NII: earthworm0131_ep2d_diffusion_uterus_sag_second_20250711165338_17.nii.gz
+  - BVAL: earthworm0131_ep2d_diffusion_uterus_sag_second_20250711165338_17.bval
+  - BVEC: earthworm0131_ep2d_diffusion_uterus_sag_second_20250711165338_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0131_ep2d_diffusion_uterus_sag_first_20250711165338_6.nii.gz
+  - BVAL: earthworm0131_ep2d_diffusion_uterus_sag_first_20250711165338_6.bval
+  - BVEC: earthworm0131_ep2d_diffusion_uterus_sag_first_20250711165338_6.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0021
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0021
+Matching files:
+  - NII: earthworm0021_ep2d_diff_3mm_trueax_brain_20241126144620_33.nii.gz
+  - BVAL: earthworm0021_ep2d_diff_3mm_trueax_brain_20241126144620_33.bval
+  - BVEC: earthworm0021_ep2d_diff_3mm_trueax_brain_20241126144620_33.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0069
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0069
+Matching files:
+  - NII: earthworm0069_ep2d_diffusion_uterus_sag_second_20250514154242_16.nii.gz
+  - BVAL: earthworm0069_ep2d_diffusion_uterus_sag_second_20250514154242_16.bval
+  - BVEC: earthworm0069_ep2d_diffusion_uterus_sag_second_20250514154242_16.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0069_ep2d_diffusion_uterus_sag_first_20250514154242_5.nii.gz
+  - BVAL: earthworm0069_ep2d_diffusion_uterus_sag_first_20250514154242_5.bval
+  - BVEC: earthworm0069_ep2d_diffusion_uterus_sag_first_20250514154242_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0099
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0099
+Matching files:
+  - NII: earthworm0099_ep2d_diffusion_uterus_sag_second_20250604153705_17.nii.gz
+  - BVAL: earthworm0099_ep2d_diffusion_uterus_sag_second_20250604153705_17.bval
+  - BVEC: earthworm0099_ep2d_diffusion_uterus_sag_second_20250604153705_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0099_ep2d_diffusion_uterus_sag_first_20250604153705_5.nii.gz
+  - BVAL: earthworm0099_ep2d_diffusion_uterus_sag_first_20250604153705_5.bval
+  - BVEC: earthworm0099_ep2d_diffusion_uterus_sag_first_20250604153705_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0056
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0056
+Matching files:
+  - NII: earthworm0056_ep2d_diffusion_uterus_sag_first_20250430153530_5.nii.gz
+  - BVAL: earthworm0056_ep2d_diffusion_uterus_sag_first_20250430153530_5.bval
+  - BVEC: earthworm0056_ep2d_diffusion_uterus_sag_first_20250430153530_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0056_ep2d_diffusion_uterus_sag_second_20250430153530_17.nii.gz
+  - BVAL: earthworm0056_ep2d_diffusion_uterus_sag_second_20250430153530_17.bval
+  - BVEC: earthworm0056_ep2d_diffusion_uterus_sag_second_20250430153530_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0092
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0092
+Matching files:
+  - NII: earthworm0092_ep2d_diffusion_uterus_sag_first_20250528165726_5.nii.gz
+  - BVAL: earthworm0092_ep2d_diffusion_uterus_sag_first_20250528165726_5.bval
+  - BVEC: earthworm0092_ep2d_diffusion_uterus_sag_first_20250528165726_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0092_ep2d_diffusion_uterus_sag_second_20250528165726_12.nii.gz
+  - BVAL: earthworm0092_ep2d_diffusion_uterus_sag_second_20250528165726_12.bval
+  - BVEC: earthworm0092_ep2d_diffusion_uterus_sag_second_20250528165726_12.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0058
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0058
+Matching files:
+  - NII: earthworm0058_ep2d_diffusion_uterus_sag_second_20250430175743_17.nii.gz
+  - BVAL: earthworm0058_ep2d_diffusion_uterus_sag_second_20250430175743_17.bval
+  - BVEC: earthworm0058_ep2d_diffusion_uterus_sag_second_20250430175743_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0058_ep2d_diffusion_uterus_sag_first_20250430175743_5.nii.gz
+  - BVAL: earthworm0058_ep2d_diffusion_uterus_sag_first_20250430175743_5.bval
+  - BVEC: earthworm0058_ep2d_diffusion_uterus_sag_first_20250430175743_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0035
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0035
+Matching files:
+  - NII: earthworm0035_ep2d_diff_sag_uterus_DRB_20250318173756_16.nii.gz
+  - BVAL: earthworm0035_ep2d_diff_sag_uterus_DRB_20250318173756_16.bval
+  - BVEC: earthworm0035_ep2d_diff_sag_uterus_DRB_20250318173756_16.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0134
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0134
+Matching files:
+  - NII: earthworm0134_ep2d_diffusion_uterus_sag_first_20250714163858_6.nii.gz
+  - BVAL: earthworm0134_ep2d_diffusion_uterus_sag_first_20250714163858_6.bval
+  - BVEC: earthworm0134_ep2d_diffusion_uterus_sag_first_20250714163858_6.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0030
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0030
+Matching files:
+  - NII: earthworm0030_ep2d_diff_sag_uterus_DRB_20250226162157_63.nii.gz
+  - BVAL: earthworm0030_ep2d_diff_sag_uterus_DRB_20250226162157_63.bval
+  - BVEC: earthworm0030_ep2d_diff_sag_uterus_DRB_20250226162157_63.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0126
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0126
+Matching files:
+  - NII: earthworm0126_ep2d_diffusion_uterus_sag_first_20250709154356_5.nii.gz
+  - BVAL: earthworm0126_ep2d_diffusion_uterus_sag_first_20250709154356_5.bval
+  - BVEC: earthworm0126_ep2d_diffusion_uterus_sag_first_20250709154356_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0126_ep2d_diffusion_uterus_sag_second_20250709154356_17.nii.gz
+  - BVAL: earthworm0126_ep2d_diffusion_uterus_sag_second_20250709154356_17.bval
+  - BVEC: earthworm0126_ep2d_diffusion_uterus_sag_second_20250709154356_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0085
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0085
+Matching files:
+  - NII: earthworm0085_ep2d_diffusion_uterus_sag_first_20250526154609_10.nii.gz
+  - BVAL: earthworm0085_ep2d_diffusion_uterus_sag_first_20250526154609_10.bval
+  - BVEC: earthworm0085_ep2d_diffusion_uterus_sag_first_20250526154609_10.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0146
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0146
+Matching files:
+  - NII: earthworm0146_ep2d_diffusion_uterus_sag_first_20250730143507_5.nii.gz
+  - BVAL: earthworm0146_ep2d_diffusion_uterus_sag_first_20250730143507_5.bval
+  - BVEC: earthworm0146_ep2d_diffusion_uterus_sag_first_20250730143507_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0146_ep2d_diffusion_uterus_sag_second_20250730143507_17.nii.gz
+  - BVAL: earthworm0146_ep2d_diffusion_uterus_sag_second_20250730143507_17.bval
+  - BVEC: earthworm0146_ep2d_diffusion_uterus_sag_second_20250730143507_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0154
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0154
+Matching files:
+  - NII: earthworm0154_ep2d_diffusion_uterus_sag_second_20250804172603_17.nii.gz
+  - BVAL: earthworm0154_ep2d_diffusion_uterus_sag_second_20250804172603_17.bval
+  - BVEC: earthworm0154_ep2d_diffusion_uterus_sag_second_20250804172603_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0154_ep2d_diffusion_uterus_sag_first_20250804172603_5.nii.gz
+  - BVAL: earthworm0154_ep2d_diffusion_uterus_sag_first_20250804172603_5.bval
+  - BVEC: earthworm0154_ep2d_diffusion_uterus_sag_first_20250804172603_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0100
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0100
+Matching files:
+  - NII: earthworm0100_ep2d_diffusion_uterus_sag_first_20250604173923_5.nii.gz
+  - BVAL: earthworm0100_ep2d_diffusion_uterus_sag_first_20250604173923_5.bval
+  - BVEC: earthworm0100_ep2d_diffusion_uterus_sag_first_20250604173923_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0100_ep2d_diffusion_uterus_sag_second_20250604173923_17.nii.gz
+  - BVAL: earthworm0100_ep2d_diffusion_uterus_sag_second_20250604173923_17.bval
+  - BVEC: earthworm0100_ep2d_diffusion_uterus_sag_second_20250604173923_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0059
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0059
+Matching files:
+  - NII: earthworm0059_ep2d_diffusion_uterus_sag_second_20250502153601_17.nii.gz
+  - BVAL: earthworm0059_ep2d_diffusion_uterus_sag_second_20250502153601_17.bval
+  - BVEC: earthworm0059_ep2d_diffusion_uterus_sag_second_20250502153601_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0059_ep2d_diffusion_uterus_sag_first_20250502153601_5.nii.gz
+  - BVAL: earthworm0059_ep2d_diffusion_uterus_sag_first_20250502153601_5.bval
+  - BVEC: earthworm0059_ep2d_diffusion_uterus_sag_first_20250502153601_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0070
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0070
+Matching files:
+  - NII: earthworm0070_ep2d_diffusion_uterus_sag_second_20250514171503_18.nii.gz
+  - BVAL: earthworm0070_ep2d_diffusion_uterus_sag_second_20250514171503_18.bval
+  - BVEC: earthworm0070_ep2d_diffusion_uterus_sag_second_20250514171503_18.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0070_ep2d_diffusion_uterus_sag_first_20250514171503_6.nii.gz
+  - BVAL: earthworm0070_ep2d_diffusion_uterus_sag_first_20250514171503_6.bval
+  - BVEC: earthworm0070_ep2d_diffusion_uterus_sag_first_20250514171503_6.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0031
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0031
+Matching files:
+  - NII: earthworm0031_ep2d_diff_sag_uterus_DRB_20250304162728_27.nii.gz
+  - BVAL: earthworm0031_ep2d_diff_sag_uterus_DRB_20250304162728_27.bval
+  - BVEC: earthworm0031_ep2d_diff_sag_uterus_DRB_20250304162728_27.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0124
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0124
+Matching files:
+  - NII: earthworm0124_ep2d_diffusion_uterus_sag_first_20250704163221_6.nii.gz
+  - BVAL: earthworm0124_ep2d_diffusion_uterus_sag_first_20250704163221_6.bval
+  - BVEC: earthworm0124_ep2d_diffusion_uterus_sag_first_20250704163221_6.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0124_ep2d_diffusion_uterus_sag_second_20250704163221_15.nii.gz
+  - BVAL: earthworm0124_ep2d_diffusion_uterus_sag_second_20250704163221_15.bval
+  - BVEC: earthworm0124_ep2d_diffusion_uterus_sag_second_20250704163221_15.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0156
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0156
+Matching files:
+  - NII: earthworm0156_ep2d_diffusion_uterus_sag_second_20250808132053_15.nii.gz
+  - BVAL: earthworm0156_ep2d_diffusion_uterus_sag_second_20250808132053_15.bval
+  - BVEC: earthworm0156_ep2d_diffusion_uterus_sag_second_20250808132053_15.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0156_ep2d_diffusion_uterus_sag_first_20250808132053_5.nii.gz
+  - BVAL: earthworm0156_ep2d_diffusion_uterus_sag_first_20250808132053_5.bval
+  - BVEC: earthworm0156_ep2d_diffusion_uterus_sag_first_20250808132053_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0113
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0113
+Matching files:
+  - NII: earthworm0113_ep2d_diffusion_uterus_sag_first_20250623173535_5.nii.gz
+  - BVAL: earthworm0113_ep2d_diffusion_uterus_sag_first_20250623173535_5.bval
+  - BVEC: earthworm0113_ep2d_diffusion_uterus_sag_first_20250623173535_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0113_ep2d_diffusion_uterus_sag_second_20250623173535_17.nii.gz
+  - BVAL: earthworm0113_ep2d_diffusion_uterus_sag_second_20250623173535_17.bval
+  - BVEC: earthworm0113_ep2d_diffusion_uterus_sag_second_20250623173535_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0075
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0075
+Matching files:
+  - NII: earthworm0075_ep2d_diffusion_uterus_sag_first_20250516193139_5.nii.gz
+  - BVAL: earthworm0075_ep2d_diffusion_uterus_sag_first_20250516193139_5.bval
+  - BVEC: earthworm0075_ep2d_diffusion_uterus_sag_first_20250516193139_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0116
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0116
+Matching files:
+  - NII: earthworm0116_ep2d_diffusion_uterus_sag_first_20250625164135_5.nii.gz
+  - BVAL: earthworm0116_ep2d_diffusion_uterus_sag_first_20250625164135_5.bval
+  - BVEC: earthworm0116_ep2d_diffusion_uterus_sag_first_20250625164135_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0116_ep2d_diffusion_uterus_sag_second_20250625164135_17.nii.gz
+  - BVAL: earthworm0116_ep2d_diffusion_uterus_sag_second_20250625164135_17.bval
+  - BVEC: earthworm0116_ep2d_diffusion_uterus_sag_second_20250625164135_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0037
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0037
+Matching files:
+  - NII: earthworm0037_ep2d_diffusion_uterus_sag_20250404124719_21.nii.gz
+  - BVAL: earthworm0037_ep2d_diffusion_uterus_sag_20250404124719_21.bval
+  - BVEC: earthworm0037_ep2d_diffusion_uterus_sag_20250404124719_21.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0067
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0067
+Matching files:
+  - NII: earthworm0067_ep2d_diffusion_uterus_sag_second_20250509164152_17.nii.gz
+  - BVAL: earthworm0067_ep2d_diffusion_uterus_sag_second_20250509164152_17.bval
+  - BVEC: earthworm0067_ep2d_diffusion_uterus_sag_second_20250509164152_17.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0067_ep2d_diffusion_uterus_sag_first_20250509164152_5.nii.gz
+  - BVAL: earthworm0067_ep2d_diffusion_uterus_sag_first_20250509164152_5.bval
+  - BVEC: earthworm0067_ep2d_diffusion_uterus_sag_first_20250509164152_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0084
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0084
+Matching files:
+  - NII: earthworm0084_ep2d_diffusion_uterus_sag_second_20250523165131_22.nii.gz
+  - BVAL: earthworm0084_ep2d_diffusion_uterus_sag_second_20250523165131_22.bval
+  - BVEC: earthworm0084_ep2d_diffusion_uterus_sag_second_20250523165131_22.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0084_ep2d_diffusion_uterus_sag_first_20250523165131_8.nii.gz
+  - BVAL: earthworm0084_ep2d_diffusion_uterus_sag_first_20250523165131_8.bval
+  - BVEC: earthworm0084_ep2d_diffusion_uterus_sag_first_20250523165131_8.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+Case: earthworm0074
+Path: /home/vault/mfdp/mfdp118h/data/earthworm0074
+Matching files:
+  - NII: earthworm0074_ep2d_diffusion_uterus_sag_first_20250516182660_5.nii.gz
+  - BVAL: earthworm0074_ep2d_diffusion_uterus_sag_first_20250516182660_5.bval
+  - BVEC: earthworm0074_ep2d_diffusion_uterus_sag_first_20250516182660_5.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
+  - NII: earthworm0074_ep2d_diffusion_uterus_sag_second_20250516182660_18.nii.gz
+  - BVAL: earthworm0074_ep2d_diffusion_uterus_sag_second_20250516182660_18.bval
+  - BVEC: earthworm0074_ep2d_diffusion_uterus_sag_second_20250516182660_18.bvec
+  - BVAL values: [0, 10, 10, 10, 50, 50, 50, 80, 80, 80, 200, 200, 200, 400, 400, 400, 600, 600, 600, 800, 800, 800, 1000, 1000, 1000]
+
