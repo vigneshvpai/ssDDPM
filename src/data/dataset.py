@@ -140,7 +140,7 @@ class DWIDataset(Dataset):
             List of patch dictionaries
         """
         patches = []
-        height, width = slice_data.shape[1], slice_data.shape[2]
+        width, height = slice_data.shape[1], slice_data.shape[2]
 
         # Calculate patch positions
         stride = self.patch_size - self.patch_overlap
@@ -148,7 +148,7 @@ class DWIDataset(Dataset):
         for y in range(0, height - self.patch_size + 1, stride):
             for x in range(0, width - self.patch_size + 1, stride):
                 # Extract patch
-                patch = slice_data[:, y : y + self.patch_size, x : x + self.patch_size]
+                patch = slice_data[:, x : x + self.patch_size, y : y + self.patch_size]
 
                 # Pad if necessary to reach patch_size
                 if patch.shape[1] < self.patch_size or patch.shape[2] < self.patch_size:
