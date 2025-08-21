@@ -1,191 +1,193 @@
 """
-Preprocessing script to parse DWI dataset and create data lists.
+DWI data preprocessing utilities.
+Handles loading NIfTI files, creating patches, and normalization.
 """
 
-import os
-import json
-import random
 import numpy as np
-from pathlib import Path
-from typing import List, Dict, Tuple
+import torch
 import nibabel as nib
+from typing import Dict, List, Tuple, Optional, Union
+import warnings
 
 from src.config import Config
 
 
-def find_dwi_files(data_root: str) -> List[Dict]:
+class DWIPreprocessor:
     """
-    Scan the dataset directory and find all DWI files with their corresponding bval/bvec files.
-    Only include files with the specific b-value sequence.
-
-    Args:
-        data_root: Root directory containing subject folders
-
-    Returns:
-        List of dictionaries containing file paths and metadata
+    Utility class for preprocessing DWI data.
+    Handles loading, slicing, patching, and normalization.
     """
-    # Get target b-value sequence from config
-    target_bvals = np.array(Config.TARGET_B_VALUES)
 
-    data_list = []
+    def __init__(
+        self,
+        normalize_to_b0: bool = True,
+        patch_size: int = 64,
+        patch_overlap: int = 16,
+        max_b_values: int = 25,
+    ):
+        """
+        Initialize the DWI preprocessor.
 
-    for subject_dir in os.listdir(data_root):
-        subject_path = os.path.join(data_root, subject_dir)
+        Args:
+            normalize_to_b0: If True, normalize each patch by the first b-value (b0).
+            patch_size: Size of each patch (default: 64).
+            patch_overlap: Overlap between adjacent patches (default: 16).
+            max_b_values: Maximum number of b-value channels to use (default: 25).
+        """
+        self.normalize_to_b0 = normalize_to_b0
+        self.patch_size = patch_size
+        self.patch_overlap = patch_overlap
+        self.max_b_values = max_b_values
 
-        if not os.path.isdir(subject_path):
-            continue
+    def load_dwi_data(self, nii_path: str) -> torch.Tensor:
+        """
+        Load DWI data from a NIfTI (.nii.gz) file.
 
-        # Find all .nii.gz files in the subject directory
-        for file in os.listdir(subject_path):
-            if file.endswith(".nii.gz"):
-                # Extract base name without extension
-                base_name = file.replace(".nii.gz", "")
+        Args:
+            nii_path: Path to the NIfTI file.
 
-                # Construct paths for corresponding files
-                nii_path = os.path.join(subject_path, file)
-                bval_path = os.path.join(subject_path, f"{base_name}.bval")
-                bvec_path = os.path.join(subject_path, f"{base_name}.bvec")
+        Returns:
+            DWI data as a torch tensor with shape (b_values, width, height, slices).
+        """
+        try:
+            img = nib.load(nii_path)
+            data = img.get_fdata()
 
-                # Check if corresponding files exist
-                if os.path.exists(bval_path) and os.path.exists(bvec_path):
-                    # Load basic metadata
-                    try:
-                        img = nib.load(nii_path)
-                        shape = img.shape
-                        bvals = np.loadtxt(bval_path)
-                        bvecs = np.loadtxt(bvec_path)
+            # Convert numpy array to torch tensor
+            data = torch.from_numpy(data).float()
 
-                        # Check if b-values match the target sequence
-                        if len(bvals) == len(target_bvals) and np.array_equal(
-                            bvals, target_bvals
-                        ):
-                            data_item = {
-                                "subject_id": subject_dir,
-                                "acquisition_id": base_name,
-                                "nii_path": nii_path,
-                                "bval_path": bval_path,
-                                "bvec_path": bvec_path,
-                                "shape": shape,
-                                "num_b_values": len(bvals),
-                                "b_values": bvals.tolist(),
-                                "b_vectors": (
-                                    bvecs.tolist()
-                                    if len(bvecs.shape) == 2
-                                    else bvecs.reshape(-1, 3).tolist()
-                                ),
-                            }
-                            data_list.append(data_item)
-                            print(f"✓ Included: {subject_dir}/{file} (b-values match)")
-                        else:
-                            print(
-                                f"✗ Skipped: {subject_dir}/{file} (b-values don't match: {bvals})"
-                            )
+            # Rearrange axes if necessary: (width, height, slices, b_values) -> (b_values, width, height, slices)
+            if len(data.shape) == 4:
+                data = data.permute(3, 0, 1, 2)
 
-                    except Exception as e:
-                        print(f"Error processing {nii_path}: {e}")
-                        continue
-                else:
-                    print(f"Missing bval/bvec files for {nii_path}")
+            return data
 
-    return data_list
+        except Exception as e:
+            raise RuntimeError(f"Error loading DWI data from {nii_path}: {e}")
 
+    def split_into_slices(self, dwi_data: torch.Tensor) -> List[torch.Tensor]:
+        """
+        Split a 3D DWI volume into a list of 2D slices.
 
-def split_dataset(
-    data_list: List[Dict],
-    train_ratio: float = 0.7,
-    val_ratio: float = 0.15,
-    test_ratio: float = 0.15,
-) -> Tuple[List[Dict], List[Dict], List[Dict]]:
-    """
-    Split dataset into train/val/test sets.
+        Args:
+            dwi_data: DWI tensor of shape (b_values, width, height, slices).
 
-    Args:
-        data_list: List of data items
-        train_ratio: Ratio for training set
-        val_ratio: Ratio for validation set
-        test_ratio: Ratio for test set
+        Returns:
+            List of 2D slice tensors, each of shape (b_values, width, height).
+        """
+        slices = []
+        for slice_idx in range(dwi_data.shape[3]):  # Loop over slices
+            slice_data = dwi_data[:, :, :, slice_idx]  # (b_values, width, height)
+            slices.append(slice_data)
+        return slices
 
-    Returns:
-        Tuple of (train_data, val_data, test_data)
-    """
-    # Group by subject to ensure no data leakage
-    subjects = list(set(item["subject_id"] for item in data_list))
-    random.shuffle(subjects)
+    def create_slice_patches(
+        self, slice_data: torch.Tensor, item: Dict, slice_idx: int
+    ) -> List[Dict]:
+        """
+        Generate patches from a single 2D slice.
 
-    n_subjects = len(subjects)
-    n_train = int(n_subjects * train_ratio)
-    n_val = int(n_subjects * val_ratio)
+        Args:
+            slice_data: 2D slice tensor of shape (b_values, width, height).
+            item: Dictionary with metadata for the current acquisition.
+            slice_idx: Index of the current slice.
 
-    train_subjects = subjects[:n_train]
-    val_subjects = subjects[n_train : n_train + n_val]
-    test_subjects = subjects[n_train + n_val :]
+        Returns:
+            List of dictionaries, each describing a patch.
+        """
+        patches = []
+        width, height = slice_data.shape[1], slice_data.shape[2]
 
-    train_data = [item for item in data_list if item["subject_id"] in train_subjects]
-    val_data = [item for item in data_list if item["subject_id"] in val_subjects]
-    test_data = [item for item in data_list if item["subject_id"] in test_subjects]
+        # Compute the stride for patch extraction
+        stride = self.patch_size - self.patch_overlap
 
-    return train_data, val_data, test_data
+        for y in range(0, height - self.patch_size + 1, stride):
+            for x in range(0, width - self.patch_size + 1, stride):
+                # Extract the patch
+                patch = slice_data[:, x : x + self.patch_size, y : y + self.patch_size]
 
+                # Pad the patch if it is smaller than patch_size
+                if patch.shape[1] < self.patch_size or patch.shape[2] < self.patch_size:
+                    pad_h = max(0, self.patch_size - patch.shape[1])
+                    pad_w = max(0, self.patch_size - patch.shape[2])
+                    patch = torch.nn.functional.pad(
+                        patch, (0, pad_w, 0, pad_h), mode="reflect"
+                    )
 
-def save_data_list(data_list: List[Dict], output_path: str):
-    """
-    Save data list to JSON file.
+                # Optionally normalize the patch by b0
+                if self.normalize_to_b0:
+                    patch = self._normalize_to_b0(patch)
 
-    Args:
-        data_list: List of data items
-        output_path: Path to save the JSON file
-    """
-    with open(output_path, "w") as f:
-        json.dump(data_list, f, indent=2)
-    print(f"Saved {len(data_list)} items to {output_path}")
+                # Store patch and metadata
+                patch_info = {
+                    "patch_data": patch,
+                    "subject_id": item["subject_id"],
+                    "acquisition_id": item["acquisition_id"],
+                    "slice_idx": slice_idx,
+                    "patch_x": x,
+                    "patch_y": y,
+                    "original_shape": item["shape"],
+                    "b_values": item["b_values"][: self.max_b_values],
+                    "b_vectors": (
+                        item["b_vectors"][: self.max_b_values]
+                        if len(item["b_vectors"]) >= self.max_b_values
+                        else item["b_vectors"]
+                    ),
+                }
 
+                patches.append(patch_info)
 
-def create_dataset_lists():
-    """
-    Main function to create dataset lists.
-    """
-    print("Scanning dataset directory...")
-    data_list = find_dwi_files(Config.DATA_ROOT)
+        return patches
 
-    if not data_list:
-        print("No valid DWI files found!")
-        return
+    def _normalize_to_b0(self, patch: torch.Tensor) -> torch.Tensor:
+        """
+        Normalize a patch by the first b-value (b0).
 
-    print(
-        f"Found {len(data_list)} DWI acquisitions from {len(set(item['subject_id'] for item in data_list))} subjects"
-    )
+        Args:
+            patch: Patch tensor of shape (b_values, height, width).
 
-    # Create output directory
-    Config.create_dirs()
+        Returns:
+            Patch normalized by b0.
+        """
+        b0 = patch[0:1]  # First b-value (b0)
 
-    # Split dataset
-    print("Splitting dataset...")
-    train_data, val_data, test_data = split_dataset(
-        data_list, Config.TRAIN_RATIO, Config.VAL_RATIO, Config.TEST_RATIO
-    )
+        # Prevent division by zero
+        b0 = torch.clamp(b0, min=1e-8)
 
-    # Save data lists
-    save_data_list(train_data, Config.TRAIN_DATA_LIST)
-    save_data_list(val_data, Config.VAL_DATA_LIST)
-    save_data_list(test_data, Config.TEST_DATA_LIST)
+        # Normalize all b-values by b0
+        normalized_patch = patch / b0
 
-    # Print summary
-    print("\nDataset Summary:")
-    print(
-        f"Training: {len(train_data)} acquisitions from {len(set(item['subject_id'] for item in train_data))} subjects"
-    )
-    print(
-        f"Validation: {len(val_data)} acquisitions from {len(set(item['subject_id'] for item in val_data))} subjects"
-    )
-    print(
-        f"Test: {len(test_data)} acquisitions from {len(set(item['subject_id'] for item in test_data))} subjects"
-    )
+        # Clamp values to [0, 1] for typical DWI data
+        normalized_patch = torch.clamp(normalized_patch, 0, 1)
 
-    # Print shape statistics
-    shapes = [item["shape"] for item in data_list]
-    print(f"\nImage shapes: {set(shapes)}")
-    print(f"B-values: {set(item['num_b_values'] for item in data_list)}")
+        return normalized_patch
 
+    def create_patches_from_data_list(self, data_list: List[Dict]) -> List[Dict]:
+        """
+        Generate all patches from a list of DWI acquisitions.
 
-if __name__ == "__main__":
-    create_dataset_lists()
+        Args:
+            data_list: List of dictionaries, each describing a DWI acquisition.
+
+        Returns:
+            List of dictionaries, each describing a patch.
+        """
+        patches = []
+
+        for item in data_list:
+            # Load the DWI volume
+            dwi_data = self.load_dwi_data(item["nii_path"])
+
+            # Restrict to the maximum number of b-values
+            if dwi_data.shape[0] > self.max_b_values:
+                dwi_data = dwi_data[: self.max_b_values]
+
+            # Split the volume into 2D slices
+            slices = self.split_into_slices(dwi_data)
+
+            # Generate patches for each slice
+            for slice_idx, slice_data in enumerate(slices):
+                slice_patches = self.create_slice_patches(slice_data, item, slice_idx)
+                patches.extend(slice_patches)
+
+        return patches
