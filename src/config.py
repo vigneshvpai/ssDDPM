@@ -10,11 +10,11 @@ class Config:
     # Dataset paths
     DATA_ROOT = os.environ.get("HPCVAULT", "/path/to/hpcvault") + "/data"
 
-    # Output paths for pre-parsed data
-    CACHE_DIR = Path("src/data/cache")
-    TRAIN_DATA_LIST = CACHE_DIR / "train_data.json"
-    VAL_DATA_LIST = CACHE_DIR / "val_data.json"
-    TEST_DATA_LIST = CACHE_DIR / "test_data.json"
+    # Output paths for dataset metadata
+    METADATA_DIR = Path("src/data/metadata")
+    TRAIN_DATA_LIST = METADATA_DIR / "train_data.json"
+    VAL_DATA_LIST = METADATA_DIR / "val_data.json"
+    TEST_DATA_LIST = METADATA_DIR / "test_data.json"
 
     # Data loading parameters
     BATCH_SIZE = 4
@@ -37,8 +37,8 @@ class Config:
     TARGET_SHAPE = (96, 96, 64)  # (width, height, slices)
 
     # 2D UNet specific parameters
-    PATCH_SIZE = 128  # 128x128 patches as per paper
-    PATCH_OVERLAP = 32  # Overlap between patches
+    PATCH_SIZE = 64  # 128x128 patches as per paper
+    PATCH_OVERLAP = 16  # Overlap between patches
     NORMALIZE_TO_B0 = True  # Normalize with respect to first b-value
     MAX_B_VALUES = 25  # Use 25 b-value channels as per paper
 
@@ -77,4 +77,4 @@ class Config:
     @classmethod
     def create_dirs(cls):
         """Create necessary directories."""
-        cls.CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        cls.METADATA_DIR.mkdir(parents=True, exist_ok=True)
