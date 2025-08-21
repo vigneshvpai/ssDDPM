@@ -1,12 +1,15 @@
 """
 PyTorch Dataset and DataLoader for 2D DWI data.
 Uses the preprocessing module for data processing.
+Includes Lightning DataModule integration.
 """
 
 import json
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 from typing import Dict, List, Tuple, Optional, Union
+
+import lightning as L
 
 from src.config import Config
 from src.data.preprocessing import DWIPreprocessor
@@ -180,76 +183,231 @@ class DWIDataset(Dataset):
         return coverage_stats
 
 
-class DWIDataLoader:
+class DWIDataLoader(L.LightningDataModule):
     """
-    Utility class for constructing 2D DWI dataloaders.
+    PyTorch Lightning DataModule for 2D DWI data.
+
+    This DataModule wraps the existing DWIDataset and provides a standardized
+    interface for Lightning training, validation, and testing.
     """
 
-    @staticmethod
-    def create_dataloaders(
-        train_data_list: str,
-        val_data_list: str,
-        test_data_list: str,
+    def __init__(
+        self,
+        train_data_list: str = None,
+        val_data_list: str = None,
+        test_data_list: str = None,
         batch_size: int = None,
         num_workers: int = None,
-        **dataset_kwargs,
-    ) -> Tuple[
-        torch.utils.data.DataLoader,
-        torch.utils.data.DataLoader,
-        torch.utils.data.DataLoader,
-    ]:
+        normalize_to_b0: bool = None,
+        patch_size: int = None,
+        patch_overlap: int = None,
+        max_b_values: int = None,
+        pin_memory: bool = None,
+    ):
         """
-        Build train, validation, and test dataloaders for 2D DWI patches.
+        Initialize the DWI Lightning DataModule.
 
         Args:
-            train_data_list: Path to the training data list JSON.
-            val_data_list: Path to the validation data list JSON.
-            test_data_list: Path to the test data list JSON.
-            batch_size: Batch size (defaults to Config.BATCH_SIZE if None).
-            num_workers: Number of worker processes (defaults to Config.NUM_WORKERS if None).
-            **dataset_kwargs: Additional arguments for DWIDataset.
-
-        Returns:
-            Tuple of (train_loader, val_loader, test_loader).
+            train_data_list: Path to training data list JSON (defaults to Config.TRAIN_DATA_LIST)
+            val_data_list: Path to validation data list JSON (defaults to Config.VAL_DATA_LIST)
+            test_data_list: Path to test data list JSON (defaults to Config.TEST_DATA_LIST)
+            batch_size: Batch size for all dataloaders (defaults to Config.BATCH_SIZE)
+            num_workers: Number of worker processes (defaults to Config.NUM_WORKERS)
+            normalize_to_b0: Normalize patches by b0 (defaults to Config.NORMALIZE_TO_B0)
+            patch_size: Size of patches (defaults to Config.PATCH_SIZE)
+            patch_overlap: Overlap between patches (defaults to Config.PATCH_OVERLAP)
+            max_b_values: Maximum b-value channels (defaults to Config.MAX_B_VALUES)
+            pin_memory: Enable pin memory for GPU training (defaults to Config.PIN_MEMORY)
         """
-        batch_size = batch_size or Config.BATCH_SIZE
-        num_workers = num_workers or Config.NUM_WORKERS
+        super().__init__()
 
-        # Set default dataset parameters for 2D patch extraction
-        dataset_kwargs.setdefault("normalize_to_b0", Config.NORMALIZE_TO_B0)
-        dataset_kwargs.setdefault("patch_size", Config.PATCH_SIZE)
-        dataset_kwargs.setdefault("patch_overlap", Config.PATCH_OVERLAP)
-        dataset_kwargs.setdefault("max_b_values", Config.MAX_B_VALUES)
+        # Set default values from config
+        self.train_data_list = train_data_list or str(Config.TRAIN_DATA_LIST)
+        self.val_data_list = val_data_list or str(Config.VAL_DATA_LIST)
+        self.test_data_list = test_data_list or str(Config.TEST_DATA_LIST)
+        self.batch_size = batch_size or Config.BATCH_SIZE
+        self.num_workers = num_workers or Config.NUM_WORKERS
+        self.normalize_to_b0 = (
+            normalize_to_b0 if normalize_to_b0 is not None else Config.NORMALIZE_TO_B0
+        )
+        self.patch_size = patch_size or Config.PATCH_SIZE
+        self.patch_overlap = patch_overlap or Config.PATCH_OVERLAP
+        self.max_b_values = max_b_values or Config.MAX_B_VALUES
+        self.pin_memory = pin_memory if pin_memory is not None else Config.PIN_MEMORY
 
-        # Instantiate datasets
-        train_dataset = DWIDataset(train_data_list, **dataset_kwargs)
-        val_dataset = DWIDataset(val_data_list, **dataset_kwargs)
-        test_dataset = DWIDataset(test_data_list, **dataset_kwargs)
+        # Dataset instances (will be created in setup)
+        self.train_dataset = None
+        self.val_dataset = None
+        self.test_dataset = None
 
-        # Create PyTorch dataloaders
-        train_loader = torch.utils.data.DataLoader(
-            train_dataset,
-            batch_size=batch_size,
+    def prepare_data(self):
+        """
+        Download or prepare data if needed.
+        This is called once per node when using distributed training.
+        """
+        # Data is already prepared in JSON format, so we just verify files exist
+        import os
+
+        for data_list in [
+            self.train_data_list,
+            self.val_data_list,
+            self.test_data_list,
+        ]:
+            if not os.path.exists(data_list):
+                raise FileNotFoundError(f"Data list file not found: {data_list}")
+
+    def setup(self, stage: Optional[str] = None):
+        """
+        Set up datasets for training, validation, and testing.
+
+        Args:
+            stage: Current stage ('fit', 'validate', 'test', or 'predict')
+        """
+        # Define dataset parameters
+        dataset_kwargs = {
+            "normalize_to_b0": self.normalize_to_b0,
+            "patch_size": self.patch_size,
+            "patch_overlap": self.patch_overlap,
+            "max_b_values": self.max_b_values,
+        }
+
+        # Create datasets based on stage
+        if stage == "fit" or stage is None:
+            self.train_dataset = DWIDataset(self.train_data_list, **dataset_kwargs)
+            self.val_dataset = DWIDataset(self.val_data_list, **dataset_kwargs)
+
+        if stage == "validate" or stage is None:
+            if self.val_dataset is None:
+                self.val_dataset = DWIDataset(self.val_data_list, **dataset_kwargs)
+
+        if stage == "test" or stage is None:
+            self.test_dataset = DWIDataset(self.test_data_list, **dataset_kwargs)
+
+        if stage == "predict" or stage is None:
+            if self.test_dataset is None:
+                self.test_dataset = DWIDataset(self.test_data_list, **dataset_kwargs)
+
+    def train_dataloader(self) -> DataLoader:
+        """Create training dataloader."""
+        if self.train_dataset is None:
+            self.setup(stage="fit")
+
+        return DataLoader(
+            self.train_dataset,
+            batch_size=self.batch_size,
             shuffle=True,
-            num_workers=num_workers,
-            pin_memory=Config.PIN_MEMORY,
+            num_workers=self.num_workers,
+            pin_memory=self.pin_memory,
             drop_last=True,
         )
 
-        val_loader = torch.utils.data.DataLoader(
-            val_dataset,
-            batch_size=batch_size,
+    def val_dataloader(self) -> DataLoader:
+        """Create validation dataloader."""
+        if self.val_dataset is None:
+            self.setup(stage="validate")
+
+        return DataLoader(
+            self.val_dataset,
+            batch_size=self.batch_size,
             shuffle=False,
-            num_workers=num_workers,
-            pin_memory=Config.PIN_MEMORY,
+            num_workers=self.num_workers,
+            pin_memory=self.pin_memory,
         )
 
-        test_loader = torch.utils.data.DataLoader(
-            test_dataset,
-            batch_size=batch_size,
+    def test_dataloader(self) -> DataLoader:
+        """Create test dataloader."""
+        if self.test_dataset is None:
+            self.setup(stage="test")
+
+        return DataLoader(
+            self.test_dataset,
+            batch_size=self.batch_size,
             shuffle=False,
-            num_workers=num_workers,
-            pin_memory=Config.PIN_MEMORY,
+            num_workers=self.num_workers,
+            pin_memory=self.pin_memory,
         )
 
-        return train_loader, val_loader, test_loader
+    def predict_dataloader(self) -> DataLoader:
+        """Create prediction dataloader."""
+        if self.test_dataset is None:
+            self.setup(stage="predict")
+
+        return DataLoader(
+            self.test_dataset,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
+            pin_memory=self.pin_memory,
+        )
+
+    def get_data_info(self) -> dict:
+        """
+        Get information about the datasets.
+
+        Returns:
+            Dictionary with dataset statistics and configuration.
+        """
+        if self.train_dataset is None:
+            self.setup(stage="fit")
+
+        train_info = self.train_dataset.get_data_info()
+        val_info = self.val_dataset.get_data_info()
+        test_info = self.test_dataset.get_data_info()
+
+        return {
+            "train": train_info,
+            "validation": val_info,
+            "test": test_info,
+            "config": {
+                "batch_size": self.batch_size,
+                "num_workers": self.num_workers,
+                "normalize_to_b0": self.normalize_to_b0,
+                "patch_size": self.patch_size,
+                "patch_overlap": self.patch_overlap,
+                "max_b_values": self.max_b_values,
+                "pin_memory": self.pin_memory,
+            },
+        }
+
+    def analyze_patch_coverage(self) -> dict:
+        """
+        Analyze patch coverage for all datasets.
+
+        Returns:
+            Dictionary with coverage statistics for train, validation, and test sets.
+        """
+        if self.train_dataset is None:
+            self.setup(stage="fit")
+
+        return {
+            "train": self.train_dataset.analyze_patch_coverage(),
+            "validation": self.val_dataset.analyze_patch_coverage(),
+            "test": self.test_dataset.analyze_patch_coverage(),
+        }
+
+    def get_sample_batch(self, stage: str = "train") -> dict:
+        """
+        Get a sample batch from the specified stage.
+
+        Args:
+            stage: Stage to get sample from ('train', 'val', 'test')
+
+        Returns:
+            Sample batch dictionary
+        """
+        if stage == "train":
+            if self.train_dataset is None:
+                self.setup(stage="fit")
+            return self.train_dataset[0]
+        elif stage == "val":
+            if self.val_dataset is None:
+                self.setup(stage="validate")
+            return self.val_dataset[0]
+        elif stage == "test":
+            if self.test_dataset is None:
+                self.setup(stage="test")
+            return self.test_dataset[0]
+        else:
+            raise ValueError(
+                f"Invalid stage: {stage}. Must be 'train', 'val', or 'test'"
+            )
