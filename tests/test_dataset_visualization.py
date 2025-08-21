@@ -8,7 +8,7 @@ from src.visualization.patch_visualizer import visualize_nii_patches
 
 def main():
     # Load your data list (replace with your actual data list path)
-    data_list_path = "src/data/metadata/train_data.json"
+    data_list_path = Config.TRAIN_DATA_LIST
 
     # Create dataset instance
     dataset = DWIDataset(

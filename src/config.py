@@ -11,10 +11,10 @@ class Config:
     DATA_ROOT = os.environ.get("HPCVAULT", "/path/to/hpcvault") + "/data"
 
     # Output paths for dataset metadata
-    METADATA_DIR = Path("src/data/metadata")
-    TRAIN_DATA_LIST = METADATA_DIR / "train_data.json"
-    VAL_DATA_LIST = METADATA_DIR / "val_data.json"
-    TEST_DATA_LIST = METADATA_DIR / "test_data.json"
+    DATASET_LISTS_DIR = Path("src/data/dataset_lists")
+    TRAIN_DATA_LIST = DATASET_LISTS_DIR / "train_data.json"
+    VAL_DATA_LIST = DATASET_LISTS_DIR / "val_data.json"
+    TEST_DATA_LIST = DATASET_LISTS_DIR / "test_data.json"
 
     # Data loading parameters
     BATCH_SIZE = 4
@@ -77,4 +77,4 @@ class Config:
     @classmethod
     def create_dirs(cls):
         """Create necessary directories."""
-        cls.METADATA_DIR.mkdir(parents=True, exist_ok=True)
+        cls.DATASET_LISTS_DIR.mkdir(parents=True, exist_ok=True)
