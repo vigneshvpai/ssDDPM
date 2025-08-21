@@ -1,5 +1,6 @@
 """
-PyTorch Dataset class for DWI data loading.
+2D-compatible PyTorch Dataset for DWI data processing.
+Splits 3D volumes into 2D slices and creates 128x128 patches for 2D UNet.
 """
 
 import json
@@ -15,76 +16,72 @@ from src.config import Config
 
 class DWIDataset(Dataset):
     """
-    PyTorch Dataset for DWI data with .nii.gz, .bval, and .bvec files.
+    2D-compatible PyTorch Dataset for DWI data.
+    Splits 3D volumes into 2D slices and creates 128x128 patches.
     """
 
     def __init__(
         self,
         data_list_path: str,
         transform=None,
-        normalize: bool = True,
-        target_shape: Optional[Tuple] = None,
+        normalize_to_b0: bool = True,
+        patch_size: int = 128,
+        patch_overlap: int = 32,
+        max_b_values: int = 25,
     ):
         """
-        Initialize DWI dataset.
+        Initialize 2D DWI dataset.
 
         Args:
             data_list_path: Path to JSON file containing data list
             transform: Optional transform to apply to the data
-            normalize: Whether to normalize the DWI data
-            target_shape: Target shape for resizing (width, height, slices)
+            normalize_to_b0: Whether to normalize with respect to first b-value
+            patch_size: Size of patches (default: 128)
+            patch_overlap: Overlap between patches (default: 32)
+            max_b_values: Maximum number of b-values to use (default: 25)
         """
         self.transform = transform
-        self.normalize = normalize
-        self.target_shape = target_shape
+        self.normalize_to_b0 = normalize_to_b0
+        self.patch_size = patch_size
+        self.patch_overlap = patch_overlap
+        self.max_b_values = max_b_values
 
         # Load data list
         with open(data_list_path, "r") as f:
             self.data_list = json.load(f)
 
+        # Pre-compute all patches for faster loading
+        self.patches = self._create_patches()
+
         print(f"Loaded {len(self.data_list)} DWI acquisitions from {data_list_path}")
+        print(f"Created {len(self.patches)} 2D patches")
 
-    def __len__(self) -> int:
-        return len(self.data_list)
-
-    def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
+    def _create_patches(self) -> List[Dict]:
         """
-        Load a single DWI acquisition.
-
-        Args:
-            idx: Index of the data item
+        Create patches from all DWI acquisitions.
 
         Returns:
-            Dictionary containing DWI data, b-values, b-vectors, and metadata
+            List of patch dictionaries
         """
-        item = self.data_list[idx]
+        patches = []
 
-        # Load DWI data
-        dwi_data = self._load_dwi_data(item["nii_path"])
+        for item in self.data_list:
+            # Load DWI data
+            dwi_data = self._load_dwi_data(item["nii_path"])
 
-        # Load b-values and b-vectors
-        bvals = torch.tensor(item["b_values"], dtype=torch.float32)
-        bvecs = torch.tensor(item["b_vectors"], dtype=torch.float32)
+            # Limit to max_b_values
+            if dwi_data.shape[0] > self.max_b_values:
+                dwi_data = dwi_data[: self.max_b_values]
 
-        # Preprocess DWI data
-        if self.normalize:
-            dwi_data = self._normalize_dwi(dwi_data)
+            # Split into 2D slices
+            slices = self._split_into_slices(dwi_data)
 
-        if self.target_shape:
-            dwi_data = self._resize_dwi(dwi_data, self.target_shape)
+            # Create patches from each slice
+            for slice_idx, slice_data in enumerate(slices):
+                slice_patches = self._create_slice_patches(slice_data, item, slice_idx)
+                patches.extend(slice_patches)
 
-        # Apply transforms if provided
-        if self.transform:
-            dwi_data = self.transform(dwi_data)
-
-        return {
-            "dwi": dwi_data,
-            "bvals": bvals,
-            "bvecs": bvecs,
-            "subject_id": item["subject_id"],
-            "acquisition_id": item["acquisition_id"],
-            "original_shape": item["shape"],
-        }
+        return patches
 
     def _load_dwi_data(self, nii_path: str) -> torch.Tensor:
         """
@@ -112,77 +109,136 @@ class DWIDataset(Dataset):
         except Exception as e:
             raise RuntimeError(f"Error loading DWI data from {nii_path}: {e}")
 
-    def _normalize_dwi(self, dwi_data: torch.Tensor) -> torch.Tensor:
+    def _split_into_slices(self, dwi_data: torch.Tensor) -> List[torch.Tensor]:
         """
-        Normalize DWI data.
+        Split 3D volume into 2D slices.
 
         Args:
-            dwi_data: DWI data tensor
+            dwi_data: DWI data tensor of shape (b_values, width, height, slices)
 
         Returns:
-            Normalized DWI data
+            List of 2D slices, each of shape (b_values, width, height)
         """
-        # Normalize each b-value volume independently
-        normalized_data = torch.zeros_like(dwi_data)
+        slices = []
+        for slice_idx in range(dwi_data.shape[3]):  # Iterate over slices
+            slice_data = dwi_data[:, :, :, slice_idx]  # (b_values, width, height)
+            slices.append(slice_data)
+        return slices
 
-        for i in range(dwi_data.shape[0]):
-            volume = dwi_data[i]
-
-            # Remove outliers (top and bottom 1%)
-            flat_volume = volume.flatten()
-            sorted_values, _ = torch.sort(flat_volume)
-            n = len(sorted_values)
-            lower_percentile = sorted_values[int(0.01 * n)]
-            upper_percentile = sorted_values[int(0.99 * n)]
-
-            # Clip outliers
-            volume = torch.clamp(volume, lower_percentile, upper_percentile)
-
-            # Normalize to [0, 1]
-            if volume.max() > volume.min():
-                volume = (volume - volume.min()) / (volume.max() - volume.min())
-
-            normalized_data[i] = volume
-
-        return normalized_data
-
-    def _resize_dwi(self, dwi_data: torch.Tensor, target_shape: Tuple) -> torch.Tensor:
+    def _create_slice_patches(
+        self, slice_data: torch.Tensor, item: Dict, slice_idx: int
+    ) -> List[Dict]:
         """
-        Resize DWI data to target shape using interpolation.
+        Create patches from a single 2D slice.
 
         Args:
-            dwi_data: DWI data tensor
-            target_shape: Target shape (width, height, slices)
+            slice_data: 2D slice tensor of shape (b_values, width, height)
+            item: Original data item
+            slice_idx: Index of the slice
 
         Returns:
-            Resized DWI data
+            List of patch dictionaries
         """
-        import torch.nn.functional as F
+        patches = []
+        height, width = slice_data.shape[1], slice_data.shape[2]
 
-        current_shape = dwi_data.shape[1:]  # (b_values, width, height, slices)
+        # Calculate patch positions
+        stride = self.patch_size - self.patch_overlap
 
-        if current_shape == target_shape:
-            return dwi_data
+        for y in range(0, height - self.patch_size + 1, stride):
+            for x in range(0, width - self.patch_size + 1, stride):
+                # Extract patch
+                patch = slice_data[:, y : y + self.patch_size, x : x + self.patch_size]
 
-        # Resize each b-value volume
-        resized_data = torch.zeros(
-            dwi_data.shape[0], *target_shape, device=dwi_data.device
-        )
+                # Pad if necessary to reach patch_size
+                if patch.shape[1] < self.patch_size or patch.shape[2] < self.patch_size:
+                    pad_h = max(0, self.patch_size - patch.shape[1])
+                    pad_w = max(0, self.patch_size - patch.shape[2])
+                    patch = torch.nn.functional.pad(
+                        patch, (0, pad_w, 0, pad_h), mode="reflect"
+                    )
 
-        for i in range(dwi_data.shape[0]):
-            volume = dwi_data[i]  # (width, height, slices)
+                # Normalize with respect to b0 if requested
+                if self.normalize_to_b0:
+                    patch = self._normalize_to_b0(patch)
 
-            # Add batch and channel dimensions for interpolation
-            volume = volume.unsqueeze(0).unsqueeze(0)  # (1, 1, width, height, slices)
+                # Create patch info
+                patch_info = {
+                    "patch_data": patch,
+                    "subject_id": item["subject_id"],
+                    "acquisition_id": item["acquisition_id"],
+                    "slice_idx": slice_idx,
+                    "patch_x": x,
+                    "patch_y": y,
+                    "original_shape": item["shape"],
+                    "b_values": item["b_values"][: self.max_b_values],
+                    "b_vectors": (
+                        item["b_vectors"][: self.max_b_values]
+                        if len(item["b_vectors"]) >= self.max_b_values
+                        else item["b_vectors"]
+                    ),
+                }
 
-            # Resize using trilinear interpolation
-            resized_volume = F.interpolate(
-                volume, size=target_shape, mode="trilinear", align_corners=False
-            )
+                patches.append(patch_info)
 
-            resized_data[i] = resized_volume.squeeze(0).squeeze(0)
+        return patches
 
-        return resized_data
+    def _normalize_to_b0(self, patch: torch.Tensor) -> torch.Tensor:
+        """
+        Normalize patch with respect to the first b-value (b0).
+
+        Args:
+            patch: Patch tensor of shape (b_values, height, width)
+
+        Returns:
+            Normalized patch
+        """
+        b0 = patch[0:1]  # First b-value (b0)
+
+        # Avoid division by zero
+        b0 = torch.clamp(b0, min=1e-8)
+
+        # Normalize all b-values with respect to b0
+        normalized_patch = patch / b0
+
+        # Clip to reasonable range [0, 1] for most DWI data
+        normalized_patch = torch.clamp(normalized_patch, 0, 1)
+
+        return normalized_patch
+
+    def __len__(self) -> int:
+        return len(self.patches)
+
+    def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
+        """
+        Load a single 2D patch.
+
+        Args:
+            idx: Index of the patch
+
+        Returns:
+            Dictionary containing patch data and metadata
+        """
+        patch_info = self.patches[idx]
+
+        # Get patch data
+        patch_data = patch_info["patch_data"]
+
+        # Apply transforms if provided
+        if self.transform:
+            patch_data = self.transform(patch_data)
+
+        return {
+            "dwi": patch_data,  # Shape: (b_values, 128, 128)
+            "bvals": torch.tensor(patch_info["b_values"], dtype=torch.float32),
+            "bvecs": torch.tensor(patch_info["b_vectors"], dtype=torch.float32),
+            "subject_id": patch_info["subject_id"],
+            "acquisition_id": patch_info["acquisition_id"],
+            "slice_idx": patch_info["slice_idx"],
+            "patch_x": patch_info["patch_x"],
+            "patch_y": patch_info["patch_y"],
+            "original_shape": patch_info["original_shape"],
+        }
 
     def get_data_info(self) -> Dict:
         """
@@ -191,24 +247,23 @@ class DWIDataset(Dataset):
         Returns:
             Dictionary containing dataset information
         """
-        shapes = [
-            tuple(item["shape"]) for item in self.data_list
-        ]  # Convert to tuples for hashing
-        b_values = [item["num_b_values"] for item in self.data_list]
-        subjects = set(item["subject_id"] for item in self.data_list)
+        subjects = set(patch["subject_id"] for patch in self.patches)
+        acquisitions = set(patch["acquisition_id"] for patch in self.patches)
 
         return {
-            "num_samples": len(self.data_list),
+            "num_patches": len(self.patches),
             "num_subjects": len(subjects),
-            "unique_shapes": list(set(shapes)),
-            "unique_b_values": list(set(b_values)),
+            "num_acquisitions": len(acquisitions),
+            "patch_size": self.patch_size,
+            "patch_overlap": self.patch_overlap,
+            "max_b_values": self.max_b_values,
             "subjects": list(subjects),
         }
 
 
 class DWIDataLoader:
     """
-    Convenience class for creating DWI dataloaders.
+    Convenience class for creating 2D DWI dataloaders.
     """
 
     @staticmethod
@@ -225,7 +280,7 @@ class DWIDataLoader:
         torch.utils.data.DataLoader,
     ]:
         """
-        Create train, validation, and test dataloaders.
+        Create train, validation, and test dataloaders for 2D patches.
 
         Args:
             train_data_list: Path to training data list
@@ -233,13 +288,19 @@ class DWIDataLoader:
             test_data_list: Path to test data list
             batch_size: Batch size (uses Config.BATCH_SIZE if None)
             num_workers: Number of workers (uses Config.NUM_WORKERS if None)
-            **dataset_kwargs: Additional arguments for DWIDataset
+            **dataset_kwargs: Additional arguments for DWIDataset2D
 
         Returns:
             Tuple of (train_loader, val_loader, test_loader)
         """
         batch_size = batch_size or Config.BATCH_SIZE
         num_workers = num_workers or Config.NUM_WORKERS
+
+        # Use 2D-specific defaults
+        dataset_kwargs.setdefault("normalize_to_b0", Config.NORMALIZE_TO_B0)
+        dataset_kwargs.setdefault("patch_size", Config.PATCH_SIZE)
+        dataset_kwargs.setdefault("patch_overlap", Config.PATCH_OVERLAP)
+        dataset_kwargs.setdefault("max_b_values", Config.MAX_B_VALUES)
 
         # Create datasets
         train_dataset = DWIDataset(train_data_list, **dataset_kwargs)

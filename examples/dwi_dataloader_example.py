@@ -38,8 +38,10 @@ def main():
         train_data_list=str(Config.TRAIN_DATA_LIST),
         val_data_list=str(Config.VAL_DATA_LIST),
         test_data_list=str(Config.TEST_DATA_LIST),
-        normalize=Config.NORMALIZE_DWI,
-        target_shape=Config.TARGET_SHAPE,
+        normalize_to_b0=Config.NORMALIZE_TO_B0,
+        patch_size=Config.PATCH_SIZE,
+        patch_overlap=Config.PATCH_OVERLAP,
+        max_b_values=Config.MAX_B_VALUES,
     )
     print("Dataloaders created successfully!\n")
 
@@ -75,8 +77,10 @@ def test_single_sample():
     # Create a single dataset
     dataset = DWIDataset(
         data_list_path=str(Config.TRAIN_DATA_LIST),
-        normalize=True,
-        target_shape=Config.TARGET_SHAPE,
+        normalize_to_b0=True,
+        patch_size=128,
+        patch_overlap=32,
+        max_b_values=25,
     )
 
     print(f"Dataset size: {len(dataset)}")
