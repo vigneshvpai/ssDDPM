@@ -2,7 +2,7 @@
 
 import json
 from src.config import Config
-from src.data.dataset import DWIDataset
+from src.data.dataloader import DWIDataset
 from src.visualization.patch_visualizer import visualize_nii_patches
 
 

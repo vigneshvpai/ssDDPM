@@ -113,6 +113,72 @@ class DWIDataset(Dataset):
             "subjects": list(subjects),
         }
 
+    def analyze_patch_coverage(self) -> Dict:
+        """
+        Analyze patch coverage and distribution across different image sizes.
+
+        Returns:
+            Dictionary with coverage statistics.
+        """
+        coverage_stats = {}
+
+        # Group patches by subject and acquisition
+        subject_acq_patches = {}
+        for patch in self.patches:
+            key = (patch["subject_id"], patch["acquisition_id"])
+            if key not in subject_acq_patches:
+                subject_acq_patches[key] = []
+            subject_acq_patches[key].append(patch)
+
+        # Analyze each subject-acquisition combination
+        for (subject_id, acq_id), patches in subject_acq_patches.items():
+            # Group by slice
+            slice_patches = {}
+            for patch in patches:
+                slice_idx = patch["slice_idx"]
+                if slice_idx not in slice_patches:
+                    slice_patches[slice_idx] = []
+                slice_patches[slice_idx].append(patch)
+
+            # Analyze each slice
+            for slice_idx, slice_patch_list in slice_patches.items():
+                original_shape = slice_patch_list[0]["original_shape"]
+                width, height = (
+                    original_shape[1],
+                    original_shape[2],
+                )  # Assuming shape is (b_values, width, height, slices)
+
+                # Calculate expected number of patches
+                stride = self.preprocessor.patch_size - self.preprocessor.patch_overlap
+                expected_patches_x = max(1, (width + stride - 1) // stride)
+                expected_patches_y = max(1, (height + stride - 1) // stride)
+                expected_total = expected_patches_x * expected_patches_y
+
+                # Get actual number of patches
+                actual_total = len(slice_patch_list)
+
+                # Calculate coverage percentage
+                coverage_percentage = (
+                    (actual_total / expected_total) * 100 if expected_total > 0 else 0
+                )
+
+                key = f"{subject_id}_{acq_id}_slice_{slice_idx}"
+                coverage_stats[key] = {
+                    "original_shape": original_shape,
+                    "width": width,
+                    "height": height,
+                    "expected_patches_x": expected_patches_x,
+                    "expected_patches_y": expected_patches_y,
+                    "expected_total": expected_total,
+                    "actual_total": actual_total,
+                    "coverage_percentage": coverage_percentage,
+                    "patch_size": self.preprocessor.patch_size,
+                    "patch_overlap": self.preprocessor.patch_overlap,
+                    "stride": stride,
+                }
+
+        return coverage_stats
+
 
 class DWIDataLoader:
     """

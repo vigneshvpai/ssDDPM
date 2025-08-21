@@ -85,7 +85,7 @@ class DWIPreprocessor:
         self, slice_data: torch.Tensor, item: Dict, slice_idx: int
     ) -> List[Dict]:
         """
-        Generate patches from a single 2D slice.
+        Generate patches from a single 2D slice with complete coverage.
 
         Args:
             slice_data: 2D slice tensor of shape (b_values, width, height).
@@ -101,31 +101,66 @@ class DWIPreprocessor:
         # Compute the stride for patch extraction
         stride = self.patch_size - self.patch_overlap
 
-        for y in range(0, height - self.patch_size + 1, stride):
-            for x in range(0, width - self.patch_size + 1, stride):
-                # Extract the patch
-                patch = slice_data[:, x : x + self.patch_size, y : y + self.patch_size]
+        # Calculate the number of patches needed to cover the entire image
+        # We want to ensure complete coverage, so we may need to extend beyond the image boundaries
+        num_patches_x = max(1, (width + stride - 1) // stride)
+        num_patches_y = max(1, (height + stride - 1) // stride)
 
-                # Pad the patch if it is smaller than patch_size
-                if patch.shape[1] < self.patch_size or patch.shape[2] < self.patch_size:
-                    pad_h = max(0, self.patch_size - patch.shape[1])
-                    pad_w = max(0, self.patch_size - patch.shape[2])
-                    patch = torch.nn.functional.pad(
-                        patch, (0, pad_w, 0, pad_h), mode="reflect"
-                    )
+        for patch_y_idx in range(num_patches_y):
+            for patch_x_idx in range(num_patches_x):
+                # Calculate the starting position for this patch
+                x_start = patch_x_idx * stride
+                y_start = patch_y_idx * stride
+
+                # Calculate the ending position
+                x_end = x_start + self.patch_size
+                y_end = y_start + self.patch_size
+
+                # Extract the patch from the image
+                x_start_img = min(x_start, width)
+                y_start_img = min(y_start, height)
+                x_end_img = min(x_end, width)
+                y_end_img = min(y_end, height)
+
+                # Extract the valid portion of the patch
+                patch = slice_data[:, x_start_img:x_end_img, y_start_img:y_end_img]
+
+                # Create a full-size patch tensor
+                full_patch = torch.zeros(
+                    (slice_data.shape[0], self.patch_size, self.patch_size),
+                    dtype=slice_data.dtype,
+                    device=slice_data.device,
+                )
+
+                # Calculate the offset within the full patch
+                x_offset = max(0, x_start_img - x_start)
+                y_offset = max(0, y_start_img - y_start)
+
+                # Place the extracted patch into the full-size patch
+                patch_width = x_end_img - x_start_img
+                patch_height = y_end_img - y_start_img
+
+                if patch_width > 0 and patch_height > 0:
+                    full_patch[
+                        :,
+                        x_offset : x_offset + patch_width,
+                        y_offset : y_offset + patch_height,
+                    ] = patch
 
                 # Optionally normalize the patch by b0
                 if self.normalize_to_b0:
-                    patch = self._normalize_to_b0(patch)
+                    full_patch = self._normalize_to_b0(full_patch)
 
                 # Store patch and metadata
                 patch_info = {
-                    "patch_data": patch,
+                    "patch_data": full_patch,
                     "subject_id": item["subject_id"],
                     "acquisition_id": item["acquisition_id"],
                     "slice_idx": slice_idx,
-                    "patch_x": x,
-                    "patch_y": y,
+                    "patch_x": x_start,
+                    "patch_y": y_start,
+                    "patch_x_idx": patch_x_idx,
+                    "patch_y_idx": patch_y_idx,
                     "original_shape": item["shape"],
                     "b_values": item["b_values"][: self.max_b_values],
                     "b_vectors": (
@@ -191,3 +226,85 @@ class DWIPreprocessor:
                 patches.extend(slice_patches)
 
         return patches
+
+    def reconstruct_slice_from_patches(
+        self, patches: List[Dict], original_shape: Tuple[int, int]
+    ) -> torch.Tensor:
+        """
+        Reconstruct a full slice from patches using weighted averaging.
+
+        Args:
+            patches: List of patch dictionaries from create_slice_patches.
+            original_shape: Original (width, height) of the slice.
+
+        Returns:
+            Reconstructed slice tensor of shape (b_values, width, height).
+        """
+        width, height = original_shape
+        b_values = patches[0]["patch_data"].shape[0]
+
+        # Initialize reconstruction tensors
+        reconstructed = torch.zeros(
+            (b_values, width, height), dtype=patches[0]["patch_data"].dtype
+        )
+        weights = torch.zeros(
+            (b_values, width, height), dtype=patches[0]["patch_data"].dtype
+        )
+
+        stride = self.patch_size - self.patch_overlap
+
+        for patch_info in patches:
+            patch_data = patch_info["patch_data"]
+            x_start = patch_info["patch_x"]
+            y_start = patch_info["patch_y"]
+
+            # Create a weight mask for this patch (higher weight in center, lower at edges)
+            weight_mask = torch.ones_like(patch_data)
+            if self.patch_overlap > 0:
+                # Create a smooth weight mask that decreases towards the edges
+                for i in range(self.patch_size):
+                    for j in range(self.patch_size):
+                        # Calculate distance from center
+                        center_x, center_y = self.patch_size // 2, self.patch_size // 2
+                        dist_x = abs(i - center_x) / (self.patch_size // 2)
+                        dist_y = abs(j - center_y) / (self.patch_size // 2)
+                        dist = max(dist_x, dist_y)
+                        weight_mask[:, i, j] = 1.0 - 0.5 * dist
+
+            # Add the weighted patch to the reconstruction
+            x_end = min(x_start + self.patch_size, width)
+            y_end = min(y_start + self.patch_size, height)
+
+            patch_x_start = max(0, x_start)
+            patch_y_start = max(0, y_start)
+
+            x_offset = max(0, x_start - patch_x_start)
+            y_offset = max(0, y_start - patch_y_start)
+
+            patch_width = x_end - patch_x_start
+            patch_height = y_end - patch_y_start
+
+            if patch_width > 0 and patch_height > 0:
+                reconstructed[:, patch_x_start:x_end, patch_y_start:y_end] += (
+                    patch_data[
+                        :,
+                        x_offset : x_offset + patch_width,
+                        y_offset : y_offset + patch_height,
+                    ]
+                    * weight_mask[
+                        :,
+                        x_offset : x_offset + patch_width,
+                        y_offset : y_offset + patch_height,
+                    ]
+                )
+                weights[:, patch_x_start:x_end, patch_y_start:y_end] += weight_mask[
+                    :,
+                    x_offset : x_offset + patch_width,
+                    y_offset : y_offset + patch_height,
+                ]
+
+        # Normalize by weights to get the final reconstruction
+        weights = torch.clamp(weights, min=1e-8)  # Prevent division by zero
+        reconstructed = reconstructed / weights
+
+        return reconstructed
