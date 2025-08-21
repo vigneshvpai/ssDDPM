@@ -42,6 +42,35 @@ class Config:
     NORMALIZE_TO_B0 = True  # Normalize with respect to first b-value
     MAX_B_VALUES = 25  # Use 25 b-value channels as per paper
 
+    # Target b-value sequence for filtering
+    TARGET_B_VALUES = [
+        0,
+        10,
+        10,
+        10,
+        50,
+        50,
+        50,
+        80,
+        80,
+        80,
+        200,
+        200,
+        200,
+        400,
+        400,
+        400,
+        600,
+        600,
+        600,
+        800,
+        800,
+        800,
+        1000,
+        1000,
+        1000,
+    ]
+
     # Model parameters
     DEVICE = "cuda" if os.environ.get("CUDA_VISIBLE_DEVICES") else "cpu"
 
