@@ -56,4 +56,4 @@ class Config:
     # -------------------------
     # Training Configs
     # -------------------------
-    MAX_EPOCHS = 5
+    MAX_EPOCHS = 10
