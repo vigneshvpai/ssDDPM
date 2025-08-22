@@ -2,7 +2,9 @@ import os
 
 
 class Config:
-    # Paths and environment variables for data storage locations
+    # -------------------------
+    # Path and Environment Configs
+    # -------------------------
     ORIGINAL_DATA_ROOT = "/home/vault/mfdp/mfdp118h/data"
     PT_DATA_ROOT = "/home/vault/mfdp/mfdp118h/pt_data"
     TMPDIR = os.environ.get("TMPDIR")
@@ -12,15 +14,38 @@ class Config:
     VAL_SPLIT_JSON = os.path.join("src", "data", "dataset_split", "val.json")
     TEST_SPLIT_JSON = os.path.join("src", "data", "dataset_split", "test.json")
 
+    # -------------------------
+    # Data Shape Configs
+    # -------------------------
     EXPECTED_SHAPE = (108, 134, 25, 25)
-
     UNET_COMPATIBLE_SHAPE = (144, 128)
 
-    # Batch size and number of workers for DataLoader
-    BATCH_SIZE = 16
+    # -------------------------
+    # DataLoader Configs
+    # -------------------------
+    BATCH_SIZE = 2
     NUM_WORKERS = 8
 
-    # Scheduler config for SSDDPM
+    # -------------------------
+    # Model Configs
+    # -------------------------
+    SSDDPM_CONFIG = {
+        "in_channels": 625,
+        "out_channels": 625,
+    }
+
+    # -------------------------
+    # Optimizer Configs
+    # -------------------------
+    OPTIMIZER_CONFIG = {
+        "lr": 1e-4,
+        "betas": (0.9, 0.999),
+        "eps": 1e-8,
+    }
+
+    # -------------------------
+    # Scheduler Configs
+    # -------------------------
     SCHEDULER_CONFIG = {
         "num_train_timesteps": 250,  # T = 250
         "beta_start": 1e-7,  # β1 = 1e-7
@@ -28,9 +53,7 @@ class Config:
         "beta_schedule": "linear",  # Linear noise schedule
     }
 
-    # Optimizer config for SSDDPM
-    OPTIMIZER_CONFIG = {
-        "lr": 1e-4,
-        "betas": (0.9, 0.999),
-        "eps": 1e-8,
-    }
+    # -------------------------
+    # Training Configs
+    # -------------------------
+    MAX_EPOCHS = 5

@@ -29,5 +29,17 @@ class SSDDPM(L.LightningModule):
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100)
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
 
-    def train_step(self, batch):
-        print(batch)
+    def training_step(self, batch):
+        images = batch
+        noise = torch.randn_like(images)
+        steps = torch.randint(
+            0,
+            self.scheduler.config.num_train_timesteps,
+            (images.shape[0],),
+            device=images.device,
+        )
+        noisy_images = self.scheduler.add_noise(images, noise, steps)
+        residual = self.model(noisy_images, steps).sample
+        loss = torch.nn.functional.mse_loss(residual, noise)
+        self.log("train_loss", loss, prog_bar=True)
+        return loss
