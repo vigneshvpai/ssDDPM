@@ -19,3 +19,18 @@ class Config:
     # Batch size and number of workers for DataLoader
     BATCH_SIZE = 16
     NUM_WORKERS = 8
+
+    # Scheduler config for SSDDPM
+    SCHEDULER_CONFIG = {
+        "num_train_timesteps": 250,  # T = 250
+        "beta_start": 1e-7,  # β1 = 1e-7
+        "beta_end": 2e-6,  # βT = 2e-6
+        "beta_schedule": "linear",  # Linear noise schedule
+    }
+
+    # Optimizer config for SSDDPM
+    OPTIMIZER_CONFIG = {
+        "lr": 1e-4,
+        "betas": (0.9, 0.999),
+        "eps": 1e-8,
+    }
