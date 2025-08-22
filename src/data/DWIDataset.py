@@ -2,8 +2,6 @@ import os
 import json
 import torch
 from torch.utils.data import Dataset
-from src.config.config import Config
-from src.data.Preprocess import Preprocess
 
 
 class DWIDataset(Dataset):
@@ -20,12 +18,7 @@ class DWIDataset(Dataset):
     ):
         self.split_json_path = split_json_path
         self.transform = transform
-
-        # Use Preprocess().preprocess as default if preprocess_fn is None
-        if preprocess_fn is None:
-            self.preprocess_fn = Preprocess().preprocess
-        else:
-            self.preprocess_fn = preprocess_fn
+        self.preprocess_fn = preprocess_fn
 
         # Load the list of samples from the split JSON
         with open(self.split_json_path, "r") as f:

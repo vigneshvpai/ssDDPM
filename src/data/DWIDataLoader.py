@@ -2,6 +2,7 @@ import lightning as L
 from torch.utils.data import DataLoader
 from src.data.DWIDataset import DWIDataset
 from src.config.config import Config
+from src.data.Preprocess import Preprocess
 
 
 class DWIDataLoader(L.LightningDataModule):
@@ -13,7 +14,6 @@ class DWIDataLoader(L.LightningDataModule):
         batch_size: int = Config.BATCH_SIZE,
         num_workers: int = Config.NUM_WORKERS,
         transform=None,
-        preprocess_fn=None,
     ):
         super().__init__()
         self.train_json = train_json
@@ -22,7 +22,7 @@ class DWIDataLoader(L.LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.transform = transform
-        self.preprocess_fn = preprocess_fn
+        self.preprocess_fn = Preprocess().preprocess
 
     def setup(self, stage=None):
         self.train_dataset = DWIDataset(
