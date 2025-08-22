@@ -1,17 +1,20 @@
 import lightning as L
 from src.model.SSDDPM import SSDDPM
 from src.data.DWIDataLoader import DWIDataLoader
+from src.config.config import Config
 
 
 def main():
     # Instantiate the data module
     data_module = DWIDataLoader()
 
-    # Instantiate the SSDDPM model
-    model = SSDDPM(in_channels=625, out_channels=1)
+    model = SSDDPM(
+        in_channels=Config.SSDDPM_CONFIG["in_channels"],
+        out_channels=Config.SSDDPM_CONFIG["out_channels"],
+    )
 
-    # Set up the trainer for 5 epochs
-    trainer = L.Trainer(max_epochs=1)
+    # Set up the trainer using max_epochs from config
+    trainer = L.Trainer(max_epochs=Config.MAX_EPOCHS)
 
     # Train the model
     trainer.fit(model, datamodule=data_module)
