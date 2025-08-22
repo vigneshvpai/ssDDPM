@@ -32,20 +32,14 @@ class DWIDataset(Dataset):
         pt_path = sample_info["path"]
         data = torch.load(pt_path, weights_only=False)
         image = data.get("image")
-        bval = data.get("bval")
+
         # Convert to torch.Tensor if not already
         if not isinstance(image, torch.Tensor):
             image = torch.from_numpy(image)
-        if not isinstance(bval, torch.Tensor):
-            bval = torch.from_numpy(bval)
-        sample = {
-            "image": image,
-            "bval": bval,
-            "filename": os.path.basename(pt_path),
-            "image_shape": sample_info.get("image_shape"),
-        }
+
         if self.preprocess_fn is not None:
-            image = self.preprocess_fn(sample)
+            image = self.preprocess_fn(image)
         if self.transform:
             image = self.transform(image)
+
         return image
