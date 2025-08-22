@@ -21,14 +21,14 @@ class Preprocess:
         image_norm = (image - min_val) / scale
         return image_norm
 
-    def reshape_bvals_to_channels(self, image):
+    def flatten_slices_and_bvals(self, image):
         """
-        Reshape the image tensor from (width, height, slices, bvalues) to (slices, bvalues, height, width),
-        so that slices become the batch dimension and bvalues become the channel dimension.
+        Flatten the slices and b-values dimensions into a single dimension.
+        Converts image from (width, height, slices, bvalues) to (slices * bvalues, height, width).
         Args:
             image (torch.Tensor): The input image tensor.
         Returns:
-            torch.Tensor: The reshaped image tensor.
+            torch.Tensor: The reshaped image tensor with shape (slices * bvalues, height, width).
         """
         # Expecting image shape: (width, height, slices, bvalues)
         if image.ndim != 4:
@@ -37,6 +37,10 @@ class Preprocess:
             )
         # Permute to (slices, bvalues, height, width)
         image = image.permute(2, 3, 1, 0)
+        # Reshape to (slices * bvalues, height, width)
+        slices, bvalues, height, width = image.shape
+        image = image.reshape(slices * bvalues, height, width)
+
         return image
 
     def pad_to_unet_compatible(self, image, target_shape=None):
@@ -79,6 +83,6 @@ class Preprocess:
         """
         image_padded = self.pad_to_unet_compatible(image)
         image_norm = self.normalize_to_b0(image_padded)
-        image_reshaped = self.reshape_bvals_to_channels(image_norm)
+        image_reshaped = self.flatten_slices_and_bvals(image_norm)
 
         return image_reshaped
