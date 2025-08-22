@@ -1,62 +1,94 @@
 import torch
 import lightning as L
-from diffusers.models import UNet2DModel
+import torch.nn as nn
+import torch.nn.functional as F
 
 
-class UNetAutoencoder(L.LightningModule):
-    def __init__(
-        self,
-        in_channels,
-        out_channels=None,
-        lr=1e-3,
-        sample_size=128,
-        norm_num_groups=8,
-    ):
+class BasicUNet(L.LightningModule):
+    """
+    A minimal UNet for testing DataLoader.
+    The model learns to map input images to random noise (Gaussian) as ground truth.
+    """
+
+    def __init__(self, in_channels=1, out_channels=1, lr=1e-3, img_size=128):
         super().__init__()
-        if out_channels is None:
-            out_channels = in_channels
-        self.save_hyperparameters(ignore=[])
+        self.save_hyperparameters()
         self.lr = lr
 
-        # Four blocks, each with two layers, channels: 64, 128, 128, 256
-        # Two out of four block transitions include spatial self-attention
-        # Down: [64, 128, 128, 256], Up: [256, 128, 128, 64]
-        # Attention in 2nd and 4th blocks (index 1 and 3)
-        self.unet = UNet2DModel(
-            sample_size=sample_size,
-            in_channels=in_channels,
-            out_channels=out_channels,
-            layers_per_block=2,
-            block_out_channels=[64, 128, 128, 256],
-            down_block_types=(
-                "DownBlock2D",  # 64
-                "AttnDownBlock2D",  # 128 (attention)
-                "DownBlock2D",  # 128
-                "AttnDownBlock2D",  # 256 (attention)
-            ),
-            up_block_types=(
-                "AttnUpBlock2D",  # 256 (attention)
-                "UpBlock2D",  # 128
-                "AttnUpBlock2D",  # 128 (attention)
-                "UpBlock2D",  # 64
-            ),
-            norm_num_groups=norm_num_groups,
+        # Encoder
+        self.enc1 = nn.Sequential(
+            nn.Conv2d(in_channels, 32, 3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 32, 3, padding=1),
+            nn.ReLU(inplace=True),
+        )
+        self.pool1 = nn.MaxPool2d(2)
+        self.enc2 = nn.Sequential(
+            nn.Conv2d(32, 64, 3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(64, 64, 3, padding=1),
+            nn.ReLU(inplace=True),
+        )
+        self.pool2 = nn.MaxPool2d(2)
+
+        # Bottleneck
+        self.bottleneck = nn.Sequential(
+            nn.Conv2d(64, 128, 3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(128, 128, 3, padding=1),
+            nn.ReLU(inplace=True),
         )
 
+        # Decoder
+        self.up2 = nn.ConvTranspose2d(128, 64, 2, stride=2)
+        self.dec2 = nn.Sequential(
+            nn.Conv2d(128, 64, 3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(64, 64, 3, padding=1),
+            nn.ReLU(inplace=True),
+        )
+        self.up1 = nn.ConvTranspose2d(64, 32, 2, stride=2)
+        self.dec1 = nn.Sequential(
+            nn.Conv2d(64, 32, 3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 32, 3, padding=1),
+            nn.ReLU(inplace=True),
+        )
+
+        self.final = nn.Conv2d(32, out_channels, 1)
+
     def forward(self, x):
-        # x: (batch, channels, height, width)
-        return self.unet(x).sample
+        # Encoder
+        e1 = self.enc1(x)
+        p1 = self.pool1(e1)
+        e2 = self.enc2(p1)
+        p2 = self.pool2(e2)
+
+        # Bottleneck
+        b = self.bottleneck(p2)
+
+        # Decoder
+        u2 = self.up2(b)
+        d2 = self.dec2(torch.cat([u2, e2], dim=1))
+        u1 = self.up1(d2)
+        d1 = self.dec1(torch.cat([u1, e1], dim=1))
+
+        out = self.final(d1)
+        return out
 
     def training_step(self, batch, batch_idx):
-        # Self-supervised: input is the target
+        # Accepts batch as dict, tuple/list, or tensor
         if isinstance(batch, dict):
             x = batch["image"]
         elif isinstance(batch, (tuple, list)):
             x = batch[0]
         else:
             x = batch
+
+        # Generate random noise as ground truth
+        noise = torch.randn_like(x)
         out = self(x)
-        loss = torch.nn.functional.mse_loss(out, x)
+        loss = F.mse_loss(out, noise)
         self.log("train_loss", loss)
         return loss
 
@@ -67,8 +99,10 @@ class UNetAutoencoder(L.LightningModule):
             x = batch[0]
         else:
             x = batch
+
+        noise = torch.randn_like(x)
         out = self(x)
-        loss = torch.nn.functional.mse_loss(out, x)
+        loss = F.mse_loss(out, noise)
         self.log("val_loss", loss)
         return loss
 

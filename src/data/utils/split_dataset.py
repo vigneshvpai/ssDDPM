@@ -78,16 +78,9 @@ def split_dataset(
     for pt_path in pt_files:
         try:
             data = torch.load(pt_path, weights_only=False)
-            bval = data.get("bval")
             image = data.get("image")
-            # Convert to list if needed
-            if hasattr(bval, "tolist"):
-                bval_list = bval.tolist()
-            else:
-                bval_list = list(bval)
-            if bvals_match(bval_list, REFERENCE_BVALS) and width_height_match(
-                image, REQUIRED_WIDTH_HEIGHT
-            ):
+            # Only allow if shape == EXPECTED_SHAPE
+            if hasattr(image, "shape") and tuple(image.shape) == Config.EXPECTED_SHAPE:
                 filtered_pt_files.append(pt_path)
         except Exception as e:
             print(f"Warning: Could not read {pt_path}: {e}")

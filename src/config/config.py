@@ -12,8 +12,10 @@ class Config:
     VAL_SPLIT_JSON = os.path.join("src", "data", "dataset_split", "val.json")
     TEST_SPLIT_JSON = os.path.join("src", "data", "dataset_split", "test.json")
 
+    EXPECTED_SHAPE = (108, 134, 25, 25)
+
     UNET_COMPATIBLE_SHAPE = (144, 128)
 
     # Batch size and number of workers for DataLoader
-    BATCH_SIZE = 32
-    NUM_WORKERS = 0
+    BATCH_SIZE = 16
+    NUM_WORKERS = 8

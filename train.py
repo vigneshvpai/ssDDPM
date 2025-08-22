@@ -1,34 +1,21 @@
-import torch
-import matplotlib.pyplot as plt
-import numpy as np
+import lightning as L
+from src.model.dummy_model import BasicUNet
 from src.data.DWIDataLoader import DWIDataLoader
 
-# Initialize the DWIDataLoader and get a batch
-dataloader_module = DWIDataLoader(batch_size=1)
-dataloader_module.setup()
-dataloader = dataloader_module.train_dataloader()
 
-# Fetch one batch
-batch = next(iter(dataloader))  # Shape: (1, slices*bvalues, height, width)
-print(f"Original batch shape: {batch.shape}")
+def main():
+    # Instantiate the data module
+    data_module = DWIDataLoader()
 
-# Remove batch dimension
-batch_np = batch.squeeze(0)  # (slices*bvalues, height, width)
-num_images, height, width = batch_np.shape
+    # Instantiate the model
+    model = BasicUNet(in_channels=625, out_channels=625)
 
-# Plot the first 100 images
-num_to_plot = min(100, num_images)
-rows = 10
-cols = 10
-fig, axes = plt.subplots(rows, cols, figsize=(20, 20))
-for i in range(num_to_plot):
-    ax = axes[i // cols, i % cols]
-    ax.imshow(batch_np[i], cmap="gray")
-    ax.axis("off")
-    ax.set_title(f"Slice {i}")
-# Hide any unused subplots
-for i in range(num_to_plot, rows * cols):
-    ax = axes[i // cols, i % cols]
-    ax.axis("off")
-plt.tight_layout()
-plt.savefig("preview.png")
+    # Set up the trainer for 5 epochs
+    trainer = L.Trainer(max_epochs=5)
+
+    # Train the model
+    trainer.fit(model, datamodule=data_module)
+
+
+if __name__ == "__main__":
+    main()
