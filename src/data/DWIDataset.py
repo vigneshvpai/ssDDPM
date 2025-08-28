@@ -33,10 +33,12 @@ class DWIDataset(Dataset):
         data = torch.load(pt_path, weights_only=False)
 
         image = data.get("image")
+        b_values = torch.tensor(sample_info["bval"])
+        b_values = torch.repeat_interleave(b_values, image.shape[3])
 
-        b_values = torch.repeat_interleave(
-            torch.tensor(sample_info["bval"]), image.shape[3]
-        )
+        # Convert to torch.Tensor if not already
+        if not isinstance(image, torch.Tensor):
+            image = torch.from_numpy(image)
 
         if self.preprocess_fn is not None:
             image = self.preprocess_fn(image)

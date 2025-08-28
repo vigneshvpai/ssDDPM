@@ -32,7 +32,7 @@ class SSDDPM(L.LightningModule):
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
 
     def training_step(self, batch):
-        images = batch  # Step 1: Sample batch y₀ ~ Y
+        images, b_values = batch  # Step 1: Sample batch y₀ ~ Y
         noise = torch.randn_like(images)  # Step 3: Sample ε ~ N(0, I)
         steps = torch.randint(
             0,
