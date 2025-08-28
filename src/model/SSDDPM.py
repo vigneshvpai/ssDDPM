@@ -24,7 +24,7 @@ class SSDDPM(L.LightningModule):
         self.adc_model = ADC()
 
         self.scheduler = DDPMScheduler(**Config.SCHEDULER_CONFIG)
-        self.lambda_reg = Config.LAMBDA_REG
+        self.lambda_reg = Config.SSDDPM_CONFIG["lambda_reg"]
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.model.parameters(), **Config.OPTIMIZER_CONFIG)
@@ -48,16 +48,14 @@ class SSDDPM(L.LightningModule):
         residual = self.model(noisy_images, steps).sample  # Step 5: ê_t = f₀(y_t, t)
         epsilon_zero = torch.randn_like(images)  # Step 6: ε₀ ~ N(0, I)
 
-        y_prime_t_minus_1 = (1 / torch.sqrt(1 - self.scheduler.betas[steps])) * (
-            noisy_images  # y_t term
-            - (
-                self.scheduler.betas[steps]
-                / torch.sqrt(1 - self.scheduler.alphas_cumprod[steps])
-            )
-            * residual  # ê_t term
+        betas = self.scheduler.betas[steps].view(-1, 1, 1, 1)
+        alphas_cumprod = self.scheduler.alphas_cumprod[steps].view(-1, 1, 1, 1)
+
+        y_prime_t_minus_1 = (1 / torch.sqrt(1 - betas)) * (
+            noisy_images - (betas / torch.sqrt(1 - alphas_cumprod)) * residual
         ) + torch.sqrt(
-            self.scheduler.betas[steps]
-        ) * epsilon_zero  # Step 7: y'_{t-1} = (1 / √1 - β_t) (y_t - (β_t / √1 - α_t) ê_t) + √β_t ε₀
+            betas
+        ) * epsilon_zero  # Step 7: y'_{t-1} = (1 / √1 - β_t) (y_t - (β_t / √1 - ā_t) ê_t) + √β_t ε₀
 
         S0_hat, D_hat = self.adc_model(
             y_prime_t_minus_1, b_values
