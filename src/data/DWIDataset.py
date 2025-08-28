@@ -34,7 +34,7 @@ class DWIDataset(Dataset):
 
         image = data.get("image")
         b_values = torch.tensor(sample_info["bval"])
-        b_values = torch.repeat_interleave(b_values, image.shape[3])
+        b_values = b_values.repeat(image.shape[3])
 
         # Convert to torch.Tensor if not already
         if not isinstance(image, torch.Tensor):
