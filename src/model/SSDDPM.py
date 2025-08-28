@@ -31,16 +31,31 @@ class SSDDPM(L.LightningModule):
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
 
     def training_step(self, batch):
-        images = batch
-        noise = torch.randn_like(images)
+        images = batch  # Step 1: Sample batch y₀ ~ Y
+        noise = torch.randn_like(images)  # Step 3: Sample ε ~ N(0, I)
         steps = torch.randint(
             0,
             self.scheduler.config.num_train_timesteps,
             (images.shape[0],),
             device=images.device,
-        )
-        noisy_images = self.scheduler.add_noise(images, noise, steps)
-        residual = self.model(noisy_images, steps).sample
+        )  # Step 2: Sample t ~ Uniform({1, ..., T})
+        noisy_images = self.scheduler.add_noise(
+            images, noise, steps
+        )  # Step 4: y_t = √ā_t y₀ + √1 - ā_t ε
+        residual = self.model(noisy_images, steps).sample  # Step 5: ê_t = f₀(y_t, t)
+        epsilon_zero = torch.randn_like(images)  # Step 6: ε₀ ~ N(0, I)
+
+        y_prime_t_minus_1 = (1 / torch.sqrt(1 - self.scheduler.betas[steps])) * (
+            noisy_images  # y_t term
+            - (
+                self.scheduler.betas[steps]
+                / torch.sqrt(1 - self.scheduler.alphas_cumprod[steps])
+            )
+            * residual  # ê_t term
+        ) + torch.sqrt(
+            self.scheduler.betas[steps]
+        ) * epsilon_zero  # Step 7: y'_{t-1} = (1 / √1 - β_t) (y_t - (β_t / √1 - α_t) ê_t) + √β_t ε₀
+
         loss = torch.nn.functional.mse_loss(residual, noise)
         self.log("train_loss", loss, prog_bar=True)
         return loss
