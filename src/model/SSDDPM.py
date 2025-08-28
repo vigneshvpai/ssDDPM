@@ -2,6 +2,7 @@ from diffusers import UNet2DModel, DDPMScheduler
 import lightning as L
 import torch
 import torch.nn as nn
+from src.model.ADC import ADC
 from src.config.config import Config
 import torchvision.utils as vutils
 
@@ -20,6 +21,7 @@ class SSDDPM(L.LightningModule):
             ),
             up_block_types=("UpBlock2D", "AttnUpBlock2D", "AttnUpBlock2D", "UpBlock2D"),
         )
+        self.adc_model = ADC()
 
         self.scheduler = DDPMScheduler(**Config.SCHEDULER_CONFIG)
         self.lambda_reg = Config.LAMBDA_REG
@@ -57,7 +59,9 @@ class SSDDPM(L.LightningModule):
             self.scheduler.betas[steps]
         ) * epsilon_zero  # Step 7: y'_{t-1} = (1 / √1 - β_t) (y_t - (β_t / √1 - α_t) ê_t) + √β_t ε₀
 
-        S0_hat, D_hat = self.f_ADC(y_prime_t_minus_1)  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
+        S0_hat, D_hat = self.adc_model(
+            y_prime_t_minus_1, b_values
+        )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
 
         y_hat_t_minus_1 = S0_hat * torch.exp(
             -self.b * D_hat
