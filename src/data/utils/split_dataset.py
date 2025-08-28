@@ -3,38 +3,6 @@ import json
 import torch
 from src.config.config import Config
 
-# The reference b-values to match, as integers
-REFERENCE_BVALS = [
-    0,
-    10,
-    10,
-    10,
-    50,
-    50,
-    50,
-    80,
-    80,
-    80,
-    200,
-    200,
-    200,
-    400,
-    400,
-    400,
-    600,
-    600,
-    600,
-    800,
-    800,
-    800,
-    1000,
-    1000,
-    1000,
-]
-
-# The required width and height for inclusion
-REQUIRED_WIDTH_HEIGHT = (108, 134)
-
 
 def bvals_match(bvals, ref_bvals):
     """Check if two bval lists match exactly (order and value), comparing as integers."""
@@ -72,8 +40,6 @@ def split_dataset(
     ]
     pt_files.sort()  # For reproducibility
 
-    # Only keep files whose bvals match REFERENCE_BVALS (as int)
-    # and whose width and height match REQUIRED_WIDTH_HEIGHT
     filtered_pt_files = []
     for pt_path in pt_files:
         try:

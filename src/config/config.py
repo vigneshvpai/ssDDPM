@@ -15,6 +15,15 @@ class Config:
     TEST_SPLIT_JSON = os.path.join("src", "data", "dataset_split", "test.json")
 
     # -------------------------
+    # Dataset Filtering/Validation Configs
+    # -------------------------
+    # Number of b-values for ADC model
+    NUM_B_VALUES = 25
+
+    # Required (width, height) for inclusion in dataset
+    REQUIRED_WIDTH_HEIGHT = (108, 134)
+
+    # -------------------------
     # Data Shape Configs
     # -------------------------
     EXPECTED_SHAPE = (108, 134, 25, 25)
@@ -26,13 +35,18 @@ class Config:
     BATCH_SIZE = 2
     NUM_WORKERS = 8
 
-    # -------------------------
     # Model Configs
     # -------------------------
     SSDDPM_CONFIG = {
         "in_channels": 625,
         "out_channels": 625,
         "lambda_reg": 1,
+    }
+
+    ADC_CONFIG = {
+        "adc_type": "avg",  # avg or dir
+        "num_dirs": 3,  # only used if adc_type == "dir"
+        "n_bvals": 25,
     }
 
     # -------------------------

@@ -76,4 +76,4 @@ class SSDDPM(L.LightningModule):
             noise_loss + self.lambda_reg * reg_loss
         )  # Total loss: noise loss + self-supervised reg loss
 
-        return 0
+        return loss
