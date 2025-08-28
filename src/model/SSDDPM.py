@@ -48,8 +48,10 @@ class SSDDPM(L.LightningModule):
         residual = self.model(noisy_images, steps).sample  # Step 5: ê_t = f₀(y_t, t)
         epsilon_zero = torch.randn_like(images)  # Step 6: ε₀ ~ N(0, I)
 
-        betas = self.scheduler.betas[steps].view(-1, 1, 1, 1)
-        alphas_cumprod = self.scheduler.alphas_cumprod[steps].view(-1, 1, 1, 1)
+        betas = self.scheduler.betas.to(steps.device)[steps].view(-1, 1, 1, 1)
+        alphas_cumprod = self.scheduler.alphas_cumprod.to(steps.device)[steps].view(
+            -1, 1, 1, 1
+        )
 
         y_prime_t_minus_1 = (1 / torch.sqrt(1 - betas)) * (
             noisy_images - (betas / torch.sqrt(1 - alphas_cumprod)) * residual
@@ -62,15 +64,16 @@ class SSDDPM(L.LightningModule):
         )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
 
         y_hat_t_minus_1 = S0_hat * torch.exp(
-            -self.b * D_hat
+            -b_values * D_hat
         )  # Step 9: ŷ_{t-1} ← Ŝ₀ e^(-b D̂)
 
         noise_loss = torch.nn.functional.mse_loss(residual, noise)  # ||ê_t - ε||²₂
         reg_loss = torch.nn.functional.mse_loss(
             y_hat_t_minus_1, y_prime_t_minus_1
-        )  # ||ŷ_{t-1} - y'_{t-1}||²₂
+        )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
+
         loss = (
             noise_loss + self.lambda_reg * reg_loss
-        )  # Step 10: ||ê_t - ε||²₂ + λ ||ŷ_{t-1} - y'_{t-1}||²₂
+        )  # Total loss: noise loss + self-supervised reg loss
 
-        return loss
+        return 0
