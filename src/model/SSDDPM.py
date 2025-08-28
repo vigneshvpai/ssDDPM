@@ -63,8 +63,14 @@ class SSDDPM(L.LightningModule):
             y_prime_t_minus_1, b_values
         )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
 
-        y_hat_t_minus_1 = S0_hat * torch.exp(
-            -b_values * D_hat
+        # Repeat each slice 25 times to match b_values shape
+        S0_hat_expanded = S0_hat.repeat(1, 25, 1, 1)  # Shape: (2, 625, H, W)
+        D_hat_expanded = D_hat.repeat(1, 25, 1, 1)  # Shape: (2, 625, H, W)
+        # Reshape b_values to broadcast properly
+        b_values_reshaped = b_values.view(2, 625, 1, 1)  # Shape: (2, 625, 1, 1)
+
+        y_hat_t_minus_1 = S0_hat_expanded * torch.exp(
+            -b_values_reshaped * D_hat_expanded
         )  # Step 9: ŷ_{t-1} ← Ŝ₀ e^(-b D̂)
 
         noise_loss = torch.nn.functional.mse_loss(residual, noise)  # ||ê_t - ε||²₂

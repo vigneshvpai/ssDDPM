@@ -17,9 +17,6 @@ class Config:
     # -------------------------
     # Dataset Filtering/Validation Configs
     # -------------------------
-    # Number of b-values for ADC model
-    NUM_B_VALUES = 25
-
     # Required (width, height) for inclusion in dataset
     REQUIRED_WIDTH_HEIGHT = (108, 134)
 
