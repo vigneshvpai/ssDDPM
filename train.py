@@ -29,5 +29,27 @@ def main():
     trainer.fit(model, datamodule=data_module)
 
 
+def train_one_batch():
+    """
+    Trains the model for a single batch and returns the loss.
+    """
+    data_module = DWIDataLoader()
+    data_module.setup()
+    model = SSDDPM(
+        in_channels=Config.SSDDPM_CONFIG["in_channels"],
+        out_channels=Config.SSDDPM_CONFIG["out_channels"],
+    )
+    model.train()
+    dataloader = data_module.train_dataloader()
+    batch = next(iter(dataloader))
+    optimizer = model.configure_optimizers()["optimizer"]
+
+    optimizer.zero_grad()
+    loss = model.training_step(batch)
+    loss.backward()
+    optimizer.step()
+    return loss.item()
+
+
 if __name__ == "__main__":
-    main()
+    train_one_batch()

@@ -32,6 +32,7 @@ class Config:
     SSDDPM_CONFIG = {
         "in_channels": 625,
         "out_channels": 625,
+        "lambda_reg": 1,
     }
 
     # -------------------------
