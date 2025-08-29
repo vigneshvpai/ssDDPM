@@ -203,13 +203,13 @@ The trained model provides:
 
 ## Current Status
 
-- ✅ **Training Pipeline**: Complete with PyTorch Lightning integration
-- ✅ **Inference Pipeline**: Complete with NIfTI export capabilities
-- ✅ **Model Implementation**: Full ssDDPM algorithm implementation
-- ✅ **Data Processing**: Complete preprocessing and postprocessing
-- ✅ **Checkpoints**: Trained models available in `checkpoints/`
-- ✅ **Results**: Inference results available in `inference_results/`
-- 🔄 **Directional ADC**: Not yet implemented (marked as TODO)
+- **Training Pipeline**: Complete with PyTorch Lightning integration
+- **Inference Pipeline**: Complete with NIfTI export capabilities
+- **Model Implementation**: Full ssDDPM algorithm implementation
+- **Data Processing**: Complete preprocessing and postprocessing
+- **Checkpoints**: Trained models available in `checkpoints/`
+- **Results**: Inference results available in `inference_results/`
+- **Directional ADC**: Not yet implemented (marked as TODO)
 
 ## Performance
 
