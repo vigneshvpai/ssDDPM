@@ -28,14 +28,16 @@ class SSDDPM(L.LightningModule):
         self.num_inference_steps = Config.SSDDPM_CONFIG["num_inference_steps"]
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.model.parameters(), **Config.OPTIMIZER_CONFIG)
+        optimizer = torch.optim.Adam(
+            self.model.parameters(), **Config.SSDDPM_CONFIG["OPTIMIZER_CONFIG"]
+        )
 
         # Use cosine annealing learning rate scheduler
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100)
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
 
     def compute_loss(self, batch):
-        images, b_values = batch  # Step 1: Sample batch y₀ ~ Y
+        images, b_values, _ = batch  # Step 1: Sample batch y₀ ~ Y
         noise = torch.randn_like(images)  # Step 3: Sample ε ~ N(0, I)
         steps = torch.randint(
             0,

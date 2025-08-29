@@ -13,12 +13,9 @@ class Config:
     TRAIN_SPLIT_JSON = os.path.join("src", "data", "dataset_split", "train.json")
     VAL_SPLIT_JSON = os.path.join("src", "data", "dataset_split", "val.json")
     TEST_SPLIT_JSON = os.path.join("src", "data", "dataset_split", "test.json")
-
-    # -------------------------
-    # Dataset Filtering/Validation Configs
-    # -------------------------
-    # Required (width, height) for inclusion in dataset
-    REQUIRED_WIDTH_HEIGHT = (108, 134)
+    TEST_NIFTI_JSON_PATH = os.path.join(
+        "src", "data", "dataset_split", "test_nifti.json"
+    )
 
     # -------------------------
     # Data Shape Configs
@@ -32,39 +29,44 @@ class Config:
     BATCH_SIZE = 2
     NUM_WORKERS = 8
 
-    # Model Configs
+    # -------------------------
+    # SSDDPM Configs
     # -------------------------
     SSDDPM_CONFIG = {
+        # -------------------------
+        # Scheduler Configs
+        # -------------------------
         "SCHEDULER_CONFIG": {
             "num_train_timesteps": 250,  # T = 250
             "beta_start": 1e-7,  # β1 = 1e-7
             "beta_end": 2e-6,  # βT = 2e-6
             "beta_schedule": "linear",  # Linear noise schedule
         },
+        # -------------------------
+        # Optimizer Configs
+        # -------------------------
+        "OPTIMIZER_CONFIG": {
+            "lr": 1e-4,
+            "betas": (0.9, 0.999),
+            "eps": 1e-8,
+        },
+        # -------------------------
+        # Model Configs
+        # -------------------------
         "in_channels": 625,
         "out_channels": 625,
         "lambda_reg": 1,
         "num_inference_steps": 250,
     }
 
+    # -------------------------
+    # ADC Configs
+    # -------------------------
     ADC_CONFIG = {
         "adc_type": "avg",  # avg or dir
         "num_dirs": 3,  # only used if adc_type == "dir"
         "n_bvals": 25,
     }
-
-    # -------------------------
-    # Optimizer Configs
-    # -------------------------
-    OPTIMIZER_CONFIG = {
-        "lr": 1e-4,
-        "betas": (0.9, 0.999),
-        "eps": 1e-8,
-    }
-
-    # -------------------------
-    # Scheduler Configs
-    # -------------------------
 
     # -------------------------
     # Training Configs
