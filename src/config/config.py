@@ -35,9 +35,16 @@ class Config:
     # Model Configs
     # -------------------------
     SSDDPM_CONFIG = {
+        "SCHEDULER_CONFIG": {
+            "num_train_timesteps": 250,  # T = 250
+            "beta_start": 1e-7,  # β1 = 1e-7
+            "beta_end": 2e-6,  # βT = 2e-6
+            "beta_schedule": "linear",  # Linear noise schedule
+        },
         "in_channels": 625,
         "out_channels": 625,
         "lambda_reg": 1,
+        "num_inference_steps": 250,
     }
 
     ADC_CONFIG = {
@@ -58,12 +65,6 @@ class Config:
     # -------------------------
     # Scheduler Configs
     # -------------------------
-    SCHEDULER_CONFIG = {
-        "num_train_timesteps": 250,  # T = 250
-        "beta_start": 1e-7,  # β1 = 1e-7
-        "beta_end": 2e-6,  # βT = 2e-6
-        "beta_schedule": "linear",  # Linear noise schedule
-    }
 
     # -------------------------
     # Training Configs
