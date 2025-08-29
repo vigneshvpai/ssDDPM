@@ -21,11 +21,15 @@ class Postprocess:
 
         # Get dimensions
         slices_times_bvals, height, width = image.shape
-        n_slices = 25  # From config
-        n_bvals = Config.ADC_CONFIG["n_bvals"]  # 25
+        n_slices = slices_times_bvals // Config.ADC_CONFIG["n_bvals"]
 
-        # Reshape to (slices, bvalues, height, width)
-        image = image.reshape(n_slices, n_bvals, height, width)
+        slices = []
+        for i in range(n_slices):
+            slice_indices = torch.arange(i, slices_times_bvals, n_slices)
+            slice_data = image[slice_indices]
+            slices.append(slice_data)
+
+        image = torch.stack(slices, dim=0)
 
         # Permute back to (width, height, slices, bvalues)
         image = image.permute(3, 2, 0, 1)

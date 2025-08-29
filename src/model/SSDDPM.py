@@ -1,10 +1,11 @@
+import time
 from diffusers import UNet2DModel, DDPMScheduler
 import lightning as L
 import torch
 import torch.nn as nn
 from src.model.ADC import ADC
 from src.config.config import Config
-import torchvision.utils as vutils
+from tqdm import tqdm
 
 
 class SSDDPM(L.LightningModule):
@@ -91,7 +92,23 @@ class SSDDPM(L.LightningModule):
     def inference(self, y_hat_t, b_values):
         self.eval()
 
-        for t in range(self.num_inference_steps - 1, -1, -1):
+        print(f"Starting inference with {self.num_inference_steps} steps...")
+
+        start_time = time.time()
+
+        # Create progress bar
+        pbar = tqdm(
+            range(self.num_inference_steps - 1, -1, -1),
+            desc="Inference Progress",
+            total=self.num_inference_steps,
+            unit="step",
+        )
+
+        for t in pbar:
+            pbar.set_description(
+                f"Step {self.num_inference_steps - 1 - t + 1}/{self.num_inference_steps} (t={t})"
+            )
+
             # Step 2: ê_t ← f_0(ŷ_t, t)
             timesteps = torch.full(
                 (y_hat_t.shape[0],), t, device=y_hat_t.device, dtype=torch.long
@@ -121,10 +138,15 @@ class SSDDPM(L.LightningModule):
             y_hat_t_minus_1 = S0_hat_expanded * torch.exp(
                 -b_values_reshaped * D_hat_expanded
             )
-
             # Update for next iteration
             y_hat_t = y_hat_t_minus_1
 
+        # Calculate total time
+        total_time = time.time() - start_time
+
+        print(
+            f"Inference completed! Total time: {total_time:.2f} seconds ({total_time/60:.2f} minutes)"
+        )
         # Return ŷ_0
         return y_hat_t
 

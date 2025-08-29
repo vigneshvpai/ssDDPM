@@ -33,25 +33,20 @@ class DWIDataset(Dataset):
         sample_info = self.samples[idx]
         path = sample_info["path"]
 
-        data = None
+        affine = None
         if path.endswith(".pt"):
             data = torch.load(path, weights_only=False)
+            image = data.get("image")
         elif path.endswith(".nii.gz"):
             # Load the NIfTI file
             nii_img = nib.load(path)
             data_nii = nii_img.get_fdata(dtype=np.float32)
             # Get the affine matrix
             affine = nii_img.affine
-            data = torch.from_numpy(
-                {"image": data_nii, "bval": sample_info["bval"], "affine": affine}
-            )
+            image = torch.from_numpy(data_nii)
 
-        image = data.get("image")
         b_values = torch.tensor(sample_info["bval"])
         b_values = b_values.repeat(image.shape[3])
-
-        # Get affine if available
-        affine = data.get("affine", None)
 
         # Convert to torch.Tensor if not already
         if not isinstance(image, torch.Tensor):
