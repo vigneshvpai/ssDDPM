@@ -19,7 +19,7 @@ class Preprocess:
         max_val = image.max()
         scale = (max_val - min_val) if (max_val - min_val) > 0 else 1.0
         image_norm = (image - min_val) / scale
-        return image_norm
+        return image_norm, min_val, max_val
 
     def flatten_slices_and_bvals(self, image):
         """
@@ -82,7 +82,7 @@ class Preprocess:
             torch.Tensor: The preprocessed and padded image tensor.
         """
         image_padded = self.pad_to_unet_compatible(image)
-        image_norm = self.normalize_to_b0(image_padded)
+        image_norm, min_val, max_val = self.normalize_to_b0(image_padded)
         image_reshaped = self.flatten_slices_and_bvals(image_norm)
 
-        return image_reshaped
+        return image_reshaped, min_val, max_val
