@@ -1,0 +1,17 @@
+name: ssddpm
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.8
+  - pytorch>=2.0.0
+  - torchvision>=0.15.0
+  - pytorch-cuda>=11.8
+  - lightning>=2.0.0
+  - diffusers>=0.21.0
+  - nibabel>=5.0.0
+  - numpy>=1.21.0
+  - matplotlib>=3.5.0
+  - tqdm>=4.64.0
+
