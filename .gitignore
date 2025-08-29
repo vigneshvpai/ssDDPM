@@ -210,3 +210,5 @@ generated_samples/
 lightning_logs/
 
 src/data/dataset_split/
+
+checkpoints/

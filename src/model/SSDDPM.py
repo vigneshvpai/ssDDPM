@@ -23,8 +23,9 @@ class SSDDPM(L.LightningModule):
         )
         self.adc_model = ADC()
 
-        self.scheduler = DDPMScheduler(**Config.SCHEDULER_CONFIG)
+        self.scheduler = DDPMScheduler(**Config.SSDDPM_CONFIG["SCHEDULER_CONFIG"])
         self.lambda_reg = Config.SSDDPM_CONFIG["lambda_reg"]
+        self.num_inference_steps = Config.SSDDPM_CONFIG["num_inference_steps"]
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.model.parameters(), **Config.OPTIMIZER_CONFIG)
@@ -33,7 +34,7 @@ class SSDDPM(L.LightningModule):
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100)
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
 
-    def training_step(self, batch):
+    def compute_loss(self, batch):
         images, b_values = batch  # Step 1: Sample batch y₀ ~ Y
         noise = torch.randn_like(images)  # Step 3: Sample ε ~ N(0, I)
         steps = torch.randint(
@@ -82,4 +83,55 @@ class SSDDPM(L.LightningModule):
             noise_loss + self.lambda_reg * reg_loss
         )  # Total loss: noise loss + self-supervised reg loss
 
+        return loss
+
+    @torch.no_grad()
+    def inference(self, y_hat_t, b_values):
+        self.eval()
+
+        for t in range(self.num_inference_steps - 1, -1, -1):
+            # Step 2: ê_t ← f_0(ŷ_t, t)
+            timesteps = torch.full(
+                (y_hat_t.shape[0],), t, device=y_hat_t.device, dtype=torch.long
+            )
+            residual = self.model(y_hat_t, timesteps).sample
+
+            # Step 3: ε_0 ~ N(0, I)
+            epsilon_zero = torch.randn_like(y_hat_t)
+
+            # Step 4: y'_t-1 ← (1 / √(1 - β_t)) * (ŷ_t - (β_t / √(1 - α_t)) * ê_t) + √(β_t) * ε_0
+            beta_t = self.scheduler.betas[t].to(y_hat_t.device).view(-1, 1, 1, 1)
+            alpha_cumprod_t = (
+                self.scheduler.alphas_cumprod[t].to(y_hat_t.device).view(-1, 1, 1, 1)
+            )
+            y_prime_t_minus_1 = (1 / torch.sqrt(1 - beta_t)) * (
+                y_hat_t - (beta_t / torch.sqrt(1 - alpha_cumprod_t)) * residual
+            ) + torch.sqrt(beta_t) * epsilon_zero
+
+            # Step 5: Ŝ_0, D̂ ← f_ADC(y'_t-1)
+            S0_hat, D_hat = self.adc_model(y_prime_t_minus_1, b_values)
+
+            # Step 6: ŷ_t-1 ← Ŝ_0 * e^(-b * D̂)
+            # Handle the complex reshaping for your specific data format
+            S0_hat_expanded = S0_hat.repeat(1, 25, 1, 1)
+            D_hat_expanded = D_hat.repeat(1, 25, 1, 1)
+            b_values_reshaped = b_values.view(b_values.shape[0], 625, 1, 1)
+            y_hat_t_minus_1 = S0_hat_expanded * torch.exp(
+                -b_values_reshaped * D_hat_expanded
+            )
+
+            # Update for next iteration
+            y_hat_t = y_hat_t_minus_1
+
+        # Return ŷ_0
+        return y_hat_t
+
+    def training_step(self, batch):
+        loss = self.compute_loss(batch)
+        self.log("train_loss", loss)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        loss = self.compute_loss(batch)
+        self.log("val_loss", loss)
         return loss
