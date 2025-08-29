@@ -17,12 +17,21 @@ ssDDPM/
 │   │   ├── DWIDataset.py      # DWI dataset implementation
 │   │   ├── DWIDataLoader.py   # PyTorch Lightning data module
 │   │   ├── Preprocess.py      # Data preprocessing utilities
+│   │   ├── Postprocess.py     # Data postprocessing utilities
 │   │   ├── dataset_split/     # Dataset split JSON files
 │   │   └── utils/             # Data utilities
+│   │       ├── convert_to_pt.py    # Convert NIfTI to PyTorch format
+│   │       ├── split_dataset.py    # Dataset splitting utilities
+│   │       └── get_data_summary.py # Data analysis utilities
 │   └── model/
 │       ├── SSDDPM.py          # Main ssDDPM model implementation
 │       └── ADC.py             # ADC estimation model
 ├── train.py                   # Training script
+├── inference.py               # Inference script
+├── environment.yml            # Conda environment configuration
+├── checkpoints/               # Trained model checkpoints
+├── inference_results/         # Generated inference results
+├── lightning_logs/            # Training logs
 ├── LICENSE                    # MIT License
 └── README.md                  # This file
 ```
@@ -37,6 +46,7 @@ The main model implementing the ssDDPM algorithm with the following key features
 - **ADC Model**: Self-supervised component for S₀ and D estimation
 - **DDPMScheduler**: Manages diffusion timesteps and noise schedules
 - **Loss Function**: Combines noise prediction loss with self-supervised regularization
+- **Inference Pipeline**: Complete denoising pipeline with progress tracking
 
 ### ADC Model (`src/model/ADC.py`)
 
@@ -51,6 +61,8 @@ Implements the ADC estimation component that:
 - **DWIDataset**: Handles loading of DWI data from PyTorch files
 - **DWIDataLoader**: PyTorch Lightning data module for efficient data loading
 - **Preprocess**: Data preprocessing including normalization, reshaping, and padding
+- **Postprocess**: Data postprocessing for inference results
+- **Utils**: Data conversion, splitting, and analysis utilities
 
 ## Algorithm Implementation
 
@@ -75,6 +87,7 @@ Key configuration parameters in `src/config/config.py`:
 - **Diffusion**: `num_train_timesteps=250`, linear beta schedule
 - **Training**: `max_epochs=10`, `batch_size=2`
 - **Data**: Expected shape `(108, 134, 25, 25)`, UNet compatible shape `(144, 128)`
+- **ADC**: Average ADC estimation with 25 b-values
 
 ## Installation and Setup
 
@@ -84,6 +97,27 @@ Key configuration parameters in `src/config/config.py`:
 - PyTorch
 - PyTorch Lightning
 - Diffusers library
+- Nibabel (for NIfTI file handling)
+- NumPy
+- Matplotlib
+- tqdm
+
+### Environment Setup
+
+Create and activate the conda environment:
+
+```bash
+conda env create -f environment.yml
+conda activate ssddpm
+```
+
+Or install dependencies manually:
+```bash
+conda create -n ssddpm python>=3.8
+conda activate ssddpm
+conda install pytorch torchvision pytorch-cuda -c pytorch
+conda install lightning diffusers nibabel numpy matplotlib tqdm -c conda-forge
+```
 
 ### Data Requirements
 
@@ -96,12 +130,9 @@ The model expects DWI data in the following format:
 ### Environment Setup
 
 1. Clone the repository
-2. Install dependencies:
-   ```bash
-   pip install torch torchvision lightning diffusers
-   ```
+2. Create and activate the conda environment using `environment.yml`
 3. Configure data paths in `src/config/config.py`
-4. Prepare dataset split JSON files
+4. Prepare dataset split JSON files using the utilities in `src/data/utils/`
 
 ## Usage
 
@@ -118,6 +149,23 @@ The training script will:
 - Initialize the ssDDPM model with specified parameters
 - Train for the configured number of epochs
 - Use PyTorch Lightning for training orchestration
+- Save checkpoints in the `checkpoints/` directory
+- Log training progress to `lightning_logs/`
+
+### Inference
+
+To run inference on trained models:
+
+```bash
+python inference.py --checkpoint path/to/checkpoint.ckpt --save_dir inference_results
+```
+
+The inference script will:
+- Load a trained model from checkpoint
+- Process test data through the complete denoising pipeline
+- Generate denoised DWI images
+- Save results as NIfTI files in the specified directory
+- Apply postprocessing to restore original data format
 
 ### Model Architecture
 
@@ -125,6 +173,7 @@ The training script will:
 - **ADC Estimation**: SVD-based linear regression
 - **Loss Function**: MSE noise loss + λ × MSE self-supervised loss
 - **Optimizer**: Adam with cosine annealing learning rate
+- **Inference**: 250-step denoising process with progress tracking
 
 ## Data Preprocessing
 
@@ -135,12 +184,40 @@ The preprocessing pipeline includes:
 3. **Reshaping**: Flattening slices and b-values for UNet input
 4. **B-value Integration**: Proper handling of diffusion gradient directions
 
+## Data Postprocessing
+
+The postprocessing pipeline for inference results:
+
+1. **Unflattening**: Restore original slice and b-value dimensions
+2. **Unpadding**: Remove padding to restore original image dimensions
+3. **Denormalization**: Restore original intensity scale using saved min/max values
+4. **NIfTI Export**: Save results in standard medical imaging format
+
 ## Model Outputs
 
 The trained model provides:
 - **Noise Prediction**: Accurate noise estimation for diffusion denoising
 - **ADC Parameters**: S₀ and D maps for tissue characterization
 - **Self-Supervised Features**: Learned representations through ADC estimation
+- **Denoised Images**: High-quality DWI reconstructions
+
+## Current Status
+
+- ✅ **Training Pipeline**: Complete with PyTorch Lightning integration
+- ✅ **Inference Pipeline**: Complete with NIfTI export capabilities
+- ✅ **Model Implementation**: Full ssDDPM algorithm implementation
+- ✅ **Data Processing**: Complete preprocessing and postprocessing
+- ✅ **Checkpoints**: Trained models available in `checkpoints/`
+- ✅ **Results**: Inference results available in `inference_results/`
+- 🔄 **Directional ADC**: Not yet implemented (marked as TODO)
+
+## Performance
+
+The model has been trained and tested with:
+- **Training**: 10 epochs completed with validation loss monitoring
+- **Inference**: 250-step denoising process with progress tracking
+- **Memory**: Efficient batch processing with configurable batch sizes
+- **Output**: NIfTI format compatible with medical imaging software
 
 ## License
 
