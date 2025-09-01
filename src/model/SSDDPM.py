@@ -138,35 +138,25 @@ class SSDDPM(L.LightningModule):
                 f"Step {self.num_inference_steps - 1 - t + 1}/{self.num_inference_steps} (t={t})"
             )
 
-            # Step 2: ê_t ← f_0(ŷ_t, t)
-            timesteps = torch.full(
-                (y_hat_t.shape[0],), t, device=y_hat_t.device, dtype=torch.long
-            )
+            _, timesteps = self._get_noise_and_timesteps(
+                y_hat_t
+            )  # Step 2: ê_t ← f_0(ŷ_t, t)
+
             residual = self.model(y_hat_t, timesteps).sample
 
-            # Step 3: ε_0 ~ N(0, I)
-            epsilon_zero = torch.randn_like(y_hat_t)
+            beta_t, alpha_cumprod_t = self._get_beta_and_alpha_cumprod(timesteps)
 
             # Step 4: y'_t-1 ← (1 / √(1 - β_t)) * (ŷ_t - (β_t / √(1 - α_t)) * ê_t) + √(β_t) * ε_0
-            beta_t = self.scheduler.betas[t].to(y_hat_t.device).view(-1, 1, 1, 1)
-            alpha_cumprod_t = (
-                self.scheduler.alphas_cumprod[t].to(y_hat_t.device).view(-1, 1, 1, 1)
+            y_prime_t_minus_1 = self._get_y_prime_t_minus_1(
+                y_hat_t, residual, beta_t, alpha_cumprod_t
             )
-            y_prime_t_minus_1 = (1 / torch.sqrt(1 - beta_t)) * (
-                y_hat_t - (beta_t / torch.sqrt(1 - alpha_cumprod_t)) * residual
-            ) + torch.sqrt(beta_t) * epsilon_zero
 
             # Step 5: Ŝ_0, D̂ ← f_ADC(y'_t-1)
             S0_hat, D_hat = self.adc_model(y_prime_t_minus_1, b_values)
 
             # Step 6: ŷ_t-1 ← Ŝ_0 * e^(-b * D̂)
-            # Handle the complex reshaping for your specific data format
-            S0_hat_expanded = S0_hat.repeat(1, 25, 1, 1)
-            D_hat_expanded = D_hat.repeat(1, 25, 1, 1)
-            b_values_reshaped = b_values.view(b_values.shape[0], 625, 1, 1)
-            y_hat_t_minus_1 = S0_hat_expanded * torch.exp(
-                -b_values_reshaped * D_hat_expanded
-            )
+            y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
+
             # Update for next iteration
             y_hat_t = y_hat_t_minus_1
 
