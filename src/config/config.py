@@ -57,6 +57,7 @@ class Config:
         "out_channels": 625,
         "lambda_reg": 1,
         "num_inference_steps": 250,
+        "max_epochs": 10,
     }
 
     # -------------------------
@@ -67,8 +68,3 @@ class Config:
         "num_dirs": 3,  # only used if adc_type == "dir"
         "n_bvals": 25,
     }
-
-    # -------------------------
-    # Training Configs
-    # -------------------------
-    MAX_EPOCHS = 10
