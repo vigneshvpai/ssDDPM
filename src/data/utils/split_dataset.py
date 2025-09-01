@@ -23,8 +23,8 @@ def width_height_match(image, required_dims):
 def split_dataset(
     pt_data_root=Config.PT_DATA_ROOT,
     output_dir=os.path.join("src", "data", "dataset_split"),
-    train_ratio=0.7,
-    val_ratio=0.15,
+    train_ratio=0.80,
+    val_ratio=0.05,
     test_ratio=0.15,
     seed=42,
 ):
