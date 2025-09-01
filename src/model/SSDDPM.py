@@ -174,7 +174,56 @@ class SSDDPM(L.LightningModule):
         self.log("train_loss", loss)
         return loss
 
-    def validation_step(self, batch, batch_idx):
-        loss = self.compute_loss(batch)
-        self.log("val_loss", loss)
-        return loss
+    def validation_step(self, batch):
+        images, b_values, _ = batch
+
+        # Original noisy image generation (same as training)
+        noise, steps = self._get_noise_and_timesteps(images)
+        noisy_images = self.scheduler.add_noise(images, noise, steps)
+
+        # Self-supervised validation: add additional synthetic noise
+        # Sample additional noise for validation
+        additional_noise = torch.randn_like(noisy_images)
+        additional_steps = torch.randint(
+            0,
+            self.scheduler.config.num_train_timesteps,
+            (images.shape[0],),
+            device=images.device,
+        )
+
+        # Create "noisier" images by adding synthetic noise
+        noisier_images = self.scheduler.add_noise(
+            noisy_images, additional_noise, additional_steps
+        )
+
+        # Use noisier_images as input, treat original noisy_images as target
+        residual = self.model(noisier_images, additional_steps).sample
+
+        # Get beta and alpha for the additional noise steps
+        betas_syn, alphas_cumprod_syn = self._get_beta_and_alpha_cumprod(
+            additional_steps
+        )
+
+        # Compute the predicted denoised version
+        y_prime_t_minus_1_syn = self._get_y_prime_t_minus_1(
+            noisier_images, residual, betas_syn, alphas_cumprod_syn
+        )
+
+        # ADC model prediction on the synthetic noise denoised version
+        S0_hat_syn, D_hat_syn = self.adc_model(y_prime_t_minus_1_syn, b_values)
+        y_hat_t_minus_1_syn = self._get_y_hat_t_minus_1(S0_hat_syn, D_hat_syn, b_values)
+
+        # Self-supervised loss: compare predicted denoised image with original noisy image
+        # This tests if the model can remove the added synthetic noise and return to the original noisy state
+        noise_loss_syn = torch.nn.functional.mse_loss(residual, additional_noise)
+        adc_loss_syn = torch.nn.functional.mse_loss(
+            y_hat_t_minus_1_syn, y_prime_t_minus_1_syn
+        )
+
+        # Total self-supervised validation loss
+        val_loss = noise_loss_syn + self.lambda_adc * adc_loss_syn
+
+        # Log the synthetic noise validation loss
+        self.log("val_loss", val_loss)
+
+        return val_loss
