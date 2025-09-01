@@ -25,7 +25,7 @@ class SSDDPM(L.LightningModule):
         self.adc_model = ADC()
 
         self.scheduler = DDPMScheduler(**Config.SSDDPM_CONFIG["SCHEDULER_CONFIG"])
-        self.lambda_reg = Config.SSDDPM_CONFIG["lambda_reg"]
+        self.lambda_adc = Config.SSDDPM_CONFIG["lambda_adc"]
         self.num_inference_steps = Config.SSDDPM_CONFIG["num_inference_steps"]
         self.max_epochs = Config.SSDDPM_CONFIG["max_epochs"]
 
@@ -40,8 +40,7 @@ class SSDDPM(L.LightningModule):
         )
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
 
-    def compute_loss(self, batch):
-        images, b_values, _ = batch  # Step 1: Sample batch y₀ ~ Y
+    def _get_noise_and_timesteps(self, images):
         noise = torch.randn_like(images)  # Step 3: Sample ε ~ N(0, I)
         steps = torch.randint(
             0,
@@ -49,16 +48,19 @@ class SSDDPM(L.LightningModule):
             (images.shape[0],),
             device=images.device,
         )  # Step 2: Sample t ~ Uniform({1, ..., T})
-        noisy_images = self.scheduler.add_noise(
-            images, noise, steps
-        )  # Step 4: y_t = √ā_t y₀ + √1 - ā_t ε
-        residual = self.model(noisy_images, steps).sample  # Step 5: ê_t = f₀(y_t, t)
-        epsilon_zero = torch.randn_like(images)  # Step 6: ε₀ ~ N(0, I)
 
+        return noise, steps
+
+    def _get_beta_and_alpha_cumprod(self, steps):
         betas = self.scheduler.betas.to(steps.device)[steps].view(-1, 1, 1, 1)
         alphas_cumprod = self.scheduler.alphas_cumprod.to(steps.device)[steps].view(
             -1, 1, 1, 1
         )
+
+        return betas, alphas_cumprod
+
+    def _get_y_prime_t_minus_1(self, noisy_images, residual, betas, alphas_cumprod):
+        epsilon_zero = torch.randn_like(noisy_images)  # Step 6: ε₀ ~ N(0, I)
 
         y_prime_t_minus_1 = (1 / torch.sqrt(1 - betas)) * (
             noisy_images - (betas / torch.sqrt(1 - alphas_cumprod)) * residual
@@ -66,10 +68,9 @@ class SSDDPM(L.LightningModule):
             betas
         ) * epsilon_zero  # Step 7: y'_{t-1} = (1 / √1 - β_t) (y_t - (β_t / √1 - ā_t) ê_t) + √β_t ε₀
 
-        S0_hat, D_hat = self.adc_model(
-            y_prime_t_minus_1, b_values
-        )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
+        return y_prime_t_minus_1
 
+    def _get_y_hat_t_minus_1(self, S0_hat, D_hat, b_values):
         # Repeat each slice 25 times to match b_values shape
         S0_hat_expanded = S0_hat.repeat(1, 25, 1, 1)  # Shape: (2, 625, H, W)
         D_hat_expanded = D_hat.repeat(1, 25, 1, 1)  # Shape: (2, 625, H, W)
@@ -80,13 +81,38 @@ class SSDDPM(L.LightningModule):
             -b_values_reshaped * D_hat_expanded
         )  # Step 9: ŷ_{t-1} ← Ŝ₀ e^(-b D̂)
 
+        return y_hat_t_minus_1
+
+    def compute_loss(self, batch):
+        images, b_values, _ = batch  # Step 1: Sample batch y₀ ~ Y
+
+        noise, steps = self._get_noise_and_timesteps(images)
+
+        noisy_images = self.scheduler.add_noise(
+            images, noise, steps
+        )  # Step 4: y_t = √ā_t y₀ + √1 - ā_t ε
+
+        residual = self.model(noisy_images, steps).sample  # Step 5: ê_t = f₀(y_t, t)
+
+        betas, alphas_cumprod = self._get_beta_and_alpha_cumprod(steps)
+
+        y_prime_t_minus_1 = self._get_y_prime_t_minus_1(
+            noisy_images, residual, betas, alphas_cumprod
+        )
+
+        S0_hat, D_hat = self.adc_model(
+            y_prime_t_minus_1, b_values
+        )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
+
+        y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
+
         noise_loss = torch.nn.functional.mse_loss(residual, noise)  # ||ê_t - ε||²₂
-        reg_loss = torch.nn.functional.mse_loss(
+        adc_loss = torch.nn.functional.mse_loss(
             y_hat_t_minus_1, y_prime_t_minus_1
         )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
 
         loss = (
-            noise_loss + self.lambda_reg * reg_loss
+            noise_loss + self.lambda_adc * adc_loss
         )  # Total loss: noise loss + self-supervised reg loss
 
         return loss

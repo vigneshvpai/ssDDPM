@@ -55,7 +55,7 @@ class Config:
         # -------------------------
         "in_channels": 625,
         "out_channels": 625,
-        "lambda_reg": 1,
+        "lambda_adc": 1,
         "num_inference_steps": 250,
         "max_epochs": 10,
     }
