@@ -68,3 +68,26 @@ class Config:
         "num_dirs": 3,  # only used if adc_type == "dir"
         "n_bvals": 25,
     }
+
+    # -------------------------
+    # Logger Configs
+    # -------------------------
+    LOGGER_CONFIG = {
+        "log_every_n_steps": 50,  # Log every 50 steps
+        "log_graph": True,  # Log model graph
+        "log_hyperparameters": True,  # Log hyperparameters
+        "save_dir": "lightning_logs",
+        "name": "ssddpm_training",
+    }
+
+    # -------------------------
+    # Checkpoint Configs
+    # -------------------------
+    CHECKPOINT_CONFIG = {
+        "save_dir": "checkpoints",
+        "filename": "ssddpm-{epoch:02d}-{val_loss:.4f}",
+        "save_top_k": 3,
+        "monitor": "val_loss",
+        "mode": "min",
+        "every_n_epochs": 1,
+    }
