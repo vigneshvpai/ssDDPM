@@ -57,6 +57,9 @@ class DWIDataset(Dataset):
         if self.transform:
             image = self.transform(image)
 
-        other_info = {"affine": affine, "min_val": min_val, "max_val": max_val}
+        if affine is not None:
+            other_info = {"affine": affine, "min_val": min_val, "max_val": max_val}
+        else:
+            other_info = {"min_val": min_val, "max_val": max_val}
 
         return image, b_values, other_info
