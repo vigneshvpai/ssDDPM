@@ -1,6 +1,7 @@
 import lightning as L
 import glob
 import os
+import argparse
 from lightning.pytorch.loggers import TensorBoardLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 from src.model.SSDDPM import SSDDPM
@@ -8,7 +9,17 @@ from src.data.DWIDataLoader import DWIDataLoader
 from src.config.config import Config
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Train SSDDPM model")
+    parser.add_argument(
+        "--resume", action="store_true", help="Resume training from latest checkpoint"
+    )
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
+
     # Instantiate the data module
     data_module = DWIDataLoader()
 
@@ -37,10 +48,17 @@ def main():
         LearningRateMonitor(logging_interval="epoch"),  # Log LR at every step
     ]
 
-    # Find the latest checkpoint
-    checkpoint_dir = Config.CHECKPOINT_CONFIG["save_dir"]
-    checkpoints = glob.glob(os.path.join(checkpoint_dir, "*.ckpt"))
-    latest_checkpoint = max(checkpoints, key=os.path.getctime) if checkpoints else None
+    # Find the latest checkpoint if resuming training
+    if args.resume:
+        checkpoint_dir = Config.CHECKPOINT_CONFIG["save_dir"]
+        checkpoints = glob.glob(os.path.join(checkpoint_dir, "*.ckpt"))
+        latest_checkpoint = (
+            max(checkpoints, key=os.path.getctime) if checkpoints else None
+        )
+        print(f"Resuming training from checkpoint: {latest_checkpoint}")
+    else:
+        print("Starting training from scratch")
+        latest_checkpoint = None
 
     # Set up the trainer using max_epochs from config and the logger
     trainer = L.Trainer(
