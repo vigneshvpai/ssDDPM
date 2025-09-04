@@ -11,6 +11,7 @@ class DWIDataLoader(L.LightningDataModule):
         train_json=Config.TRAIN_SPLIT_JSON,
         val_json=Config.VAL_SPLIT_JSON,
         test_json=Config.TEST_SPLIT_JSON,
+        data_root=Config.PT_DATA_ROOT,
         batch_size: int = Config.BATCH_SIZE,
         num_workers: int = Config.NUM_WORKERS,
         transform=None,
@@ -19,6 +20,7 @@ class DWIDataLoader(L.LightningDataModule):
         self.train_json = train_json
         self.val_json = val_json
         self.test_json = test_json
+        self.data_root = data_root
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.transform = transform
@@ -27,16 +29,19 @@ class DWIDataLoader(L.LightningDataModule):
     def setup(self, stage=None):
         self.train_dataset = DWIDataset(
             split_json_path=self.train_json,
+            data_root=self.data_root,
             transform=self.transform,
             preprocess_fn=self.preprocess_fn,
         )
         self.val_dataset = DWIDataset(
             split_json_path=self.val_json,
+            data_root=self.data_root,
             transform=self.transform,
             preprocess_fn=self.preprocess_fn,
         )
         self.test_dataset = DWIDataset(
             split_json_path=self.test_json,
+            data_root=self.data_root,
             transform=self.transform,
             preprocess_fn=self.preprocess_fn,
         )

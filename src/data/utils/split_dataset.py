@@ -26,7 +26,6 @@ def split_dataset(
     train_ratio=0.80,
     val_ratio=0.05,
     test_ratio=0.15,
-    seed=42,
 ):
     # Ensure output directory exists
     if not os.path.exists(output_dir):
@@ -51,12 +50,6 @@ def split_dataset(
         except Exception as e:
             print(f"Warning: Could not read {pt_path}: {e}")
 
-    # Shuffle
-    import random
-
-    random.seed(seed)
-    random.shuffle(filtered_pt_files)
-
     n_total = len(filtered_pt_files)
     n_train = int(n_total * train_ratio)
     n_val = int(n_total * val_ratio)
@@ -71,7 +64,7 @@ def split_dataset(
         image = data.get("image")
         bval = data.get("bval")
         info = {
-            "path": pt_path,
+            "path": os.path.basename(pt_path),
             "image_shape": list(image.shape) if hasattr(image, "shape") else None,
             "bval": bval.tolist() if hasattr(bval, "tolist") else list(bval),
         }

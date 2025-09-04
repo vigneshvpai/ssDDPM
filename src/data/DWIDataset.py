@@ -15,10 +15,12 @@ class DWIDataset(Dataset):
     def __init__(
         self,
         split_json_path=None,
+        data_root=None,
         transform=None,
         preprocess_fn=None,
     ):
         self.split_json_path = split_json_path
+        self.data_root = data_root
         self.transform = transform
         self.preprocess_fn = preprocess_fn
 
@@ -31,7 +33,7 @@ class DWIDataset(Dataset):
 
     def __getitem__(self, idx):
         sample_info = self.samples[idx]
-        path = sample_info["path"]
+        path = os.path.join(self.data_root, sample_info["path"])
 
         affine = None
         if path.endswith(".pt"):

@@ -4,8 +4,8 @@ from src.config.config import Config
 
 
 class Preprocess:
-    def __init__(self, pt_data_root=Config.PT_DATA_ROOT):
-        self.pt_data_root = pt_data_root
+    def __init__(self):
+        pass
 
     def normalize_to_b0(self, image):
         """

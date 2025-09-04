@@ -14,14 +14,29 @@ def parse_args():
     parser.add_argument(
         "--resume", action="store_true", help="Resume training from latest checkpoint"
     )
+    parser.add_argument(
+        "--hpc", action="store_true", help="Run in HPC mode using $TMPDIR/pt_data"
+    )
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
 
-    # Instantiate the data module
-    data_module = DWIDataLoader()
+    if args.hpc:
+        data_module = DWIDataLoader(
+            train_json=Config.TRAIN_JSON,
+            val_json=Config.VAL_JSON,
+            test_json=Config.TEST_JSON,
+            data_root=os.environ.get("TMPDIR"),
+        )
+    else:
+        data_module = DWIDataLoader(
+            train_json=Config.TRAIN_SPLIT_JSON,
+            val_json=Config.VAL_SPLIT_JSON,
+            test_json=Config.TEST_SPLIT_JSON,
+            data_root=Config.PT_DATA_ROOT,
+        )
 
     model = SSDDPM(
         in_channels=Config.SSDDPM_CONFIG["in_channels"],

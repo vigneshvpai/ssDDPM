@@ -8,14 +8,14 @@ class Config:
     ORIGINAL_DATA_ROOT = "/home/vault/mfdp/mfdp118h/data"
     PT_DATA_ROOT = "/home/vault/mfdp/mfdp118h/pt_data"
     TMPDIR = os.environ.get("TMPDIR")
-    HPC_DATA_ROOT = os.path.join(TMPDIR, "pt_data") if TMPDIR else None
 
-    TRAIN_SPLIT_JSON = os.path.join("src", "data", "dataset_split", "train.json")
-    VAL_SPLIT_JSON = os.path.join("src", "data", "dataset_split", "val.json")
-    TEST_SPLIT_JSON = os.path.join("src", "data", "dataset_split", "test.json")
-    TEST_NIFTI_JSON_PATH = os.path.join(
-        "src", "data", "dataset_split", "test_nifti.json"
-    )
+    TRAIN_JSON = "train.json"
+    VAL_JSON = "val.json"
+    TEST_JSON = "test.json"
+
+    TRAIN_SPLIT_JSON = os.path.join("src", "data", "dataset_split", TRAIN_JSON)
+    VAL_SPLIT_JSON = os.path.join("src", "data", "dataset_split", VAL_JSON)
+    TEST_SPLIT_JSON = os.path.join("src", "data", "dataset_split", TEST_JSON)
 
     # -------------------------
     # Data Shape Configs
@@ -57,7 +57,7 @@ class Config:
         "out_channels": 625,
         "lambda_adc": 1,
         "num_inference_steps": 250,
-        "max_epochs": 10,
+        "max_epochs": 10,  # MAX EPOCHS
     }
 
     # -------------------------
@@ -76,7 +76,6 @@ class Config:
         "log_hyperparameters": True,  # Log hyperparameters
         "save_dir": "lightning_logs",
         "name": "ssddpm_training",
-        "log_images_every_n_epochs": 1,
     }
 
     # -------------------------
@@ -87,5 +86,5 @@ class Config:
         "filename": "ssddpm-{epoch:02d}-{val_loss:.4f}-{train_loss:.4f}",
         "monitor": "val/total_loss",
         "mode": "min",
-        "every_n_epochs": 5,
+        "every_n_epochs": SSDDPM_CONFIG["max_epochs"] // 4,
     }
