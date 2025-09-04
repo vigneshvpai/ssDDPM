@@ -73,10 +73,10 @@ class Config:
     # Logger Configs
     # -------------------------
     LOGGER_CONFIG = {
-        "log_every_n_steps": 50,  # Log every 50 steps
         "log_hyperparameters": True,  # Log hyperparameters
         "save_dir": "lightning_logs",
         "name": "ssddpm_training",
+        "log_images_every_n_epochs": 1,
     }
 
     # -------------------------
@@ -85,7 +85,7 @@ class Config:
     CHECKPOINT_CONFIG = {
         "save_dir": "checkpoints",
         "filename": "ssddpm-{epoch:02d}-{val_loss:.4f}-{train_loss:.4f}",
-        "monitor": "val_loss",
+        "monitor": "val/total_loss",
         "mode": "min",
         "every_n_epochs": 5,
     }

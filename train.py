@@ -48,14 +48,12 @@ def main():
         enable_checkpointing=True,
         logger=logger,
         callbacks=callbacks,
-        log_every_n_steps=Config.LOGGER_CONFIG["log_every_n_steps"],
         enable_progress_bar=False,
         enable_model_summary=True,
-        resume_from_checkpoint=latest_checkpoint,
     )
 
     # Train the model
-    trainer.fit(model, datamodule=data_module)
+    trainer.fit(model, datamodule=data_module, ckpt_path=latest_checkpoint)
 
 
 if __name__ == "__main__":

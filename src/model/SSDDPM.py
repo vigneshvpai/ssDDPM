@@ -6,6 +6,8 @@ import torch.nn as nn
 from src.model.ADC import ADC
 from src.config.config import Config
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+import os
 
 
 class SSDDPM(L.LightningModule):
@@ -72,8 +74,8 @@ class SSDDPM(L.LightningModule):
 
     def _get_y_hat_t_minus_1(self, S0_hat, D_hat, b_values):
         # Repeat each slice 25 times to match b_values shape
-        S0_hat_expanded = S0_hat.repeat(1, 25, 1, 1)  # Shape: (2, 625, H, W)
-        D_hat_expanded = D_hat.repeat(1, 25, 1, 1)  # Shape: (2, 625, H, W)
+        S0_hat_expanded = S0_hat.repeat_interleave(25, dim=1)  # Shape: (2, 625, H, W)
+        D_hat_expanded = D_hat.repeat_interleave(25, dim=1)  # Shape: (2, 625, H, W)
         # Reshape b_values to broadcast properly
         b_values_reshaped = b_values.view(2, 625, 1, 1)  # Shape: (2, 625, 1, 1)
 
@@ -82,6 +84,33 @@ class SSDDPM(L.LightningModule):
         )  # Step 9: ŷ_{t-1} ← Ŝ₀ e^(-b D̂)
 
         return y_hat_t_minus_1
+
+    def _log_specific_slice(
+        self, images, step_or_epoch, prefix="train", save_dir="training_images"
+    ):
+
+        # Just take slice 11 directly
+        slice_12 = images[0, 11, :, :]  # Slice 12
+
+        self.logger.experiment.add_image(
+            f"{prefix}/slice", slice_12, step_or_epoch, dataformats="HW"
+        )
+
+        # Also save to disk using matplotlib
+        plt.figure(figsize=(8, 6))
+        plt.imshow(slice_12.cpu().detach().numpy(), cmap="gray")
+        plt.title(f"{prefix} - Epoch {step_or_epoch}")
+        plt.axis("off")
+
+        # Create directory if it doesn't exist
+        save_dir = f"{save_dir}/{prefix.replace('/', '_')}"
+        os.makedirs(save_dir, exist_ok=True)
+
+        # Save the plot
+        plt.savefig(
+            f"{save_dir}/epoch_{step_or_epoch:03d}.png", dpi=150, bbox_inches="tight"
+        )
+        plt.close()  # Close to free memory
 
     def compute_loss(self, batch):
         images, b_values, _ = batch  # Step 1: Sample batch y₀ ~ Y
@@ -116,6 +145,19 @@ class SSDDPM(L.LightningModule):
             noise_loss + self.lambda_adc * adc_loss
         )  # Total loss: noise loss + self-supervised reg loss
         self.log("train/total_loss", loss, on_epoch=True)
+
+        if self.global_step % self.trainer.num_training_batches == 0:
+            self._log_specific_slice(images, self.current_epoch, "train/orignal")
+            self._log_specific_slice(
+                noisy_images, self.current_epoch, "train/noisy_image"
+            )
+            self._log_specific_slice(residual, self.current_epoch, "train/residual")
+            self._log_specific_slice(
+                y_prime_t_minus_1, self.current_epoch, "train/y_prime_t_minus_1"
+            )
+            self._log_specific_slice(
+                y_hat_t_minus_1, self.current_epoch, "train/y_hat_t_minus_1"
+            )
 
         return loss
 
@@ -229,4 +271,38 @@ class SSDDPM(L.LightningModule):
         # Log the synthetic noise validation loss
         self.log("val/total_loss", val_loss, on_epoch=True)
 
+        if self.global_step % self.trainer.num_training_batches == 0:
+            self._log_specific_slice(
+                images, self.current_epoch, "val/original", save_dir="validation_images"
+            )
+            self._log_specific_slice(
+                noisy_images,
+                self.current_epoch,
+                "val/noisy_image",
+                save_dir="validation_images",
+            )
+            self._log_specific_slice(
+                noisier_images,
+                self.current_epoch,
+                "val/noisier_image",
+                save_dir="validation_images",
+            )
+            self._log_specific_slice(
+                residual,
+                self.current_epoch,
+                "val/residual",
+                save_dir="validation_images",
+            )
+            self._log_specific_slice(
+                y_prime_t_minus_1_syn,
+                self.current_epoch,
+                "val/y_prime_t_minus_1",
+                save_dir="validation_images",
+            )
+            self._log_specific_slice(
+                y_hat_t_minus_1_syn,
+                self.current_epoch,
+                "val/y_hat_t_minus_1",
+                save_dir="validation_images",
+            )
         return val_loss
