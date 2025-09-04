@@ -1,4 +1,6 @@
 import lightning as L
+import glob
+import os
 from lightning.pytorch.loggers import TensorBoardLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 from src.model.SSDDPM import SSDDPM
@@ -20,7 +22,6 @@ def main():
         save_dir=Config.LOGGER_CONFIG["save_dir"],
         name=Config.LOGGER_CONFIG["name"],
         version=None,  # Auto-increment version
-        log_graph=Config.LOGGER_CONFIG["log_graph"],
         default_hp_metric=False,
     )
 
@@ -36,6 +37,11 @@ def main():
         LearningRateMonitor(logging_interval="epoch"),  # Log LR at every step
     ]
 
+    # Find the latest checkpoint
+    checkpoint_dir = Config.CHECKPOINT_CONFIG["save_dir"]
+    checkpoints = glob.glob(os.path.join(checkpoint_dir, "*.ckpt"))
+    latest_checkpoint = max(checkpoints, key=os.path.getctime) if checkpoints else None
+
     # Set up the trainer using max_epochs from config and the logger
     trainer = L.Trainer(
         max_epochs=Config.SSDDPM_CONFIG["max_epochs"],
@@ -45,6 +51,7 @@ def main():
         log_every_n_steps=Config.LOGGER_CONFIG["log_every_n_steps"],
         enable_progress_bar=False,
         enable_model_summary=True,
+        resume_from_checkpoint=latest_checkpoint,
     )
 
     # Train the model
