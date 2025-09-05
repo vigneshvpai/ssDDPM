@@ -161,26 +161,28 @@ class SSDDPM(L.LightningModule):
     def inference(self, y_hat_t, b_values):
         self.eval()
 
+        # Set the scheduler timesteps for inference
+        self.scheduler.set_timesteps(self.num_inference_steps)
+
         print(f"Starting inference with {self.num_inference_steps} steps...")
 
         start_time = time.time()
 
         # Create progress bar
         pbar = tqdm(
-            range(self.num_inference_steps - 1, -1, -1),
+            self.scheduler.timesteps,
             desc="Inference Progress",
             total=self.num_inference_steps,
             unit="step",
         )
 
-        for t in pbar:
-            pbar.set_description(
-                f"Step {self.num_inference_steps - 1 - t + 1}/{self.num_inference_steps} (t={t})"
-            )
+        for i, t in enumerate(pbar):
+            pbar.set_description(f"Step {i + 1}/{self.num_inference_steps} (t={t})")
 
-            _, timesteps = self._get_noise_and_timesteps(
-                y_hat_t
-            )  # Step 2: ê_t ← f_0(ŷ_t, t)
+            # Create timestep tensor for the model
+            timesteps = torch.full(
+                (y_hat_t.shape[0],), t, device=y_hat_t.device, dtype=torch.long
+            )
 
             residual = self.model(y_hat_t, timesteps).sample
 

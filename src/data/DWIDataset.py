@@ -35,6 +35,14 @@ class DWIDataset(Dataset):
         sample_info = self.samples[idx]
         path = os.path.join(self.data_root, sample_info["path"])
 
+        # Extract original filename for saving
+        original_filename = os.path.basename(sample_info["path"])
+        # Remove extension if it exists
+        if original_filename.endswith(".nii.gz"):
+            original_filename = original_filename[:-7]  # Remove .nii.gz
+        elif original_filename.endswith(".pt"):
+            original_filename = original_filename[:-3]  # Remove .pt
+
         affine = None
         if path.endswith(".pt"):
             data = torch.load(path, weights_only=False)
@@ -60,8 +68,17 @@ class DWIDataset(Dataset):
             image = self.transform(image)
 
         if affine is not None:
-            other_info = {"affine": affine, "min_val": min_val, "max_val": max_val}
+            other_info = {
+                "affine": affine,
+                "min_val": min_val,
+                "max_val": max_val,
+                "original_filename": original_filename,
+            }
         else:
-            other_info = {"min_val": min_val, "max_val": max_val}
+            other_info = {
+                "min_val": min_val,
+                "max_val": max_val,
+                "original_filename": original_filename,
+            }
 
         return image, b_values, other_info
