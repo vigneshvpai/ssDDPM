@@ -7,7 +7,8 @@ class Config:
     # -------------------------
     ORIGINAL_DATA_ROOT = "/home/vault/mfdp/mfdp118h/data"
     PT_DATA_ROOT = "/home/vault/mfdp/mfdp118h/pt_data"
-    TMPDIR = os.environ.get("TMPDIR")
+    TMPDIR = os.environ.get("TMPDIR", "")
+    HPC_DATA_ROOT = os.path.join(TMPDIR, "pt_data")
 
     TRAIN_JSON = "train.json"
     VAL_JSON = "val.json"
@@ -16,6 +17,10 @@ class Config:
     TRAIN_SPLIT_JSON = os.path.join("src", "data", "dataset_split", TRAIN_JSON)
     VAL_SPLIT_JSON = os.path.join("src", "data", "dataset_split", VAL_JSON)
     TEST_SPLIT_JSON = os.path.join("src", "data", "dataset_split", TEST_JSON)
+
+    HPC_TRAIN_JSON = os.path.join(TMPDIR, TRAIN_JSON)
+    HPC_VAL_JSON = os.path.join(TMPDIR, VAL_JSON)
+    HPC_TEST_JSON = os.path.join(TMPDIR, TEST_JSON)
 
     # -------------------------
     # Data Shape Configs
@@ -34,7 +39,11 @@ class Config:
     # -------------------------
     SSDDPM_CONFIG = {
         # -------------------------
-        # Scheduler Configs
+        # Epochs Configs
+        # -------------------------
+        "max_epochs": 250,  # MAX EPOCHS
+        # -------------------------
+        # Noise Scheduler Configs
         # -------------------------
         "SCHEDULER_CONFIG": {
             "num_train_timesteps": 250,  # T = 250
@@ -57,7 +66,7 @@ class Config:
         "out_channels": 625,
         "lambda_adc": 1,
         "num_inference_steps": 250,
-        "max_epochs": 10,  # MAX EPOCHS
+        "log_every_n_steps": 8,
     }
 
     # -------------------------

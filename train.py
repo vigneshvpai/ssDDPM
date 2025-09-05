@@ -25,10 +25,10 @@ def main():
 
     if args.hpc:
         data_module = DWIDataLoader(
-            train_json=Config.TRAIN_JSON,
-            val_json=Config.VAL_JSON,
-            test_json=Config.TEST_JSON,
-            data_root=os.environ.get("TMPDIR"),
+            train_json=Config.HPC_TRAIN_JSON,
+            val_json=Config.HPC_VAL_JSON,
+            test_json=Config.HPC_TEST_JSON,
+            data_root=Config.HPC_DATA_ROOT,
         )
     else:
         data_module = DWIDataLoader(
@@ -83,6 +83,7 @@ def main():
         callbacks=callbacks,
         enable_progress_bar=False,
         enable_model_summary=True,
+        log_every_n_steps=Config.SSDDPM_CONFIG["log_every_n_steps"],
     )
 
     # Train the model

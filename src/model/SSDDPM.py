@@ -136,15 +136,15 @@ class SSDDPM(L.LightningModule):
         y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
 
         noise_loss = torch.nn.functional.mse_loss(residual, noise)  # ||ê_t - ε||²₂
-        self.log("train/noise_loss", noise_loss, on_epoch=True)
+        self.log("train/noise_loss", noise_loss, on_epoch=True, sync_dist=True)
         adc_loss = torch.nn.functional.mse_loss(
             y_hat_t_minus_1, y_prime_t_minus_1
         )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
-        self.log("train/adc_loss", adc_loss, on_epoch=True)
+        self.log("train/adc_loss", adc_loss, on_epoch=True, sync_dist=True)
         loss = (
             noise_loss + self.lambda_adc * adc_loss
         )  # Total loss: noise loss + self-supervised reg loss
-        self.log("train/total_loss", loss, on_epoch=True)
+        self.log("train/total_loss", loss, on_epoch=True, sync_dist=True)
 
         if self.global_step % self.trainer.num_training_batches == 0:
             self._log_specific_slice(images, self.current_epoch, "train/orignal")
@@ -259,17 +259,17 @@ class SSDDPM(L.LightningModule):
         # Self-supervised loss: compare predicted denoised image with original noisy image
         # This tests if the model can remove the added synthetic noise and return to the original noisy state
         noise_loss_syn = torch.nn.functional.mse_loss(residual, additional_noise)
-        self.log("val/noise_loss", noise_loss_syn, on_epoch=True)
+        self.log("val/noise_loss", noise_loss_syn, on_epoch=True, sync_dist=True)
         adc_loss_syn = torch.nn.functional.mse_loss(
             y_hat_t_minus_1_syn, y_prime_t_minus_1_syn
         )
-        self.log("val/adc_loss", adc_loss_syn, on_epoch=True)
+        self.log("val/adc_loss", adc_loss_syn, on_epoch=True, sync_dist=True)
 
         # Total self-supervised validation loss
         val_loss = noise_loss_syn + self.lambda_adc * adc_loss_syn
 
         # Log the synthetic noise validation loss
-        self.log("val/total_loss", val_loss, on_epoch=True)
+        self.log("val/total_loss", val_loss, on_epoch=True, sync_dist=True)
 
         if self.global_step % self.trainer.num_training_batches == 0:
             self._log_specific_slice(

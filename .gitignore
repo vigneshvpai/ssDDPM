@@ -213,3 +213,8 @@ src/data/dataset_split/
 
 checkpoints/
 inference_results/
+training_images/
+validation_images/
+
+# SLURM job output files
+*.sh.o*
