@@ -92,8 +92,9 @@ class Config:
     # -------------------------
     CHECKPOINT_CONFIG = {
         "save_dir": "checkpoints",
-        "filename": "ssddpm-{epoch:02d}-{val_loss:.4f}-{train_loss:.4f}",
+        "filename": "ssddpm-{epoch:02d}-{step:06d}",
         "monitor": "val/total_loss",
         "mode": "min",
+        "save_top_k": 3,
         "every_n_epochs": SSDDPM_CONFIG["max_epochs"] // 4,
     }

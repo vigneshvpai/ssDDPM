@@ -92,11 +92,7 @@ class SSDDPM(L.LightningModule):
         # Just take slice 11 directly
         slice_12 = images[0, 11, :, :]  # Slice 12
 
-        self.logger.experiment.add_image(
-            f"{prefix}/slice", slice_12, step_or_epoch, dataformats="HW"
-        )
-
-        # Also save to disk using matplotlib
+        # Save to disk using matplotlib
         plt.figure(figsize=(8, 6))
         plt.imshow(slice_12.cpu().detach().numpy(), cmap="gray")
         plt.title(f"{prefix} - Epoch {step_or_epoch}")

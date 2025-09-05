@@ -43,13 +43,23 @@ def main():
         out_channels=Config.SSDDPM_CONFIG["out_channels"],
     )
 
-    # Set up TensorBoard logger with more options
-    logger = TensorBoardLogger(
+    # Set up TensorBoard logger
+    tb_logger = TensorBoardLogger(
         save_dir=Config.LOGGER_CONFIG["save_dir"],
         name=Config.LOGGER_CONFIG["name"],
         version=None,  # Auto-increment version
         default_hp_metric=False,
     )
+
+    # Set up CSV logger
+    csv_logger = CSVLogger(
+        save_dir=Config.LOGGER_CONFIG["save_dir"],
+        name=Config.LOGGER_CONFIG["name"],
+        version=None,  # Auto-increment version
+    )
+
+    # Combine both loggers
+    loggers = [tb_logger, csv_logger]
 
     # Set up callbacks
     callbacks = [
@@ -59,6 +69,7 @@ def main():
             monitor=Config.CHECKPOINT_CONFIG["monitor"],
             mode=Config.CHECKPOINT_CONFIG["mode"],
             every_n_epochs=Config.CHECKPOINT_CONFIG["every_n_epochs"],
+            save_top_k=Config.CHECKPOINT_CONFIG["save_top_k"],
         ),
         LearningRateMonitor(logging_interval="epoch"),  # Log LR at every step
     ]
@@ -79,7 +90,7 @@ def main():
     trainer = L.Trainer(
         max_epochs=Config.SSDDPM_CONFIG["max_epochs"],
         enable_checkpointing=True,
-        logger=logger,
+        logger=loggers,
         callbacks=callbacks,
         enable_progress_bar=False,
         enable_model_summary=True,
