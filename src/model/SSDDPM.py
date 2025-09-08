@@ -123,7 +123,7 @@ class SSDDPM(L.LightningModule):
 
         noise_loss = torch.nn.functional.mse_loss(residual, noise)  # ||ê_t - ε||²₂
         self.log(
-            "noise_loss",
+            "train_noise_loss",
             noise_loss,
             on_epoch=True,
             sync_dist=True,
@@ -133,7 +133,7 @@ class SSDDPM(L.LightningModule):
         if self.lambda_adc == 0:
             loss = noise_loss
             self.log(
-                "total_loss",
+                "train_total_loss",
                 loss,
                 on_epoch=True,
                 sync_dist=True,
@@ -161,7 +161,7 @@ class SSDDPM(L.LightningModule):
             y_hat_t_minus_1, y_prime_t_minus_1
         )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
         self.log(
-            "adc_loss",
+            "train_adc_loss",
             adc_loss,
             on_epoch=True,
             sync_dist=True,
@@ -171,7 +171,7 @@ class SSDDPM(L.LightningModule):
             noise_loss + self.lambda_adc * adc_loss
         )  # Total loss: noise loss + self-supervised reg loss
         self.log(
-            "total_loss",
+            "train_total_loss",
             loss,
             on_epoch=True,
             sync_dist=True,
@@ -252,6 +252,9 @@ class SSDDPM(L.LightningModule):
         return loss
 
     def validation_step(self, batch):
+        # Set seed for reproducibility
+        torch.manual_seed(42)
+
         images, b_values, _ = batch
 
         # Original noisy image generation (same as training)
@@ -283,7 +286,7 @@ class SSDDPM(L.LightningModule):
 
         noise_loss_syn = torch.nn.functional.mse_loss(residual, additional_noise)
         self.log(
-            "noise_loss",
+            "val_noise_loss",
             noise_loss_syn,
             on_epoch=True,
             sync_dist=True,
@@ -293,7 +296,7 @@ class SSDDPM(L.LightningModule):
         if self.lambda_adc == 0:
             val_loss = noise_loss_syn
             self.log(
-                "total_loss",
+                "val_total_loss",
                 val_loss,
                 on_epoch=True,
                 sync_dist=True,
@@ -341,7 +344,7 @@ class SSDDPM(L.LightningModule):
             y_hat_t_minus_1_syn, y_prime_t_minus_1_syn
         )
         self.log(
-            "adc_loss",
+            "val_adc_loss",
             adc_loss_syn,
             on_epoch=True,
             sync_dist=True,
@@ -353,7 +356,7 @@ class SSDDPM(L.LightningModule):
 
         # Log the synthetic noise validation loss
         self.log(
-            "total_loss",
+            "val_total_loss",
             val_loss,
             on_epoch=True,
             sync_dist=True,
