@@ -86,7 +86,7 @@ class SSDDPM(L.LightningModule):
         return y_hat_t_minus_1
 
     def _log_specific_slice(
-        self, images, step_or_epoch, prefix="train", save_dir="training_images"
+        self, images, step_or_epoch, prefix="train", save_dir="train_images"
     ):
 
         # Just take slice 11 directly
@@ -108,7 +108,7 @@ class SSDDPM(L.LightningModule):
         )
         plt.close()  # Close to free memory
 
-    def compute_loss(self, batch):
+    def compute_loss(self, batch, mode="train"):
         images, b_values, _ = batch  # Step 1: Sample batch y₀ ~ Y
 
         noise, steps = self._get_noise_and_timesteps(images)
@@ -123,7 +123,7 @@ class SSDDPM(L.LightningModule):
 
         noise_loss = torch.nn.functional.mse_loss(residual, noise)  # ||ê_t - ε||²₂
         self.log(
-            "train_noise_loss",
+            f"{mode}_noise_loss",
             noise_loss,
             on_epoch=True,
             sync_dist=True,
@@ -133,18 +133,31 @@ class SSDDPM(L.LightningModule):
         if self.lambda_adc == 0:
             loss = noise_loss
             self.log(
-                "train_total_loss",
+                f"{mode}_total_loss",
                 loss,
                 on_epoch=True,
                 sync_dist=True,
                 batch_size=Config.BATCH_SIZE,
             )
             if self.global_step % self.trainer.num_training_batches == 0:
-                self._log_specific_slice(images, self.current_epoch, "train/orignal")
                 self._log_specific_slice(
-                    noisy_images, self.current_epoch, "train/noisy_image"
+                    images,
+                    self.current_epoch,
+                    f"{mode}/orignal",
+                    save_dir=f"{mode}_images",
                 )
-                self._log_specific_slice(residual, self.current_epoch, "train/residual")
+                self._log_specific_slice(
+                    noisy_images,
+                    self.current_epoch,
+                    f"{mode}/noisy_image",
+                    save_dir=f"{mode}_images",
+                )
+                self._log_specific_slice(
+                    residual,
+                    self.current_epoch,
+                    f"{mode}/residual",
+                    save_dir=f"{mode}_images",
+                )
             return loss
 
         y_prime_t_minus_1 = self._get_y_prime_t_minus_1(
@@ -161,7 +174,7 @@ class SSDDPM(L.LightningModule):
             y_hat_t_minus_1, y_prime_t_minus_1
         )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
         self.log(
-            "train_adc_loss",
+            f"{mode}_adc_loss",
             adc_loss,
             on_epoch=True,
             sync_dist=True,
@@ -171,7 +184,7 @@ class SSDDPM(L.LightningModule):
             noise_loss + self.lambda_adc * adc_loss
         )  # Total loss: noise loss + self-supervised reg loss
         self.log(
-            "train_total_loss",
+            f"{mode}_total_loss",
             loss,
             on_epoch=True,
             sync_dist=True,
@@ -179,16 +192,32 @@ class SSDDPM(L.LightningModule):
         )
 
         if self.global_step % self.trainer.num_training_batches == 0:
-            self._log_specific_slice(images, self.current_epoch, "train/orignal")
             self._log_specific_slice(
-                noisy_images, self.current_epoch, "train/noisy_image"
-            )
-            self._log_specific_slice(residual, self.current_epoch, "train/residual")
-            self._log_specific_slice(
-                y_prime_t_minus_1, self.current_epoch, "train/y_prime_t_minus_1"
+                images, self.current_epoch, f"{mode}/orignal", save_dir=f"{mode}_images"
             )
             self._log_specific_slice(
-                y_hat_t_minus_1, self.current_epoch, "train/y_hat_t_minus_1"
+                noisy_images,
+                self.current_epoch,
+                f"{mode}/noisy_image",
+                save_dir=f"{mode}_images",
+            )
+            self._log_specific_slice(
+                residual,
+                self.current_epoch,
+                f"{mode}/residual",
+                save_dir=f"{mode}_images",
+            )
+            self._log_specific_slice(
+                y_prime_t_minus_1,
+                self.current_epoch,
+                f"{mode}/y_prime_t_minus_1",
+                save_dir=f"{mode}_images",
+            )
+            self._log_specific_slice(
+                y_hat_t_minus_1,
+                self.current_epoch,
+                f"{mode}/y_hat_t_minus_1",
+                save_dir=f"{mode}_images",
             )
 
         return loss
@@ -252,149 +281,5 @@ class SSDDPM(L.LightningModule):
         return loss
 
     def validation_step(self, batch):
-        # Set seed for reproducibility
-        torch.manual_seed(42)
-
-        images, b_values, _ = batch
-
-        # Original noisy image generation (same as training)
-        noise, steps = self._get_noise_and_timesteps(images)
-        noisy_images = self.scheduler.add_noise(images, noise, steps)
-
-        # Self-supervised validation: add additional synthetic noise
-        # Sample additional noise for validation
-        additional_noise = torch.randn_like(noisy_images)
-        additional_steps = torch.randint(
-            0,
-            self.scheduler.config.num_train_timesteps,
-            (images.shape[0],),
-            device=images.device,
-        )
-
-        # Create "noisier" images by adding synthetic noise
-        noisier_images = self.scheduler.add_noise(
-            noisy_images, additional_noise, additional_steps
-        )
-
-        # Use noisier_images as input, treat original noisy_images as target
-        residual = self.model(noisier_images, additional_steps).sample
-
-        # Get beta and alpha for the additional noise steps
-        betas_syn, alphas_cumprod_syn = self._get_beta_and_alpha_cumprod(
-            additional_steps
-        )
-
-        noise_loss_syn = torch.nn.functional.mse_loss(residual, additional_noise)
-        self.log(
-            "val_noise_loss",
-            noise_loss_syn,
-            on_epoch=True,
-            sync_dist=True,
-            batch_size=Config.BATCH_SIZE,
-        )
-
-        if self.lambda_adc == 0:
-            val_loss = noise_loss_syn
-            self.log(
-                "val_total_loss",
-                val_loss,
-                on_epoch=True,
-                sync_dist=True,
-                batch_size=Config.BATCH_SIZE,
-            )
-            if self.global_step % self.trainer.num_training_batches == 0:
-                self._log_specific_slice(
-                    images,
-                    self.current_epoch,
-                    "val/original",
-                    save_dir="validation_images",
-                )
-                self._log_specific_slice(
-                    noisy_images,
-                    self.current_epoch,
-                    "val/noisy_image",
-                    save_dir="validation_images",
-                )
-                self._log_specific_slice(
-                    noisier_images,
-                    self.current_epoch,
-                    "val/noisier_image",
-                    save_dir="validation_images",
-                )
-                self._log_specific_slice(
-                    residual,
-                    self.current_epoch,
-                    "val/residual",
-                    save_dir="validation_images",
-                )
-            return val_loss
-
-        # Compute the predicted denoised version
-        y_prime_t_minus_1_syn = self._get_y_prime_t_minus_1(
-            noisier_images, residual, betas_syn, alphas_cumprod_syn
-        )
-
-        # ADC model prediction on the synthetic noise denoised version
-        S0_hat_syn, D_hat_syn = self.adc_model(y_prime_t_minus_1_syn, b_values)
-        y_hat_t_minus_1_syn = self._get_y_hat_t_minus_1(S0_hat_syn, D_hat_syn, b_values)
-
-        # Self-supervised loss: compare predicted denoised image with original noisy image
-        # This tests if the model can remove the added synthetic noise and return to the original noisy state
-        adc_loss_syn = torch.nn.functional.mse_loss(
-            y_hat_t_minus_1_syn, y_prime_t_minus_1_syn
-        )
-        self.log(
-            "val_adc_loss",
-            adc_loss_syn,
-            on_epoch=True,
-            sync_dist=True,
-            batch_size=Config.BATCH_SIZE,
-        )
-
-        # Total self-supervised validation loss
-        val_loss = noise_loss_syn + self.lambda_adc * adc_loss_syn
-
-        # Log the synthetic noise validation loss
-        self.log(
-            "val_total_loss",
-            val_loss,
-            on_epoch=True,
-            sync_dist=True,
-            batch_size=Config.BATCH_SIZE,
-        )
-
-        if self.global_step % self.trainer.num_training_batches == 0:
-            self._log_specific_slice(
-                images, self.current_epoch, "val/original", save_dir="validation_images"
-            )
-            self._log_specific_slice(
-                noisy_images,
-                self.current_epoch,
-                "val/noisy_image",
-                save_dir="validation_images",
-            )
-            self._log_specific_slice(
-                noisier_images,
-                self.current_epoch,
-                "val/noisier_image",
-                save_dir="validation_images",
-            )
-            self._log_specific_slice(
-                residual,
-                self.current_epoch,
-                "val/residual",
-                save_dir="validation_images",
-            )
-            self._log_specific_slice(
-                y_prime_t_minus_1_syn,
-                self.current_epoch,
-                "val/y_prime_t_minus_1",
-                save_dir="validation_images",
-            )
-            self._log_specific_slice(
-                y_hat_t_minus_1_syn,
-                self.current_epoch,
-                "val/y_hat_t_minus_1",
-                save_dir="validation_images",
-            )
-        return val_loss
+        loss = self.compute_loss(batch, mode="val")
+        return loss

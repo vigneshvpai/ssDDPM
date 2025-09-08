@@ -215,6 +215,8 @@ checkpoints/
 inference_results/
 training_images/
 validation_images/
+train_images/
+val_images/
 
 # SLURM job output files
 *.sh.o*
