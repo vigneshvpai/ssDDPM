@@ -139,25 +139,6 @@ class SSDDPM(L.LightningModule):
                 sync_dist=True,
                 batch_size=Config.BATCH_SIZE,
             )
-            if self.global_step % self.trainer.num_training_batches == 0:
-                self._log_specific_slice(
-                    images,
-                    self.current_epoch,
-                    f"{mode}/orignal",
-                    save_dir=f"{mode}_images",
-                )
-                self._log_specific_slice(
-                    noisy_images,
-                    self.current_epoch,
-                    f"{mode}/noisy_image",
-                    save_dir=f"{mode}_images",
-                )
-                self._log_specific_slice(
-                    residual,
-                    self.current_epoch,
-                    f"{mode}/residual",
-                    save_dir=f"{mode}_images",
-                )
             return loss
 
         y_prime_t_minus_1 = self._get_y_prime_t_minus_1(
@@ -190,35 +171,6 @@ class SSDDPM(L.LightningModule):
             sync_dist=True,
             batch_size=Config.BATCH_SIZE,
         )
-
-        if self.global_step % self.trainer.num_training_batches == 0:
-            self._log_specific_slice(
-                images, self.current_epoch, f"{mode}/orignal", save_dir=f"{mode}_images"
-            )
-            self._log_specific_slice(
-                noisy_images,
-                self.current_epoch,
-                f"{mode}/noisy_image",
-                save_dir=f"{mode}_images",
-            )
-            self._log_specific_slice(
-                residual,
-                self.current_epoch,
-                f"{mode}/residual",
-                save_dir=f"{mode}_images",
-            )
-            self._log_specific_slice(
-                y_prime_t_minus_1,
-                self.current_epoch,
-                f"{mode}/y_prime_t_minus_1",
-                save_dir=f"{mode}_images",
-            )
-            self._log_specific_slice(
-                y_hat_t_minus_1,
-                self.current_epoch,
-                f"{mode}/y_hat_t_minus_1",
-                save_dir=f"{mode}_images",
-            )
 
         return loss
 
