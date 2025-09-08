@@ -88,6 +88,9 @@ def main():
 
     # Set up the trainer using max_epochs from config and the logger
     trainer = L.Trainer(
+        devices="auto",
+        accelerator="auto",
+        strategy="auto",
         max_epochs=Config.SSDDPM_CONFIG["max_epochs"],
         enable_checkpointing=True,
         logger=loggers,

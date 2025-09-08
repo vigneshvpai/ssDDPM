@@ -46,7 +46,7 @@ class Config:
         # Noise Scheduler Configs
         # -------------------------
         "SCHEDULER_CONFIG": {
-            "num_train_timesteps": 250,  # T = 250
+            "num_train_timesteps": 1000,  # T = 250
             "beta_start": 1e-7,  # β1 = 1e-7
             "beta_end": 2e-6,  # βT = 2e-6
             "beta_schedule": "linear",  # Linear noise schedule
@@ -64,7 +64,7 @@ class Config:
         # -------------------------
         "in_channels": 625,
         "out_channels": 625,
-        "lambda_adc": 1,
+        "lambda_adc": 0,
         "num_inference_steps": 250,
         "log_every_n_steps": 8,
     }
