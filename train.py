@@ -2,7 +2,7 @@ import lightning as L
 import glob
 import os
 import argparse
-from lightning.pytorch.loggers import TensorBoardLogger
+from lightning.pytorch.loggers import TensorBoardLogger, CSVLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 from src.model.SSDDPM import SSDDPM
 from src.data.DWIDataLoader import DWIDataLoader
