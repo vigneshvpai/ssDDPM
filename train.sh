@@ -36,7 +36,7 @@ else
     echo "Destination: $HPC_DATA_ROOT"
     
     # Copy data from vault to HPC SSD (using rsync for efficiency)
-    rsync -a --progress /home/vault/mfdp/mfdp118h/pt_data/ "$HPC_DATA_ROOT/"
+    rsync -a /home/vault/mfdp/mfdp118h/pt_data/ "$HPC_DATA_ROOT/"
     
     echo "Data transfer completed!"
 fi
@@ -55,7 +55,7 @@ echo "Using JSON files from: $TMPDIR"
 echo "Experiment name: $EXP_NAME"
 
 # Run the training script with experiment name
-echo "Starting training..."
+echo "Python script is starting execution..."
 srun python train.py --hpc --exp-name "$EXP_NAME"
 
 echo "Training completed!"
