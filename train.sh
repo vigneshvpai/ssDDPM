@@ -9,6 +9,14 @@ unset SLURM_EXPORT_ENV
 module load python
 conda activate thesis
 
+# Parse experiment name argument
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 <experiment_name>"
+    exit 1
+fi
+
+EXP_NAME="$1"
+
 # Use the HPC-provided TMPDIR (which has SSD storage)
 echo "HPC TMPDIR: $TMPDIR"
 echo "PT_DATA_ROOT: /home/vault/mfdp/mfdp118h/pt_data"
@@ -44,9 +52,10 @@ echo "JSON files copied to: $TMPDIR"
 # Print the data paths being used
 echo "Using HPC_DATA_ROOT: $HPC_DATA_ROOT"
 echo "Using JSON files from: $TMPDIR"
+echo "Experiment name: $EXP_NAME"
 
-# Run the training script
+# Run the training script with experiment name
 echo "Starting training..."
-srun python train.py --hpc 
+srun python train.py --hpc --exp-name "$EXP_NAME"
 
 echo "Training completed!"

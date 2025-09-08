@@ -1,4 +1,5 @@
 import os
+import pprint
 
 
 class Config:
@@ -84,7 +85,6 @@ class Config:
     LOGGER_CONFIG = {
         "log_hyperparameters": True,  # Log hyperparameters
         "save_dir": "lightning_logs",
-        "name": "ssddpm_training",
     }
 
     # -------------------------
@@ -98,3 +98,27 @@ class Config:
         "save_top_k": 3,
         "every_n_epochs": SSDDPM_CONFIG["max_epochs"] // 4,
     }
+
+    @classmethod
+    def summary(cls):
+        summary_dict = {
+            "ORIGINAL_DATA_ROOT": cls.ORIGINAL_DATA_ROOT,
+            "PT_DATA_ROOT": cls.PT_DATA_ROOT,
+            "TMPDIR": cls.TMPDIR,
+            "HPC_DATA_ROOT": cls.HPC_DATA_ROOT,
+            "TRAIN_SPLIT_JSON": cls.TRAIN_SPLIT_JSON,
+            "VAL_SPLIT_JSON": cls.VAL_SPLIT_JSON,
+            "TEST_SPLIT_JSON": cls.TEST_SPLIT_JSON,
+            "HPC_TRAIN_JSON": cls.HPC_TRAIN_JSON,
+            "HPC_VAL_JSON": cls.HPC_VAL_JSON,
+            "HPC_TEST_JSON": cls.HPC_TEST_JSON,
+            "EXPECTED_SHAPE": cls.EXPECTED_SHAPE,
+            "UNET_COMPATIBLE_SHAPE": cls.UNET_COMPATIBLE_SHAPE,
+            "BATCH_SIZE": cls.BATCH_SIZE,
+            "NUM_WORKERS": cls.NUM_WORKERS,
+            "SSDDPM_CONFIG": cls.SSDDPM_CONFIG,
+            "ADC_CONFIG": cls.ADC_CONFIG,
+            "LOGGER_CONFIG": cls.LOGGER_CONFIG,
+            "CHECKPOINT_CONFIG": cls.CHECKPOINT_CONFIG,
+        }
+        return pprint.pformat(summary_dict, indent=2)

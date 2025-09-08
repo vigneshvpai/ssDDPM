@@ -17,11 +17,21 @@ def parse_args():
     parser.add_argument(
         "--hpc", action="store_true", help="Run in HPC mode using $TMPDIR/pt_data"
     )
+    parser.add_argument("--exp-name", type=str, required=True, help="Experiment name")
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
+
+    print(Config.summary())
+
+    # Get SLURM job id if available
+    slurm_job_id = os.environ.get("SLURM_JOB_ID", None)
+    if slurm_job_id:
+        run_name = f"{args.exp_name}_slurm{slurm_job_id}"
+    else:
+        run_name = args.exp_name
 
     if args.hpc:
         data_module = DWIDataLoader(
@@ -46,7 +56,7 @@ def main():
     # Set up TensorBoard logger
     tb_logger = TensorBoardLogger(
         save_dir=Config.LOGGER_CONFIG["save_dir"],
-        name=Config.LOGGER_CONFIG["name"],
+        name=run_name,
         version=None,  # Auto-increment version
         default_hp_metric=False,
     )
@@ -54,7 +64,7 @@ def main():
     # Set up CSV logger
     csv_logger = CSVLogger(
         save_dir=Config.LOGGER_CONFIG["save_dir"],
-        name=Config.LOGGER_CONFIG["name"],
+        name=run_name,
         version=None,  # Auto-increment version
     )
 
@@ -62,9 +72,11 @@ def main():
     loggers = [tb_logger, csv_logger]
 
     # Set up callbacks
+    checkpoint_dir = os.path.join(Config.CHECKPOINT_CONFIG["save_dir"], run_name)
+    os.makedirs(checkpoint_dir, exist_ok=True)
     callbacks = [
         ModelCheckpoint(
-            dirpath=Config.CHECKPOINT_CONFIG["save_dir"],
+            dirpath=checkpoint_dir,
             filename=Config.CHECKPOINT_CONFIG["filename"],
             monitor=Config.CHECKPOINT_CONFIG["monitor"],
             mode=Config.CHECKPOINT_CONFIG["mode"],
@@ -76,7 +88,6 @@ def main():
 
     # Find the latest checkpoint if resuming training
     if args.resume:
-        checkpoint_dir = Config.CHECKPOINT_CONFIG["save_dir"]
         checkpoints = glob.glob(os.path.join(checkpoint_dir, "*.ckpt"))
         latest_checkpoint = (
             max(checkpoints, key=os.path.getctime) if checkpoints else None
