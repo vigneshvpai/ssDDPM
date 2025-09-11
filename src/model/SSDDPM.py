@@ -23,8 +23,6 @@ class SSDDPM(L.LightningModule):
                 "DownBlock2D",
             ),
             up_block_types=("UpBlock2D", "AttnUpBlock2D", "AttnUpBlock2D", "UpBlock2D"),
-            layers_per_block=2,
-            block_out_channels=(64, 128, 128, 256),
         )
         self.adc_model = ADC()
 
@@ -113,19 +111,36 @@ class SSDDPM(L.LightningModule):
 
     def compute_loss(self, batch, mode="train"):
         images, b_values, _ = batch  # Step 1: Sample batch y₀ ~ Y
+        self._log_specific_slice(
+            images,
+            step_or_epoch=self.current_epoch,
+            prefix=mode,
+            save_dir=f"{self.run_name}/original_images",
+        )
 
         noise, steps = self._get_noise_and_timesteps(images)
 
         noisy_images = self.scheduler.add_noise(
             images, noise, steps
         )  # Step 4: y_t = √ā_t y₀ + √1 - ā_t ε
+        self._log_specific_slice(
+            noisy_images,
+            step_or_epoch=self.current_epoch,
+            prefix=mode,
+            save_dir=f"{self.run_name}/noisy_images",
+        )
 
         residual = self.model(noisy_images, steps).sample  # Step 5: ê_t = f₀(y_t, t)
+        self._log_specific_slice(
+            residual,
+            step_or_epoch=self.current_epoch,
+            prefix=mode,
+            save_dir=f"{self.run_name}/residual_images",
+        )
 
         betas, alphas_cumprod = self._get_beta_and_alpha_cumprod(steps)
 
         noise_loss = torch.nn.functional.mse_loss(residual, noise)  # ||ê_t - ε||²₂
-
         self.log(
             f"{mode}_noise_loss",
             noise_loss,
@@ -137,53 +152,59 @@ class SSDDPM(L.LightningModule):
         y_prime_t_minus_1 = self._get_y_prime_t_minus_1(
             noisy_images, residual, betas, alphas_cumprod
         )
-
-        S0_original, D_original = self.adc_model(
-            images, b_values
-        )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
-
-        S0_hat, D_hat = self.adc_model(
-            y_prime_t_minus_1, b_values
-        )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
-
-        # y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
-
-        # adc_loss = torch.nn.functional.mse_loss(
-        #     y_hat_t_minus_1, y_prime_t_minus_1
-        # )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
-
-        recon_loss = torch.nn.functional.mse_loss(S0_original, S0_hat)
-        adc_loss = torch.nn.functional.mse_loss(D_original, D_hat)
-
-        self.log(
-            f"{mode}_recon_loss",
-            recon_loss,
-            on_epoch=True,
-            sync_dist=True,
-            batch_size=Config.BATCH_SIZE,
+        self._log_specific_slice(
+            y_prime_t_minus_1,
+            step_or_epoch=self.current_epoch,
+            prefix=mode,
+            save_dir=f"{self.run_name}/y_prime_t_minus_1",
         )
 
-        self.log(
-            f"{mode}_adc_loss",
-            adc_loss,
-            on_epoch=True,
-            sync_dist=True,
-            batch_size=Config.BATCH_SIZE,
-        )
+        # S0_original, D_original = self.adc_model(
+        #     images, b_values
+        # )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
 
-        loss = (
-            noise_loss + self.lambda_adc * adc_loss + self.lambda_recon * recon_loss
-        )  # Total loss: noise loss + self-supervised reg loss
+        # S0_hat, D_hat = self.adc_model(
+        #     y_prime_t_minus_1, b_values
+        # )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
 
-        self.log(
-            f"{mode}_total_loss",
-            loss,
-            on_epoch=True,
-            sync_dist=True,
-            batch_size=Config.BATCH_SIZE,
-        )
+        # # y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
 
-        return loss
+        # # adc_loss = torch.nn.functional.mse_loss(
+        # #     y_hat_t_minus_1, y_prime_t_minus_1
+        # # )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
+
+        # recon_loss = torch.nn.functional.mse_loss(S0_original, S0_hat)
+        # adc_loss = torch.nn.functional.mse_loss(D_original, D_hat)
+
+        # self.log(
+        #     f"{mode}_recon_loss",
+        #     recon_loss,
+        #     on_epoch=True,
+        #     sync_dist=True,
+        #     batch_size=Config.BATCH_SIZE,
+        # )
+
+        # self.log(
+        #     f"{mode}_adc_loss",
+        #     adc_loss,
+        #     on_epoch=True,
+        #     sync_dist=True,
+        #     batch_size=Config.BATCH_SIZE,
+        # )
+
+        # loss = (
+        #     noise_loss + self.lambda_adc * adc_loss + self.lambda_recon * recon_loss
+        # )  # Total loss: noise loss + self-supervised loss
+
+        # self.log(
+        #     f"{mode}_total_loss",
+        #     loss,
+        #     on_epoch=True,
+        #     sync_dist=True,
+        #     batch_size=Config.BATCH_SIZE,
+        # )
+
+        return noise_loss
 
     @torch.no_grad()
     def inference(self, y_hat_t, b_values):
@@ -240,6 +261,7 @@ class SSDDPM(L.LightningModule):
         return y_hat_t
 
     def training_step(self, batch):
+        print(batch.shape)
         loss = self.compute_loss(batch)
         return loss
 

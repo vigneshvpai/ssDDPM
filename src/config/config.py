@@ -70,13 +70,13 @@ class Config:
         # -------------------------
         # Model Configs
         # -------------------------
-        "in_channels": 625,
-        "out_channels": 625,
+        "in_channels": 225,
+        "out_channels": 225,
         # -------------------------
         # Loss Configs
         # -------------------------
-        "lambda_adc": 0.1,
-        "lambda_recon": 0.1,
+        "lambda_adc": 0.25,
+        "lambda_recon": 0.25,
         # -------------------------
         # Inference Configs
         # -------------------------
@@ -89,7 +89,7 @@ class Config:
     ADC_CONFIG = {
         "adc_type": "avg",  # avg or dir
         "num_dirs": 3,  # only used if adc_type == "dir"
-        "n_bvals": 25,
+        "n_bvals": 9,
     }
 
     # -------------------------
