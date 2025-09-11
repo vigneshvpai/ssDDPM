@@ -111,32 +111,14 @@ class SSDDPM(L.LightningModule):
 
     def compute_loss(self, batch, mode="train"):
         images, b_values, _ = batch  # Step 1: Sample batch y₀ ~ Y
-        self._log_specific_slice(
-            images,
-            step_or_epoch=self.current_epoch,
-            prefix=mode,
-            save_dir=f"{self.run_name}/original_images",
-        )
 
         noise, steps = self._get_noise_and_timesteps(images)
 
         noisy_images = self.scheduler.add_noise(
             images, noise, steps
         )  # Step 4: y_t = √ā_t y₀ + √1 - ā_t ε
-        self._log_specific_slice(
-            noisy_images,
-            step_or_epoch=self.current_epoch,
-            prefix=mode,
-            save_dir=f"{self.run_name}/noisy_images",
-        )
 
         residual = self.model(noisy_images, steps).sample  # Step 5: ê_t = f₀(y_t, t)
-        self._log_specific_slice(
-            residual,
-            step_or_epoch=self.current_epoch,
-            prefix=mode,
-            save_dir=f"{self.run_name}/residual_images",
-        )
 
         betas, alphas_cumprod = self._get_beta_and_alpha_cumprod(steps)
 
@@ -151,12 +133,6 @@ class SSDDPM(L.LightningModule):
 
         y_prime_t_minus_1 = self._get_y_prime_t_minus_1(
             noisy_images, residual, betas, alphas_cumprod
-        )
-        self._log_specific_slice(
-            y_prime_t_minus_1,
-            step_or_epoch=self.current_epoch,
-            prefix=mode,
-            save_dir=f"{self.run_name}/y_prime_t_minus_1",
         )
 
         # S0_original, D_original = self.adc_model(
@@ -196,13 +172,41 @@ class SSDDPM(L.LightningModule):
         #     noise_loss + self.lambda_adc * adc_loss + self.lambda_recon * recon_loss
         # )  # Total loss: noise loss + self-supervised loss
 
-        # self.log(
-        #     f"{mode}_total_loss",
-        #     loss,
-        #     on_epoch=True,
-        #     sync_dist=True,
-        #     batch_size=Config.BATCH_SIZE,
-        # )
+        self.log(
+            f"{mode}_total_loss",
+            noise_loss,
+            on_epoch=True,
+            sync_dist=True,
+            batch_size=Config.BATCH_SIZE,
+        )
+
+        if mode == "val" and (
+            self.current_epoch % Config.CHECKPOINT_CONFIG["every_n_epochs"] == 0
+        ):
+            self._log_specific_slice(
+                images,
+                step_or_epoch=self.current_epoch,
+                prefix=mode,
+                save_dir=f"{mode}_images/{self.run_name}/original_images",
+            )
+            self._log_specific_slice(
+                noisy_images,
+                step_or_epoch=self.current_epoch,
+                prefix=mode,
+                save_dir=f"{mode}_images/{self.run_name}/noisy_images",
+            )
+            self._log_specific_slice(
+                residual,
+                step_or_epoch=self.current_epoch,
+                prefix=mode,
+                save_dir=f"{mode}_images/{self.run_name}/residual_images",
+            )
+            self._log_specific_slice(
+                y_prime_t_minus_1,
+                step_or_epoch=self.current_epoch,
+                prefix=mode,
+                save_dir=f"{mode}_images/{self.run_name}/y_prime_t_minus_1",
+            )
 
         return noise_loss
 
@@ -261,7 +265,6 @@ class SSDDPM(L.LightningModule):
         return y_hat_t
 
     def training_step(self, batch):
-        print(batch.shape)
         loss = self.compute_loss(batch)
         return loss
 

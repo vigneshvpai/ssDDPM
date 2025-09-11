@@ -30,10 +30,12 @@ class DWIDataset(Dataset):
             self.samples = json.load(f)
 
     def __len__(self):
-        return len(self.samples)
+        return len(self.samples) * self.num_dirs
 
     def __getitem__(self, idx):
-        sample_info = self.samples[idx]
+        sample_idx = idx // self.num_dirs
+        direction = idx % self.num_dirs
+        sample_info = self.samples[sample_idx]
         path = os.path.join(self.data_root, sample_info["path"])
 
         # Extract original filename for saving
