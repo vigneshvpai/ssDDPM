@@ -11,7 +11,7 @@ import os
 
 
 class SSDDPM(L.LightningModule):
-    def __init__(self, in_channels, out_channels, lr=1e-4):
+    def __init__(self, in_channels, out_channels, run_name):
         super().__init__()
         self.model = UNet2DModel(
             in_channels=in_channels,
@@ -23,13 +23,17 @@ class SSDDPM(L.LightningModule):
                 "DownBlock2D",
             ),
             up_block_types=("UpBlock2D", "AttnUpBlock2D", "AttnUpBlock2D", "UpBlock2D"),
+            layers_per_block=2,
+            block_out_channels=(64, 128, 128, 256),
         )
         self.adc_model = ADC()
 
         self.scheduler = DDPMScheduler(**Config.SSDDPM_CONFIG["SCHEDULER_CONFIG"])
         self.lambda_adc = Config.SSDDPM_CONFIG["lambda_adc"]
+        self.lambda_recon = Config.SSDDPM_CONFIG["lambda_recon"]
         self.num_inference_steps = Config.SSDDPM_CONFIG["num_inference_steps"]
         self.max_epochs = Config.SSDDPM_CONFIG["max_epochs"]
+        self.run_name = run_name
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(
@@ -99,7 +103,6 @@ class SSDDPM(L.LightningModule):
         plt.axis("off")
 
         # Create directory if it doesn't exist
-        save_dir = f"{save_dir}/{prefix.replace('/', '_')}"
         os.makedirs(save_dir, exist_ok=True)
 
         # Save the plot
@@ -122,6 +125,7 @@ class SSDDPM(L.LightningModule):
         betas, alphas_cumprod = self._get_beta_and_alpha_cumprod(steps)
 
         noise_loss = torch.nn.functional.mse_loss(residual, noise)  # ||ê_t - ε||²₂
+
         self.log(
             f"{mode}_noise_loss",
             noise_loss,
@@ -130,30 +134,35 @@ class SSDDPM(L.LightningModule):
             batch_size=Config.BATCH_SIZE,
         )
 
-        if self.lambda_adc == 0:
-            loss = noise_loss
-            self.log(
-                f"{mode}_total_loss",
-                loss,
-                on_epoch=True,
-                sync_dist=True,
-                batch_size=Config.BATCH_SIZE,
-            )
-            return loss
-
         y_prime_t_minus_1 = self._get_y_prime_t_minus_1(
             noisy_images, residual, betas, alphas_cumprod
         )
+
+        S0_original, D_original = self.adc_model(
+            images, b_values
+        )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
 
         S0_hat, D_hat = self.adc_model(
             y_prime_t_minus_1, b_values
         )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
 
-        y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
+        # y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
 
-        adc_loss = torch.nn.functional.mse_loss(
-            y_hat_t_minus_1, y_prime_t_minus_1
-        )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
+        # adc_loss = torch.nn.functional.mse_loss(
+        #     y_hat_t_minus_1, y_prime_t_minus_1
+        # )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
+
+        recon_loss = torch.nn.functional.mse_loss(S0_original, S0_hat)
+        adc_loss = torch.nn.functional.mse_loss(D_original, D_hat)
+
+        self.log(
+            f"{mode}_recon_loss",
+            recon_loss,
+            on_epoch=True,
+            sync_dist=True,
+            batch_size=Config.BATCH_SIZE,
+        )
+
         self.log(
             f"{mode}_adc_loss",
             adc_loss,
@@ -161,9 +170,11 @@ class SSDDPM(L.LightningModule):
             sync_dist=True,
             batch_size=Config.BATCH_SIZE,
         )
+
         loss = (
-            noise_loss + self.lambda_adc * adc_loss
+            noise_loss + self.lambda_adc * adc_loss + self.lambda_recon * recon_loss
         )  # Total loss: noise loss + self-supervised reg loss
+
         self.log(
             f"{mode}_total_loss",
             loss,

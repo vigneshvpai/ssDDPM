@@ -51,6 +51,7 @@ def main():
     model = SSDDPM(
         in_channels=Config.SSDDPM_CONFIG["in_channels"],
         out_channels=Config.SSDDPM_CONFIG["out_channels"],
+        run_name=run_name,
     )
 
     # Set up TensorBoard logger
@@ -99,9 +100,8 @@ def main():
 
     # Set up the trainer using max_epochs from config and the logger
     trainer = L.Trainer(
-        devices="auto",
-        accelerator="auto",
-        strategy="auto",
+        devices=1,
+        accelerator="gpu",
         max_epochs=Config.SSDDPM_CONFIG["max_epochs"],
         enable_checkpointing=True,
         logger=loggers,

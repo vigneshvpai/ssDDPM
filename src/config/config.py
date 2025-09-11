@@ -32,8 +32,8 @@ class Config:
     # -------------------------
     # DataLoader Configs
     # -------------------------
-    BATCH_SIZE = 2
-    NUM_WORKERS = 8
+    BATCH_SIZE = 10
+    NUM_WORKERS = 10
 
     # -------------------------
     # SSDDPM Configs
@@ -43,6 +43,7 @@ class Config:
         # Epochs Configs
         # -------------------------
         "max_epochs": 250,  # MAX EPOCHS
+        "log_every_n_steps": 8,
         # -------------------------
         # Noise Scheduler Configs
         # -------------------------
@@ -50,13 +51,19 @@ class Config:
             "num_train_timesteps": 1000,  # T = 250
             "beta_start": 1e-7,  # β1 = 1e-7
             "beta_end": 2e-6,  # βT = 2e-6
+            # "beta_start": 1e-4,  # β1 = 1e-4 (standard)
+            # "beta_end": 0.02,  # βT = 0.02 (standard)
+            # "beta_start": 1e-5,  # 10x your current start
+            # "beta_end": 0.005,  # 2500x your current end, but 4x less than standard
+            # "beta_start": 1e-6,  # 10x your current (not 1000x)
+            # "beta_end": 1e-5,  # 5x your current (not 10,000x)
             "beta_schedule": "linear",  # Linear noise schedule
         },
         # -------------------------
         # Optimizer Configs
         # -------------------------
         "OPTIMIZER_CONFIG": {
-            "lr": 1e-6,
+            "lr": 1e-4,
             "betas": (0.9, 0.999),
             "eps": 1e-8,
         },
@@ -65,9 +72,15 @@ class Config:
         # -------------------------
         "in_channels": 625,
         "out_channels": 625,
-        "lambda_adc": 0,
+        # -------------------------
+        # Loss Configs
+        # -------------------------
+        "lambda_adc": 0.1,
+        "lambda_recon": 0.1,
+        # -------------------------
+        # Inference Configs
+        # -------------------------
         "num_inference_steps": 250,
-        "log_every_n_steps": 8,
     }
 
     # -------------------------
@@ -95,7 +108,7 @@ class Config:
         "filename": "ssddpm-{epoch:02d}-val_loss={val_total_loss:.4f}",
         "monitor": "val_total_loss",
         "mode": "min",
-        "save_top_k": 3,
+        "save_top_k": 1,
         "every_n_epochs": SSDDPM_CONFIG["max_epochs"] // 4,
     }
 

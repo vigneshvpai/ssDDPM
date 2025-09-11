@@ -1,8 +1,11 @@
 #!/bin/bash -l
 #
-#SBATCH --gres=gpu:rtx2080ti:4
+#SBATCH --gres=gpu:a100:1
+#SBATCH --partition=a100
 #SBATCH --time=24:00:00
 #SBATCH --export=NONE
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=10
 
 unset SLURM_EXPORT_ENV
 
