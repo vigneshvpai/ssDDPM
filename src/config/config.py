@@ -32,7 +32,7 @@ class Config:
     # -------------------------
     # DataLoader Configs
     # -------------------------
-    BATCH_SIZE = 10
+    BATCH_SIZE = 2
     NUM_WORKERS = 10
 
     # -------------------------

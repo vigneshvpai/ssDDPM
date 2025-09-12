@@ -67,6 +67,7 @@ class Preprocess:
 
         # Find unique b-values (excluding 0)
         unique_bvals = torch.unique(b_values[b_values > 0], sorted=True)
+        unique_bvals_with_b0 = torch.unique(b_values, sorted=True)
         num_diffusion_bvals = len(unique_bvals)
         num_dirs = Config.ADC_CONFIG["num_dirs"]
 
@@ -101,7 +102,7 @@ class Preprocess:
         dwi_images_reordered = dwi_images_reshaped.permute(0, 2, 1, 3, 4)
 
         # Return b0 separately and only diffusion-weighted b-values
-        return b0_image, dwi_images_reordered, unique_bvals
+        return b0_image, dwi_images_reordered, unique_bvals_with_b0
 
     def preprocess(self, image, b_values):
         image_padded = self.pad_to_unet_compatible(image)
@@ -109,8 +110,8 @@ class Preprocess:
         image_reshaped = self.reorder_slices_and_bvals(image_norm)
 
         # Reorder b-values by direction
-        b0_image, dwi_images_reordered, unique_bvals = self.reorder_bvals_by_direction(
-            image_reshaped, b_values
+        b0_image, dwi_images_reordered, unique_bvals_with_b0 = (
+            self.reorder_bvals_by_direction(image_reshaped, b_values)
         )
 
-        return b0_image, dwi_images_reordered, unique_bvals, min_val, max_val
+        return b0_image, dwi_images_reordered, unique_bvals_with_b0, min_val, max_val

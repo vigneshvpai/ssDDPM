@@ -46,13 +46,13 @@ class SSDDPM(L.LightningModule):
         )
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
 
-    def _process_each_slice_across_directions(self, batch):
+    def _process_each_slice_across_directions(self, batch, mode="train"):
         b0_image, dwi_images_reordered, unique_bvals, _ = batch
 
-        unique_bvals_with_b0 = torch.cat([0, unique_bvals], dim=0)
+        print(dwi_images_reordered.shape)
 
         # dwi_images_reordered shape: (slices, num_dirs, num_diffusion_bvals, height, width)
-        slices, b_dirs, _ = dwi_images_reordered.shape
+        slices, b_dirs, b_vals, height, width = dwi_images_reordered.shape
 
         # Process each slice-direction combination
         total_loss = 0
@@ -68,12 +68,12 @@ class SSDDPM(L.LightningModule):
                 images = torch.cat([b0_image_current, current_dwi], dim=0)
 
                 # Create a mini-batch for this slice-direction combination
-                mini_batch = (images, unique_bvals_with_b0, None)
+                mini_batch = (images, unique_bvals)
 
                 # Compute loss for this specific combination
-                loss = self.compute_loss(mini_batch)
+                loss = self.compute_loss(mini_batch, mode=mode)
                 self.log(
-                    f"{mode}_noise_loss",
+                    f"dir_{dir_idx}_loss",
                     loss,
                     on_epoch=True,
                     sync_dist=True,
@@ -151,7 +151,7 @@ class SSDDPM(L.LightningModule):
         plt.close()  # Close to free memory
 
     def compute_loss(self, batch, mode="train"):
-        images, b_values, _ = batch  # Step 1: Sample batch y₀ ~ Y
+        images, b_values = batch  # Step 1: Sample batch y₀ ~ Y
 
         noise, steps = self._get_noise_and_timesteps(images)
 
@@ -302,5 +302,5 @@ class SSDDPM(L.LightningModule):
         return loss
 
     def validation_step(self, batch):
-        loss = self.compute_loss(batch, mode="val")
+        loss = self._process_each_slice_across_directions(batch, mode="val")
         return loss
