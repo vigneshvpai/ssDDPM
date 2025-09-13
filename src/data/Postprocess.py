@@ -21,7 +21,7 @@ class Postprocess:
 
         # Get dimensions
         slices_times_bvals, height, width = image.shape
-        n_slices = slices_times_bvals // Config.ADC_CONFIG["n_bvals"]
+        n_slices = slices_times_bvals // Config.DWI_CONFIG["n_bvals"]
 
         slices = []
         for i in range(n_slices):

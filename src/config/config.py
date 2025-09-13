@@ -32,8 +32,17 @@ class Config:
     # -------------------------
     # DataLoader Configs
     # -------------------------
-    BATCH_SIZE = 1
+    BATCH_SIZE = 8
     NUM_WORKERS = 8
+
+    # -------------------------
+    # DWI Configs
+    # -------------------------
+    DWI_CONFIG = {
+        "num_dirs": 3,
+        "n_bvals": 9,
+        "n_slices": 25,
+    }
 
     # -------------------------
     # SSDDPM Configs
@@ -70,8 +79,8 @@ class Config:
         # -------------------------
         # Model Configs
         # -------------------------
-        "in_channels": 9,
-        "out_channels": 9,
+        "in_channels": DWI_CONFIG["n_bvals"] * DWI_CONFIG["n_slices"],
+        "out_channels": DWI_CONFIG["n_bvals"] * DWI_CONFIG["n_slices"],
         # -------------------------
         # Loss Configs
         # -------------------------
@@ -81,15 +90,6 @@ class Config:
         # Inference Configs
         # -------------------------
         "num_inference_steps": 250,
-    }
-
-    # -------------------------
-    # ADC Configs
-    # -------------------------
-    ADC_CONFIG = {
-        "adc_type": "avg",
-        "num_dirs": 3,
-        "n_bvals": 9,
     }
 
     # -------------------------
@@ -130,7 +130,7 @@ class Config:
             "BATCH_SIZE": cls.BATCH_SIZE,
             "NUM_WORKERS": cls.NUM_WORKERS,
             "SSDDPM_CONFIG": cls.SSDDPM_CONFIG,
-            "ADC_CONFIG": cls.ADC_CONFIG,
+            "DWI_CONFIG": cls.DWI_CONFIG,
             "LOGGER_CONFIG": cls.LOGGER_CONFIG,
             "CHECKPOINT_CONFIG": cls.CHECKPOINT_CONFIG,
         }

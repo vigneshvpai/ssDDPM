@@ -5,8 +5,8 @@ from src.config.config import Config
 
 class Preprocess:
     def __init__(self):
-        self.num_dirs = Config.ADC_CONFIG["num_dirs"]
-        self.n_bvals = Config.ADC_CONFIG["n_bvals"]
+        self.num_dirs = Config.DWI_CONFIG["num_dirs"]
+        self.n_bvals = Config.DWI_CONFIG["n_bvals"]
 
     def normalize_to_b0(self, image):
         """
