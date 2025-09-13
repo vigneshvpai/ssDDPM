@@ -32,8 +32,8 @@ class Config:
     # -------------------------
     # DataLoader Configs
     # -------------------------
-    BATCH_SIZE = 2
-    NUM_WORKERS = 10
+    BATCH_SIZE = 1
+    NUM_WORKERS = 8
 
     # -------------------------
     # SSDDPM Configs
@@ -70,8 +70,8 @@ class Config:
         # -------------------------
         # Model Configs
         # -------------------------
-        "in_channels": 225,
-        "out_channels": 225,
+        "in_channels": 9,
+        "out_channels": 9,
         # -------------------------
         # Loss Configs
         # -------------------------
@@ -87,8 +87,8 @@ class Config:
     # ADC Configs
     # -------------------------
     ADC_CONFIG = {
-        "adc_type": "avg",  # avg or dir
-        "num_dirs": 3,  # only used if adc_type == "dir"
+        "adc_type": "avg",
+        "num_dirs": 3,
         "n_bvals": 9,
     }
 

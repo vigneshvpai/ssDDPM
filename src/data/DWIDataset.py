@@ -53,22 +53,21 @@ class DWIDataset(Dataset):
             data_nii = nii_img.get_fdata(dtype=np.float32)
             # Get the affine matrix
             affine = nii_img.affine
-            image = torch.from_numpy(data_nii)
+            # Create tensor directly with correct dtype to avoid conversion
+            image = torch.from_numpy(data_nii).float()
 
-        b_values = torch.tensor(sample_info["bval"])
+        # Create b_values tensor more efficiently
+        b_values = torch.tensor(sample_info["bval"], dtype=torch.float32)
+        b_values = torch.unique(b_values, sorted=True)
 
-        # Convert to torch.Tensor if not already
+        # Convert to torch.Tensor if not already - use in-place conversion
         if not isinstance(image, torch.Tensor):
-            image = torch.from_numpy(image)
+            image = torch.from_numpy(image).float()
+        elif image.dtype != torch.float32:
+            image = image.float()  # In-place dtype conversion
 
         if self.preprocess_fn is not None:
-            (
-                b0_image,
-                dwi_images_reordered,
-                unique_bvals,
-                min_val,
-                max_val,
-            ) = self.preprocess_fn(image, b_values)
+            image, min_val, max_val = self.preprocess_fn(image)
         if self.transform:
             image = self.transform(image)
 
@@ -86,9 +85,11 @@ class DWIDataset(Dataset):
                 "original_filename": original_filename,
             }
 
+        print(f"Image shape: {image.shape}")
+        print(f"B values shape: {b_values.shape}")
+
         return (
-            b0_image,
-            dwi_images_reordered,
-            unique_bvals,
+            image,
+            b_values,
             other_info,
         )

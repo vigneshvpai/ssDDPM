@@ -5,7 +5,8 @@ from src.config.config import Config
 
 class Preprocess:
     def __init__(self):
-        pass
+        self.num_dirs = Config.ADC_CONFIG["num_dirs"]
+        self.n_bvals = Config.ADC_CONFIG["n_bvals"]
 
     def normalize_to_b0(self, image):
         """
@@ -18,8 +19,12 @@ class Preprocess:
         min_val = image.min()
         max_val = image.max()
         scale = (max_val - min_val) if (max_val - min_val) > 0 else 1.0
-        image_norm = (image - min_val) / scale
-        return image_norm, min_val, max_val
+
+        # In-place operations
+        image.sub_(min_val)  # image = image - min_val
+        image.div_(scale)  # image = image / scale
+
+        return image, min_val, max_val
 
     def reorder_slices_and_bvals(self, image):
         # Expecting image shape: (width, height, slices, bvalues)
@@ -30,7 +35,60 @@ class Preprocess:
         # Permute to (slices, bvalues, height, width)
         image = image.permute(2, 3, 1, 0)
 
+        # Split bvalues into num_dirs and n_bvals
+        image = self.split_bvals_to_dirs_and_bvals(image)
+
         return image
+
+    def split_bvals_to_dirs_and_bvals(self, image):
+        """
+        Split the bvalues dimension to separate num_dirs and n_bvals.
+
+        Args:
+            image (torch.Tensor): Image tensor of shape (slices, bvalues, height, width)
+                                  where bvalues = 1 + num_dirs * (n_bvals - 1)
+
+        Returns:
+            torch.Tensor: Image tensor of shape (slices, num_dirs, n_bvals, height, width)
+        """
+        if image.ndim != 4:
+            raise ValueError(
+                f"Expected image of shape (slices, bvalues, height, width), got {image.shape}"
+            )
+
+        slices, bvalues, height, width = image.shape
+
+        # Expected structure: b0 + num_dirs * (n_bvals - 1)
+        expected_bvalues = 1 + self.num_dirs * (self.n_bvals - 1)
+        if bvalues != expected_bvalues:
+            raise ValueError(
+                f"Expected {expected_bvalues} b-values (1 b0 + {self.num_dirs} dirs × {self.n_bvals-1} bvals), "
+                f"got {bvalues}"
+            )
+
+        # Split b0 from the rest
+        b0_image = image[:, 0:1, :, :]  # Shape: (slices, 1, height, width)
+        non_b0_image = image[
+            :, 1:, :, :
+        ]  # Shape: (slices, num_dirs * (n_bvals - 1), height, width)
+
+        # Reshape non-b0 values: (slices, num_dirs * (n_bvals - 1), height, width)
+        # -> (slices, num_dirs, n_bvals - 1, height, width)
+        non_b0_reshaped = non_b0_image.view(
+            slices, self.num_dirs, self.n_bvals - 1, height, width
+        )
+
+        # Concatenate b0 with each direction
+        # b0 needs to be repeated for each direction: (slices, 1, height, width) -> (slices, num_dirs, 1, height, width)
+        b0_repeated = b0_image.unsqueeze(1).expand(
+            slices, self.num_dirs, 1, height, width
+        )
+
+        # Concatenate b0 with each direction's b-values
+        # Shape: (slices, num_dirs, n_bvals, height, width)
+        result = torch.cat([b0_repeated, non_b0_reshaped], dim=2)
+
+        return result
 
     def pad_to_unet_compatible(self, image, target_shape=None):
         """
@@ -59,59 +117,20 @@ class Preprocess:
 
         # For padding width and height (first two dimensions)
         pad = (0, 0, 0, 0, pad_left_h, pad_right_h, pad_left_w, pad_right_w)
+        # Note: torch.nn.functional.pad() always creates new memory
         image_padded = torch.nn.functional.pad(image, pad)
         return image_padded
 
-    def reorder_bvals_by_direction(self, image, b_values):
-        total_bvals = len(b_values)
+    def preprocess(self, image):
+        # Work on a copy to avoid modifying the original
+        image = image.clone()
 
-        # Find unique b-values (excluding 0)
-        unique_bvals = torch.unique(b_values[b_values > 0], sorted=True)
-        unique_bvals_with_b0 = torch.unique(b_values, sorted=True)
-        num_diffusion_bvals = len(unique_bvals)
-        num_dirs = Config.ADC_CONFIG["num_dirs"]
+        image = self.pad_to_unet_compatible(image)
+        image, min_val, max_val = self.normalize_to_b0(image)  # Now in-place
+        image = self.reorder_slices_and_bvals(image)
 
-        # Verify the structure: 1 b=0 + num_diffusion_bvals * num_dirs = total_bvals
-        expected_total = 1 + num_diffusion_bvals * num_dirs
-        if total_bvals != expected_total:
-            raise ValueError(
-                f"B-value structure mismatch: expected {expected_total} b-values "
-                f"(1 b=0 + {num_diffusion_bvals} diffusion × {num_dirs} directions), "
-                f"but got {total_bvals}"
-            )
+        # Clear GPU cache after preprocessing if on GPU
+        if image.is_cuda and torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
-        # Extract b=0 separately
-        b0_image = image[:, 0:1, :, :]
-
-        # Extract and reshape diffusion-weighted images
-        dwi_images = image[
-            :, 1:, :, :
-        ]  # Shape: (slices, num_diffusion_bvals*num_dirs, height, width)
-
-        # Reshape to separate directions: (slices, num_diffusion_bvals, num_dirs, height, width)
-        dwi_images_reshaped = dwi_images.view(
-            image.shape[0],
-            num_diffusion_bvals,
-            num_dirs,
-            image.shape[2],
-            image.shape[3],
-        )
-
-        # Use PyTorch operations to reorder by direction
-        # Permute to get all x, then all y, then all z: (slices, num_dirs, num_diffusion_bvals, height, width)
-        dwi_images_reordered = dwi_images_reshaped.permute(0, 2, 1, 3, 4)
-
-        # Return b0 separately and only diffusion-weighted b-values
-        return b0_image, dwi_images_reordered, unique_bvals_with_b0
-
-    def preprocess(self, image, b_values):
-        image_padded = self.pad_to_unet_compatible(image)
-        image_norm, min_val, max_val = self.normalize_to_b0(image_padded)
-        image_reshaped = self.reorder_slices_and_bvals(image_norm)
-
-        # Reorder b-values by direction
-        b0_image, dwi_images_reordered, unique_bvals_with_b0 = (
-            self.reorder_bvals_by_direction(image_reshaped, b_values)
-        )
-
-        return b0_image, dwi_images_reordered, unique_bvals_with_b0, min_val, max_val
+        return image, min_val, max_val

@@ -32,8 +32,6 @@ class SSDDPM(L.LightningModule):
         self.num_inference_steps = Config.SSDDPM_CONFIG["num_inference_steps"]
         self.max_epochs = Config.SSDDPM_CONFIG["max_epochs"]
         self.run_name = run_name
-        self.num_dirs = Config.ADC_CONFIG["num_dirs"]
-        self.n_bvals = Config.ADC_CONFIG["n_bvals"]
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(
@@ -45,45 +43,6 @@ class SSDDPM(L.LightningModule):
             optimizer, T_max=self.max_epochs
         )
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
-
-    def _process_each_slice_across_directions(self, batch, mode="train"):
-        b0_image, dwi_images_reordered, unique_bvals, _ = batch
-
-        print(dwi_images_reordered.shape)
-
-        # dwi_images_reordered shape: (slices, num_dirs, num_diffusion_bvals, height, width)
-        slices, b_dirs, b_vals, height, width = dwi_images_reordered.shape
-
-        # Process each slice-direction combination
-        total_loss = 0
-        for slice_idx in range(slices):
-            for dir_idx in range(b_dirs):
-                # Get the specific slice-direction combination
-                current_dwi = dwi_images_reordered[
-                    slice_idx, dir_idx
-                ]  # Shape: (num_diffusion_bvals, height, width)
-
-                b0_image_current = b0_image[slice_idx, :, :]  # Shape: (height, width)
-
-                images = torch.cat([b0_image_current, current_dwi], dim=0)
-
-                # Create a mini-batch for this slice-direction combination
-                mini_batch = (images, unique_bvals)
-
-                # Compute loss for this specific combination
-                loss = self.compute_loss(mini_batch, mode=mode)
-                self.log(
-                    f"dir_{dir_idx}_loss",
-                    loss,
-                    on_epoch=True,
-                    sync_dist=True,
-                    batch_size=Config.BATCH_SIZE,
-                )
-
-                total_loss += loss
-
-        # Return average loss across all slice-direction combinations
-        return total_loss / (slices * b_dirs)
 
     def _get_noise_and_timesteps(self, images):
         noise = torch.randn_like(images)  # Step 3: Sample ε ~ N(0, I)
@@ -151,7 +110,7 @@ class SSDDPM(L.LightningModule):
         plt.close()  # Close to free memory
 
     def compute_loss(self, batch, mode="train"):
-        images, b_values = batch  # Step 1: Sample batch y₀ ~ Y
+        images, b_values, _ = batch  # Step 1: Sample batch y₀ ~ Y
 
         noise, steps = self._get_noise_and_timesteps(images)
 
@@ -212,6 +171,14 @@ class SSDDPM(L.LightningModule):
         # loss = (
         #     noise_loss + self.lambda_adc * adc_loss + self.lambda_recon * recon_loss
         # )  # Total loss: noise loss + self-supervised loss
+
+        self.log(
+            f"{mode}_total_loss",
+            noise_loss,
+            on_epoch=True,
+            sync_dist=True,
+            batch_size=Config.BATCH_SIZE,
+        )
 
         if mode == "val" and (
             self.current_epoch % Config.CHECKPOINT_CONFIG["every_n_epochs"] == 0
@@ -298,9 +265,9 @@ class SSDDPM(L.LightningModule):
         return y_hat_t
 
     def training_step(self, batch):
-        loss = self._process_each_slice_across_directions(batch)
+        loss = self.compute_loss(batch)
         return loss
 
     def validation_step(self, batch):
-        loss = self._process_each_slice_across_directions(batch, mode="val")
+        loss = self.compute_loss(batch, mode="val")
         return loss
