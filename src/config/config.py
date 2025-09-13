@@ -32,8 +32,8 @@ class Config:
     # -------------------------
     # DataLoader Configs
     # -------------------------
-    BATCH_SIZE = 8
-    NUM_WORKERS = 8
+    BATCH_SIZE = 10
+    NUM_WORKERS = 10
 
     # -------------------------
     # DWI Configs

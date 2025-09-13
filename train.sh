@@ -5,7 +5,7 @@
 #SBATCH --time=24:00:00
 #SBATCH --export=NONE
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=10
+#SBATCH --cpus-per-task=16
 
 unset SLURM_EXPORT_ENV
 
