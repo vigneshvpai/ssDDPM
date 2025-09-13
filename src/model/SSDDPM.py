@@ -90,15 +90,30 @@ class SSDDPM(L.LightningModule):
     def _log_specific_slice(
         self, images, step_or_epoch, prefix="train", save_dir="train_images"
     ):
+        # images shape: [25, 9, 144, 128] (slices_as_batch, bvals, height, width)
+        # Plot all 25 slices for the first b-value (b-value 0)
+        all_slices = images[
+            12, :, :, :
+        ]  # Shape: [25, 144, 128] (all slices for b-value 0)
 
-        # Just take slice 11 directly
-        slice_12 = images[0, 11, :, :]  # Slice 12
+        # Create 5x5 subplot grid for all 25 slices
+        fig, axes = plt.subplots(3, 3, figsize=(15, 15))
+        fig.suptitle(
+            f"{prefix} - Epoch {step_or_epoch} - All Slices (B-value 0)", fontsize=16
+        )
 
-        # Save to disk using matplotlib
-        plt.figure(figsize=(8, 6))
-        plt.imshow(slice_12.cpu().detach().numpy(), cmap="gray")
-        plt.title(f"{prefix} - Epoch {step_or_epoch}")
-        plt.axis("off")
+        # Flatten axes for easier indexing
+        axes_flat = axes.flatten()
+
+        # Plot each slice
+        for i in range(9):
+            slice_image = (
+                all_slices[i, :, :].cpu().detach().numpy()
+            )  # Shape: [144, 128]
+
+            axes_flat[i].imshow(slice_image, cmap="gray")
+            axes_flat[i].set_title(f"Slice {i}", fontsize=8)
+            axes_flat[i].axis("off")
 
         # Create directory if it doesn't exist
         os.makedirs(save_dir, exist_ok=True)
@@ -111,6 +126,10 @@ class SSDDPM(L.LightningModule):
 
     def compute_loss(self, batch, mode="train"):
         images, b_values, _ = batch  # Step 1: Sample batch y₀ ~ Y
+
+        # Current shape: [batch, 25, 3, 9, 144, 128]
+        # Reshape to batch along slices for 0th direction
+        images = images[:, :, 0, :, :, :].contiguous().view(-1, 9, 144, 128)
 
         noise, steps = self._get_noise_and_timesteps(images)
 

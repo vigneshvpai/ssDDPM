@@ -41,16 +41,6 @@ class Preprocess:
         return image
 
     def split_bvals_to_dirs_and_bvals(self, image):
-        """
-        Split the bvalues dimension to separate num_dirs and n_bvals.
-
-        Args:
-            image (torch.Tensor): Image tensor of shape (slices, bvalues, height, width)
-                                  where bvalues = 1 + num_dirs * (n_bvals - 1)
-
-        Returns:
-            torch.Tensor: Image tensor of shape (slices, num_dirs, n_bvals, height, width)
-        """
         if image.ndim != 4:
             raise ValueError(
                 f"Expected image of shape (slices, bvalues, height, width), got {image.shape}"
@@ -72,21 +62,26 @@ class Preprocess:
             :, 1:, :, :
         ]  # Shape: (slices, num_dirs * (n_bvals - 1), height, width)
 
-        # Reshape non-b0 values: (slices, num_dirs * (n_bvals - 1), height, width)
-        # -> (slices, num_dirs, n_bvals - 1, height, width)
-        non_b0_reshaped = non_b0_image.view(
-            slices, self.num_dirs, self.n_bvals - 1, height, width
+        # The non-b0 values are interleaved by b-value, not by direction
+        # Current structure: [bval1_dir1, bval1_dir2, bval1_dir3, bval2_dir1, bval2_dir2, bval2_dir3, ...]
+        # Need to reorder to: [bval1_dir1, bval2_dir1, ..., bval1_dir2, bval2_dir2, ..., bval1_dir3, bval2_dir3, ...]
+
+        # Reshape to separate b-values and directions
+        # Shape: (slices, n_bvals-1, num_dirs, height, width)
+        non_b0_image = non_b0_image.view(
+            slices, self.n_bvals - 1, self.num_dirs, height, width
         )
+
+        # Permute to group by direction: (slices, num_dirs, n_bvals-1, height, width)
+        non_b0_image = non_b0_image.permute(0, 2, 1, 3, 4)
 
         # Concatenate b0 with each direction
         # b0 needs to be repeated for each direction: (slices, 1, height, width) -> (slices, num_dirs, 1, height, width)
-        b0_repeated = b0_image.unsqueeze(1).expand(
-            slices, self.num_dirs, 1, height, width
-        )
+        b0_image = b0_image.unsqueeze(1).expand(slices, self.num_dirs, 1, height, width)
 
         # Concatenate b0 with each direction's b-values
         # Shape: (slices, num_dirs, n_bvals, height, width)
-        result = torch.cat([b0_repeated, non_b0_reshaped], dim=2)
+        result = torch.cat([b0_image, non_b0_image], dim=2)
 
         return result
 

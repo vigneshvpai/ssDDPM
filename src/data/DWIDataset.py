@@ -85,9 +85,6 @@ class DWIDataset(Dataset):
                 "original_filename": original_filename,
             }
 
-        print(f"Image shape: {image.shape}")
-        print(f"B values shape: {b_values.shape}")
-
         return (
             image,
             b_values,
