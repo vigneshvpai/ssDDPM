@@ -8,6 +8,7 @@ class Config:
     # -------------------------
     ORIGINAL_DATA_ROOT = "/home/vault/mfdp/mfdp118h/data"
     PT_DATA_ROOT = "/home/vault/mfdp/mfdp118h/pt_data"
+    PT_DATA_ROOT_SLICEWISE = "/home/vault/mfdp/mfdp118h/pt_data_slicewise"
     TMPDIR = os.environ.get("TMPDIR", "")
     HPC_DATA_ROOT = os.path.join(TMPDIR, "pt_data")
 
