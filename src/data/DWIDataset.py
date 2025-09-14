@@ -58,7 +58,6 @@ class DWIDataset(Dataset):
 
         # Create b_values tensor more efficiently
         b_values = torch.tensor(sample_info["bval"], dtype=torch.float32)
-        b_values = torch.unique(b_values, sorted=True)
 
         # Convert to torch.Tensor if not already - use in-place conversion
         if not isinstance(image, torch.Tensor):

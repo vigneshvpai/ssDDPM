@@ -68,43 +68,48 @@ def convert_nii_bval_to_pt(
 
                 # Extract b-values for each direction
                 # b0 is at index 0, then x, y, z directions follow the pattern
+                # Pattern: b0, bx1, by1, bz1, bx2, by2, bz2, bx3, by3, bz3, ...
                 b0_idx = 0
-                x_indices = [b0_idx] + list(
+
+                # For each direction, we need b0 + 8 directional b-values = 9 total
+                # X direction: b0, bx1, bx2, bx3, bx4, bx5, bx6, bx7, bx8
+                x_indices = [0] + list(
                     range(
-                        1, Config.DWI_CONFIG["n_bvals"], Config.DWI_CONFIG["num_dirs"]
+                        1,
+                        (Config.DWI_CONFIG["n_bvals"] * Config.DWI_CONFIG["num_dirs"])
+                        - 2,
+                        Config.DWI_CONFIG["num_dirs"],
                     )
-                )  # b0, bx1, bx2, bx3, ...
-                y_indices = [b0_idx] + list(
+                )  # [0, 1, 4, 7, 10, 13, 16, 19, 22]
+                y_indices = [0] + list(
                     range(
-                        2, Config.DWI_CONFIG["n_bvals"], Config.DWI_CONFIG["num_dirs"]
+                        2,
+                        (Config.DWI_CONFIG["n_bvals"] * Config.DWI_CONFIG["num_dirs"])
+                        - 2,
+                        Config.DWI_CONFIG["num_dirs"],
                     )
-                )  # b0, by1, by2, by3, ...
-                z_indices = [b0_idx] + list(
+                )  # [0, 2, 5, 8, 11, 14, 17, 20, 23]
+                z_indices = [0] + list(
                     range(
-                        3, Config.DWI_CONFIG["n_bvals"], Config.DWI_CONFIG["num_dirs"]
+                        3,
+                        (Config.DWI_CONFIG["n_bvals"] * Config.DWI_CONFIG["num_dirs"])
+                        - 2,
+                        Config.DWI_CONFIG["num_dirs"],
                     )
-                )  # b0, bz1, bz2, bz3, ...
+                )  # [0, 3, 6, 9, 12, 15, 18, 21, 24]
 
                 # Extract data for each direction
-                x_data = slice_data[
-                    :, :, x_indices
-                ]  # Shape: (108, 134, 9) - b0 + 8 x-directions
-                y_data = slice_data[
-                    :, :, y_indices
-                ]  # Shape: (108, 134, 9) - b0 + 8 y-directions
-                z_data = slice_data[
-                    :, :, z_indices
-                ]  # Shape: (108, 134, 9) - b0 + 8 z-directions
+                x_data = slice_data[:, :, x_indices]  # Shape: (108, 134, 9)
+                y_data = slice_data[:, :, y_indices]  # Shape: (108, 134, 9)
+                z_data = slice_data[:, :, z_indices]  # Shape: (108, 134, 9)
 
-                # Get corresponding b-values
-                x_bvals = bval[x_indices]
-                y_bvals = bval[y_indices]
-                z_bvals = bval[z_indices]
+                # Get complete b-values (all 9 unique values) for each direction
+                complete_bvals = torch.unique(torch.tensor(bval), sorted=True)
 
                 # Save x-direction data
                 x_data_dict = {
                     "image": x_data,
-                    "bval": x_bvals,
+                    "bval": complete_bvals,
                     "direction": "x",
                     "slice": slice_idx,
                 }
@@ -115,7 +120,7 @@ def convert_nii_bval_to_pt(
                 # Save y-direction data
                 y_data_dict = {
                     "image": y_data,
-                    "bval": y_bvals,
+                    "bval": complete_bvals,
                     "direction": "y",
                     "slice": slice_idx,
                 }
@@ -126,7 +131,7 @@ def convert_nii_bval_to_pt(
                 # Save z-direction data
                 z_data_dict = {
                     "image": z_data,
-                    "bval": z_bvals,
+                    "bval": complete_bvals,
                     "direction": "z",
                     "slice": slice_idx,
                 }
