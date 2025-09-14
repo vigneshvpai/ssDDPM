@@ -16,9 +16,15 @@ class Config:
     VAL_JSON = "val.json"
     TEST_JSON = "test.json"
 
-    TRAIN_SPLIT_JSON = os.path.join("src", "data", "dataset_split", TRAIN_JSON)
-    VAL_SPLIT_JSON = os.path.join("src", "data", "dataset_split", VAL_JSON)
-    TEST_SPLIT_JSON = os.path.join("src", "data", "dataset_split", TEST_JSON)
+    TRAIN_SPLIT_JSON = os.path.join(
+        "src", "data", "dataset_split_slicewise", "x", TRAIN_JSON
+    )
+    VAL_SPLIT_JSON = os.path.join(
+        "src", "data", "dataset_split_slicewise", "x", VAL_JSON
+    )
+    TEST_SPLIT_JSON = os.path.join(
+        "src", "data", "dataset_split_slicewise", "x", TEST_JSON
+    )
 
     HPC_TRAIN_JSON = os.path.join(TMPDIR, TRAIN_JSON)
     HPC_VAL_JSON = os.path.join(TMPDIR, VAL_JSON)
@@ -33,8 +39,8 @@ class Config:
     # -------------------------
     # DataLoader Configs
     # -------------------------
-    BATCH_SIZE = 10
-    NUM_WORKERS = 10
+    BATCH_SIZE = 16
+    NUM_WORKERS = 16
 
     # -------------------------
     # DWI Configs
@@ -80,8 +86,8 @@ class Config:
         # -------------------------
         # Model Configs
         # -------------------------
-        "in_channels": DWI_CONFIG["n_bvals"] * DWI_CONFIG["n_slices"],
-        "out_channels": DWI_CONFIG["n_bvals"] * DWI_CONFIG["n_slices"],
+        "in_channels": DWI_CONFIG["n_bvals"],
+        "out_channels": DWI_CONFIG["n_bvals"],
         # -------------------------
         # Loss Configs
         # -------------------------

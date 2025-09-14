@@ -23,6 +23,13 @@ class SSDDPM(L.LightningModule):
                 "DownBlock2D",
             ),
             up_block_types=("UpBlock2D", "AttnUpBlock2D", "AttnUpBlock2D", "UpBlock2D"),
+            block_out_channels=(
+                64,
+                128,
+                128,
+                256,
+            ),
+            layers_per_block=2,
         )
         self.adc_model = ADC()
 
@@ -90,57 +97,66 @@ class SSDDPM(L.LightningModule):
         return y_hat_t_minus_1
 
     def _log_specific_slice(
-        self, images, b_values, step_or_epoch, prefix="train", save_dir="train_images"
+        self,
+        images,
+        b_values,
+        other_info,
+        step_or_epoch,
+        prefix="train",
+        save_dir="train_images",
     ):
-        # images shape: [1, 225, 144, 128] (batch_size, slices*bvals, height, width)
-        # Get middle slice (slice 12 out of 25 slices)
-        middle_slice_idx = self.n_slices // 2  # Middle of 25 slices (0-indexed)
+        # Work directly with the existing tensor (no conversion needed)
+        slice_values = other_info["slice"]
 
-        # Extract the 9 b-values for the middle slice
-        # Each slice has 9 b-values, so middle slice starts at middle_slice_idx * 9
-        start_idx = middle_slice_idx * self.n_bvals
-        end_idx = start_idx + self.n_bvals
+        # Find indices where slice equals middle slice using PyTorch operations
+        middle_slice_mask = slice_values == (self.n_slices // 2)
+        middle_slice_indices = torch.where(middle_slice_mask)[0].tolist()
 
-        middle_slice_bvals = images[0, start_idx:end_idx, :, :]  # Shape: [9, 144, 128]
+        if not middle_slice_indices:
+            return  # No images with middle slice found
 
-        # Create 3x3 subplot grid for all 9 b-values
-        fig, axes = plt.subplots(3, 3, figsize=(15, 15))
+        # Create epoch-specific directory
+        epoch_dir = os.path.join(save_dir, f"epoch_{step_or_epoch:03d}")
+        os.makedirs(epoch_dir, exist_ok=True)
 
-        # Reduce spacing between subplots
-        plt.subplots_adjust(wspace=0.05, hspace=0.05)  # Add this line
+        # Log each image with middle slice
+        for batch_idx, image_idx in enumerate(middle_slice_indices):
+            # Get the specific image from the batch
+            single_image = images[image_idx : image_idx + 1]  # Keep batch dimension
+            single_b_values = b_values[image_idx : image_idx + 1]
+            single_info = {key: other_info[key][image_idx] for key in other_info}
 
-        # Flatten axes for easier indexing
-        axes_flat = axes.flatten()
+            # Create 3x3 subplot grid for all 9 b-values
+            fig, axes = plt.subplots(3, 3, figsize=(15, 15))
 
-        # Plot each b-value
-        for i in range(self.n_bvals):  # 9 b-values
-            b_value_image = (
-                middle_slice_bvals[i, :, :].cpu().detach().numpy()
-            )  # Shape: [144, 128]
+            # Reduce spacing between subplots
+            plt.subplots_adjust(wspace=0.05, hspace=0.05)
 
-            axes_flat[i].imshow(b_value_image, cmap="gray")
-            axes_flat[i].set_title(f"B-value: {int(b_values[0, i])}", fontsize=8)
-            axes_flat[i].axis("off")
+            # Flatten axes for easier indexing
+            axes_flat = axes.flatten()
 
-        # Create directory if it doesn't exist
-        os.makedirs(save_dir, exist_ok=True)
+            # Plot each b-value directly from the tensor
+            for i in range(self.n_bvals):  # 9 b-values
+                b_value_image = (
+                    single_image[0, i, :, :].cpu().detach().numpy()
+                )  # Shape: [144, 128]
 
-        # Save the plot
-        plt.savefig(
-            f"{save_dir}/epoch_{step_or_epoch:03d}.png", dpi=150, bbox_inches="tight"
-        )
-        plt.close()  # Close to free memory
+                axes_flat[i].imshow(b_value_image, cmap="gray")
+                axes_flat[i].set_title(
+                    f"B-value: {int(single_b_values[0, i])}", fontsize=8
+                )
+                axes_flat[i].axis("off")
+
+            direction = single_info["direction"]
+            middle_slice_idx = self.n_slices // 2
+            filename = f"dir_{direction}_slice_{middle_slice_idx}_batch_{batch_idx}.png"
+
+            # Save the plot
+            plt.savefig(os.path.join(epoch_dir, filename), dpi=150, bbox_inches="tight")
+            plt.close()  # Close to free memory
 
     def compute_loss(self, batch, mode="train"):
-        images, b_values, _ = batch  # Step 1: Sample batch y₀ ~ Y
-
-        batch_size, n_slices, n_dirs, n_bvals, height, width = images.shape
-
-        images = (
-            images[:, :, 0, :, :, :]
-            .contiguous()
-            .view(batch_size, n_slices * n_bvals, height, width)
-        )
+        images, b_values, other_info = batch  # Step 1: Sample batch y₀ ~ Y
 
         noise, steps = self._get_noise_and_timesteps(images)
 
@@ -198,13 +214,11 @@ class SSDDPM(L.LightningModule):
         #     batch_size=Config.BATCH_SIZE,
         # )
 
-        # loss = (
-        #     noise_loss + self.lambda_adc * adc_loss + self.lambda_recon * recon_loss
-        # )  # Total loss: noise loss + self-supervised loss
+        loss = noise_loss  # Total loss: noise loss
 
         self.log(
             f"{mode}_total_loss",
-            noise_loss,
+            loss,
             on_epoch=True,
             sync_dist=True,
             batch_size=Config.BATCH_SIZE,
@@ -216,6 +230,7 @@ class SSDDPM(L.LightningModule):
             self._log_specific_slice(
                 images,
                 b_values,
+                other_info,
                 step_or_epoch=self.current_epoch,
                 prefix=mode,
                 save_dir=f"{mode}_images/{self.run_name}/original_images",
@@ -223,6 +238,7 @@ class SSDDPM(L.LightningModule):
             self._log_specific_slice(
                 noisy_images,
                 b_values,
+                other_info,
                 step_or_epoch=self.current_epoch,
                 prefix=mode,
                 save_dir=f"{mode}_images/{self.run_name}/noisy_images",
@@ -230,6 +246,7 @@ class SSDDPM(L.LightningModule):
             self._log_specific_slice(
                 residual,
                 b_values,
+                other_info,
                 step_or_epoch=self.current_epoch,
                 prefix=mode,
                 save_dir=f"{mode}_images/{self.run_name}/residual_images",
@@ -237,6 +254,7 @@ class SSDDPM(L.LightningModule):
             self._log_specific_slice(
                 y_prime_t_minus_1,
                 b_values,
+                other_info,
                 step_or_epoch=self.current_epoch,
                 prefix=mode,
                 save_dir=f"{mode}_images/{self.run_name}/y_prime_t_minus_1",

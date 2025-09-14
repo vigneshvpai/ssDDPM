@@ -70,19 +70,25 @@ class DWIDataset(Dataset):
         if self.transform:
             image = self.transform(image)
 
+        # Create comprehensive metadata dictionary
+        other_info = {
+            "original_filename": original_filename,
+            "direction": sample_info["direction"],
+            "slice": sample_info["slice"],
+        }
+
+        # Add preprocessing info if available
+        if self.preprocess_fn is not None:
+            other_info.update(
+                {
+                    "min_val": min_val,
+                    "max_val": max_val,
+                }
+            )
+
+        # Add affine matrix if available
         if affine is not None:
-            other_info = {
-                "affine": affine,
-                "min_val": min_val,
-                "max_val": max_val,
-                "original_filename": original_filename,
-            }
-        else:
-            other_info = {
-                "min_val": min_val,
-                "max_val": max_val,
-                "original_filename": original_filename,
-            }
+            other_info["affine"] = affine
 
         return (
             image,

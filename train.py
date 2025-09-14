@@ -45,7 +45,7 @@ def main():
             train_json=Config.TRAIN_SPLIT_JSON,
             val_json=Config.VAL_SPLIT_JSON,
             test_json=Config.TEST_SPLIT_JSON,
-            data_root=Config.PT_DATA_ROOT,
+            data_root=Config.PT_DATA_ROOT_SLICEWISE,
         )
 
     model = SSDDPM(
@@ -106,7 +106,7 @@ def main():
         enable_checkpointing=True,
         logger=loggers,
         callbacks=callbacks,
-        enable_progress_bar=False,
+        enable_progress_bar=True,
         enable_model_summary=True,
         log_every_n_steps=Config.SSDDPM_CONFIG["log_every_n_steps"],
     )
