@@ -119,8 +119,15 @@ class SSDDPM(L.LightningModule):
         epoch_dir = os.path.join(save_dir, f"epoch_{step_or_epoch:03d}")
         os.makedirs(epoch_dir, exist_ok=True)
 
+        if not middle_slice_indices:
+            return  # No images with middle slice found
+
+        # Create epoch-specific directory
+        epoch_dir = os.path.join(save_dir, f"epoch_{step_or_epoch:03d}")
+        os.makedirs(epoch_dir, exist_ok=True)
+
         # Log each image with middle slice
-        for batch_idx, image_idx in enumerate(middle_slice_indices):
+        for _, image_idx in enumerate(middle_slice_indices):
             # Get the specific image from the batch
             single_image = images[image_idx : image_idx + 1]  # Keep batch dimension
             single_b_values = b_values[image_idx : image_idx + 1]
@@ -138,8 +145,8 @@ class SSDDPM(L.LightningModule):
             # Plot each b-value directly from the tensor
             for i in range(self.n_bvals):  # 9 b-values
                 b_value_image = (
-                    single_image[0, i, :, :].cpu().detach().numpy()
-                )  # Shape: [144, 128]
+                    single_image[0, i, :, :].cpu().detach().float().numpy()
+                )  # Convert to float32 before numpy conversion
 
                 axes_flat[i].imshow(b_value_image, cmap="gray")
                 axes_flat[i].set_title(
@@ -147,12 +154,12 @@ class SSDDPM(L.LightningModule):
                 )
                 axes_flat[i].axis("off")
 
-            direction = single_info["direction"]
-            middle_slice_idx = self.n_slices // 2
-            filename = f"dir_{direction}_slice_{middle_slice_idx}_batch_{batch_idx}.png"
-
             # Save the plot
-            plt.savefig(os.path.join(epoch_dir, filename), dpi=150, bbox_inches="tight")
+            plt.savefig(
+                os.path.join(epoch_dir, f"{single_info["original_filename"]}.png"),
+                dpi=150,
+                bbox_inches="tight",
+            )
             plt.close()  # Close to free memory
 
     def compute_loss(self, batch, mode="train"):

@@ -1,12 +1,15 @@
 import lightning as L
 import glob
 import os
+import torch
 import argparse
 from lightning.pytorch.loggers import TensorBoardLogger, CSVLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 from src.model.SSDDPM import SSDDPM
 from src.data.DWIDataLoader import DWIDataLoader
 from src.config.config import Config
+
+torch.set_float32_matmul_precision("high")
 
 
 def parse_args():
@@ -102,6 +105,7 @@ def main():
     trainer = L.Trainer(
         devices=1,
         accelerator="gpu",
+        precision="bf16-mixed",
         max_epochs=Config.SSDDPM_CONFIG["max_epochs"],
         enable_checkpointing=True,
         logger=loggers,
