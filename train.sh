@@ -65,7 +65,7 @@ else
     echo "Destination: $HPC_DATA_ROOT"
     
     # Copy data from vault to HPC SSD (using rsync for efficiency)
-    rsync -av --inplace /home/vault/mfdp/mfdp118h/pt_data_slicewise/ "$HPC_DATA_ROOT/"
+    rsync -a --inplace /home/vault/mfdp/mfdp118h/pt_data_slicewise/ "$HPC_DATA_ROOT/"
     
     echo "Data transfer completed!"
 fi
