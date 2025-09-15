@@ -41,6 +41,7 @@ class SSDDPM(L.LightningModule):
         self.n_slices = Config.DWI_CONFIG["n_slices"]
         self.n_bvals = Config.DWI_CONFIG["n_bvals"]
         self.run_name = run_name
+        self.enable_progress_bar = Config.LOGGER_CONFIG["enable_progress_bar"]
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(
@@ -72,14 +73,21 @@ class SSDDPM(L.LightningModule):
 
         return betas, alphas_cumprod
 
-    def _get_y_prime_t_minus_1(self, noisy_images, residual, betas, alphas_cumprod):
-        epsilon_zero = torch.randn_like(noisy_images)  # Step 6: ε₀ ~ N(0, I)
+    def _get_y_prime_t_minus_1(
+        self, noisy_images, residual, betas, alphas_cumprod, mode="train"
+    ):
+        if mode == "train":
+            epsilon_zero = torch.randn_like(noisy_images)  # Step 6: ε₀ ~ N(0, I)
 
-        y_prime_t_minus_1 = (1 / torch.sqrt(1 - betas)) * (
-            noisy_images - (betas / torch.sqrt(1 - alphas_cumprod)) * residual
-        ) + torch.sqrt(
-            betas
-        ) * epsilon_zero  # Step 7: y'_{t-1} = (1 / √1 - β_t) (y_t - (β_t / √1 - ā_t) ê_t) + √β_t ε₀
+            y_prime_t_minus_1 = (1 / torch.sqrt(1 - betas)) * (
+                noisy_images - (betas / torch.sqrt(1 - alphas_cumprod)) * residual
+            ) + torch.sqrt(
+                betas
+            ) * epsilon_zero  # Step 7: y'_{t-1} = (1 / √1 - β_t) (y_t - (β_t / √1 - ā_t) ê_t) + √β_t ε₀
+        else:
+            y_prime_t_minus_1 = (1 / torch.sqrt(1 - betas)) * (
+                noisy_images - (betas / torch.sqrt(1 - alphas_cumprod)) * residual
+            )
 
         return y_prime_t_minus_1
 
@@ -184,9 +192,9 @@ class SSDDPM(L.LightningModule):
             batch_size=Config.BATCH_SIZE,
         )
 
-        y_prime_t_minus_1 = self._get_y_prime_t_minus_1(
-            noisy_images, residual, betas, alphas_cumprod
-        )
+        # y_prime_t_minus_1 = self._get_y_prime_t_minus_1(
+        #     noisy_images, residual, betas, alphas_cumprod
+        # )
 
         # S0_original, D_original = self.adc_model(
         #     images, b_values
@@ -258,13 +266,15 @@ class SSDDPM(L.LightningModule):
                 prefix=mode,
                 save_dir=f"{mode}_images/{self.run_name}/residual_images",
             )
+
+            denoised_images = self.inference(noisy_images, b_values)
             self._log_specific_slice(
-                y_prime_t_minus_1,
+                denoised_images,
                 b_values,
                 other_info,
                 step_or_epoch=self.current_epoch,
                 prefix=mode,
-                save_dir=f"{mode}_images/{self.run_name}/y_prime_t_minus_1",
+                save_dir=f"{mode}_images/{self.run_name}/denoised_images",
             )
 
         return noise_loss
@@ -272,6 +282,9 @@ class SSDDPM(L.LightningModule):
     @torch.no_grad()
     def inference(self, y_hat_t, b_values):
         self.eval()
+
+        # Store original timesteps
+        original_timesteps = self.scheduler.config.num_train_timesteps
 
         # Set the scheduler timesteps for inference
         self.scheduler.set_timesteps(self.num_inference_steps)
@@ -281,15 +294,19 @@ class SSDDPM(L.LightningModule):
         start_time = time.time()
 
         # Create progress bar
-        pbar = tqdm(
-            self.scheduler.timesteps,
-            desc="Inference Progress",
-            total=self.num_inference_steps,
-            unit="step",
-        )
+        if self.enable_progress_bar:
+            pbar = tqdm(
+                self.scheduler.timesteps,
+                desc="Inference Progress",
+                total=self.num_inference_steps,
+                unit="step",
+            )
+        else:
+            pbar = self.scheduler.timesteps
 
         for i, t in enumerate(pbar):
-            pbar.set_description(f"Step {i + 1}/{self.num_inference_steps} (t={t})")
+            if self.enable_progress_bar:
+                pbar.set_description(f"Step {i + 1}/{self.num_inference_steps} (t={t})")
 
             # Create timestep tensor for the model
             timesteps = torch.full(
@@ -302,17 +319,17 @@ class SSDDPM(L.LightningModule):
 
             # Step 4: y'_t-1 ← (1 / √(1 - β_t)) * (ŷ_t - (β_t / √(1 - α_t)) * ê_t) + √(β_t) * ε_0
             y_prime_t_minus_1 = self._get_y_prime_t_minus_1(
-                y_hat_t, residual, beta_t, alpha_cumprod_t
+                y_hat_t, residual, beta_t, alpha_cumprod_t, mode="inference"
             )
 
-            # Step 5: Ŝ_0, D̂ ← f_ADC(y'_t-1)
-            S0_hat, D_hat = self.adc_model(y_prime_t_minus_1, b_values)
+            # # Step 5: Ŝ_0, D̂ ← f_ADC(y'_t-1)
+            # S0_hat, D_hat = self.adc_model(y_prime_t_minus_1, b_values)
 
-            # Step 6: ŷ_t-1 ← Ŝ_0 * e^(-b * D̂)
-            y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
+            # # Step 6: ŷ_t-1 ← Ŝ_0 * e^(-b * D̂)
+            # y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
 
             # Update for next iteration
-            y_hat_t = y_hat_t_minus_1
+            y_hat_t = y_prime_t_minus_1
 
         # Calculate total time
         total_time = time.time() - start_time
@@ -320,6 +337,10 @@ class SSDDPM(L.LightningModule):
         print(
             f"Inference completed! Total time: {total_time:.2f} seconds ({total_time/60:.2f} minutes)"
         )
+
+        # Reset to original timesteps
+        self.scheduler.set_timesteps(original_timesteps)
+
         # Return ŷ_0
         return y_hat_t
 

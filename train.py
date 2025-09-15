@@ -18,6 +18,11 @@ def parse_args():
         "--resume", action="store_true", help="Resume training from latest checkpoint"
     )
     parser.add_argument(
+        "--checkpoint-path",
+        type=str,
+        help="Path to specific checkpoint file to resume from",
+    )
+    parser.add_argument(
         "--hpc", action="store_true", help="Run in HPC mode using $TMPDIR/pt_data"
     )
     parser.add_argument("--exp-name", type=str, required=True, help="Experiment name")
@@ -90,16 +95,29 @@ def main():
         LearningRateMonitor(logging_interval="epoch"),  # Log LR at every step
     ]
 
-    # Find the latest checkpoint if resuming training
-    if args.resume:
+    # Determine checkpoint path for resuming training
+    latest_checkpoint = None
+    if args.checkpoint_path:
+        # Use the specified checkpoint path
+        if os.path.exists(args.checkpoint_path):
+            latest_checkpoint = args.checkpoint_path
+            print(f"Resuming training from specified checkpoint: {latest_checkpoint}")
+        else:
+            raise FileNotFoundError(
+                f"Checkpoint file not found: {args.checkpoint_path}"
+            )
+    elif args.resume:
+        # Find the latest checkpoint in the checkpoint directory
         checkpoints = glob.glob(os.path.join(checkpoint_dir, "*.ckpt"))
         latest_checkpoint = (
             max(checkpoints, key=os.path.getctime) if checkpoints else None
         )
-        print(f"Resuming training from checkpoint: {latest_checkpoint}")
+        if latest_checkpoint:
+            print(f"Resuming training from latest checkpoint: {latest_checkpoint}")
+        else:
+            print("No checkpoints found in checkpoint directory, starting from scratch")
     else:
         print("Starting training from scratch")
-        latest_checkpoint = None
 
     # Set up the trainer using max_epochs from config and the logger
     trainer = L.Trainer(
@@ -110,9 +128,10 @@ def main():
         enable_checkpointing=True,
         logger=loggers,
         callbacks=callbacks,
-        enable_progress_bar=False,
+        enable_progress_bar=Config.LOGGER_CONFIG["enable_progress_bar"],
         enable_model_summary=True,
         log_every_n_steps=Config.SSDDPM_CONFIG["log_every_n_steps"],
+        num_sanity_val_steps=0,
     )
 
     # Train the model

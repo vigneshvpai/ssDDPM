@@ -39,8 +39,8 @@ class Config:
     # -------------------------
     # DataLoader Configs
     # -------------------------
-    BATCH_SIZE = 16
-    NUM_WORKERS = 16
+    BATCH_SIZE = 72
+    NUM_WORKERS = 12
 
     # -------------------------
     # DWI Configs
@@ -58,7 +58,7 @@ class Config:
         # -------------------------
         # Epochs Configs
         # -------------------------
-        "max_epochs": 250,  # MAX EPOCHS
+        "max_epochs": 256,  # MAX EPOCHS
         "log_every_n_steps": 8,
         # -------------------------
         # Noise Scheduler Configs
@@ -105,6 +105,7 @@ class Config:
     LOGGER_CONFIG = {
         "log_hyperparameters": True,  # Log hyperparameters
         "save_dir": "lightning_logs",
+        "enable_progress_bar": False,
     }
 
     # -------------------------
@@ -116,7 +117,8 @@ class Config:
         "monitor": "val_total_loss",
         "mode": "min",
         "save_top_k": 1,
-        "every_n_epochs": SSDDPM_CONFIG["max_epochs"] // 4,
+        "every_n_epochs": (SSDDPM_CONFIG["max_epochs"] - 1) // 3,
+        # "every_n_epochs": 1,
     }
 
     @classmethod
