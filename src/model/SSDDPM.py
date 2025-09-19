@@ -8,6 +8,8 @@ from src.config.config import Config
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import os
+import gc
+import torch
 
 
 class SSDDPM(L.LightningModule):
@@ -113,62 +115,74 @@ class SSDDPM(L.LightningModule):
         prefix="train",
         save_dir="train_images",
     ):
-        # Work directly with the existing tensor (no conversion needed)
-        slice_values = other_info["slice"]
+        # Convert to CPU once at the beginning to avoid GPU memory accumulation
+        images_cpu = images.cpu().detach()
+        b_values_cpu = b_values.cpu().detach()
 
-        # Find indices where slice equals middle slice using PyTorch operations
+        slice_values = other_info["slice"]
         middle_slice_mask = slice_values == (self.n_slices // 2)
         middle_slice_indices = torch.where(middle_slice_mask)[0].tolist()
 
         if not middle_slice_indices:
-            return  # No images with middle slice found
+            return
 
-        # Create epoch-specific directory
+        # Create directories
         epoch_dir = os.path.join(save_dir, f"epoch_{step_or_epoch:03d}")
-        os.makedirs(epoch_dir, exist_ok=True)
+        plots_dir = os.path.join(epoch_dir, "plots")
+        pt_files_dir = os.path.join(epoch_dir, "pt_files")
+        os.makedirs(plots_dir, exist_ok=True)
+        os.makedirs(pt_files_dir, exist_ok=True)
 
-        if not middle_slice_indices:
-            return  # No images with middle slice found
-
-        # Create epoch-specific directory
-        epoch_dir = os.path.join(save_dir, f"epoch_{step_or_epoch:03d}")
-        os.makedirs(epoch_dir, exist_ok=True)
-
-        # Log each image with middle slice
         for _, image_idx in enumerate(middle_slice_indices):
-            # Get the specific image from the batch
-            single_image = images[image_idx : image_idx + 1]  # Keep batch dimension
-            single_b_values = b_values[image_idx : image_idx + 1]
+            # Use CPU tensors to avoid GPU memory accumulation
+            single_image = images_cpu[image_idx : image_idx + 1]
+            single_b_values = b_values_cpu[image_idx : image_idx + 1]
             single_info = {key: other_info[key][image_idx] for key in other_info}
 
-            # Create 3x3 subplot grid for all 9 b-values
+            # Save with explicit cleanup
+            pt_filename = os.path.join(
+                pt_files_dir, f"{single_info['original_filename']}.pt"
+            )
+            torch.save(
+                {
+                    "image": single_image,
+                    "b_values": single_b_values,
+                    "other_info": single_info,
+                    "step_or_epoch": step_or_epoch,
+                    "prefix": prefix,
+                },
+                pt_filename,
+            )
+
+            # Create plot
             fig, axes = plt.subplots(3, 3, figsize=(15, 15))
-
-            # Reduce spacing between subplots
             plt.subplots_adjust(wspace=0.05, hspace=0.05)
-
-            # Flatten axes for easier indexing
             axes_flat = axes.flatten()
 
-            # Plot each b-value directly from the tensor
-            for i in range(self.n_bvals):  # 9 b-values
-                b_value_image = (
-                    single_image[0, i, :, :].cpu().detach().float().numpy()
-                )  # Convert to float32 before numpy conversion
-
+            for i in range(self.n_bvals):
+                b_value_image = single_image[0, i, :, :].float().numpy()
                 axes_flat[i].imshow(b_value_image, cmap="gray")
                 axes_flat[i].set_title(
                     f"B-value: {int(single_b_values[0, i])}", fontsize=8
                 )
                 axes_flat[i].axis("off")
 
-            # Save the plot
             plt.savefig(
-                os.path.join(epoch_dir, f"{single_info["original_filename"]}.png"),
+                os.path.join(plots_dir, f"{single_info['original_filename']}.png"),
                 dpi=150,
                 bbox_inches="tight",
             )
-            plt.close()  # Close to free memory
+            plt.close(fig)  # Explicitly close the figure
+
+            # Explicit cleanup
+            del single_image, single_b_values, b_value_image
+            del fig, axes, axes_flat
+
+        # Final cleanup
+        del images_cpu, b_values_cpu
+        torch.cuda.empty_cache()  # Clear GPU cache
+
+        gc.collect()  # Force garbage collection
 
     def compute_loss(self, batch, mode="train"):
         images, b_values, other_info = batch  # Step 1: Sample batch y₀ ~ Y

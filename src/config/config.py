@@ -79,7 +79,7 @@ class Config:
         # Optimizer Configs
         # -------------------------
         "OPTIMIZER_CONFIG": {
-            "lr": 1e-4,
+            "lr": 1e-5,
             "betas": (0.9, 0.999),
             "eps": 1e-8,
         },
@@ -96,7 +96,7 @@ class Config:
         # -------------------------
         # Inference Configs
         # -------------------------
-        "num_inference_steps": 250,
+        "num_inference_steps": 500,
     }
 
     # -------------------------
@@ -116,7 +116,7 @@ class Config:
         "filename": "ssddpm-{epoch:02d}-val_loss={val_total_loss:.4f}",
         "monitor": "val_total_loss",
         "mode": "min",
-        "save_top_k": 1,
+        "save_top_k": 2,
         "every_n_epochs": (SSDDPM_CONFIG["max_epochs"] - 1) // 3,
         # "every_n_epochs": 1,
     }

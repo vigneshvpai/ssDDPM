@@ -33,7 +33,7 @@ class Preprocess:
                 f"Expected image of shape (width, height, bvalues), got {image.shape}"
             )
         # Permute to (bvalues, height, width)
-        image = image.permute(2, 1, 0)
+        image = image.permute(2, 0, 1)
 
         return image
 

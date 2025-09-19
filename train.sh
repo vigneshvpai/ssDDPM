@@ -14,14 +14,44 @@ conda activate thesis
 
 # Parse arguments
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <experiment_name> [direction]"
+    echo "Usage: $0 <experiment_name> [direction] [--resume] [--checkpoint-path <path>]"
     echo "  experiment_name: Name of the experiment"
     echo "  direction: Optional direction (x, y, z). If not provided, uses parent folder files"
+    echo "  --resume: Resume training from latest checkpoint"
+    echo "  --checkpoint-path <path>: Resume training from specific checkpoint file"
     exit 1
 fi
 
 EXP_NAME="$1"
 DIRECTION="$2"
+
+# Initialize resume arguments
+RESUME_ARG=""
+CHECKPOINT_PATH_ARG=""
+
+# Parse additional arguments starting from position 3
+shift 2  # Remove first two arguments (exp_name and direction)
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --resume)
+            RESUME_ARG="--resume"
+            shift
+            ;;
+        --checkpoint-path)
+            if [[ -z "$2" ]]; then
+                echo "Error: --checkpoint-path requires a path argument"
+                exit 1
+            fi
+            CHECKPOINT_PATH_ARG="--checkpoint-path $2"
+            shift 2
+            ;;
+        *)
+            echo "Error: Unknown argument '$1'"
+            echo "Usage: $0 <experiment_name> [direction] [--resume] [--checkpoint-path <path>]"
+            exit 1
+            ;;
+    esac
+done
 
 # Determine JSON file source directory
 if [ -n "$DIRECTION" ]; then
@@ -85,9 +115,15 @@ echo "Experiment name: $EXP_NAME"
 if [ -n "$DIRECTION" ]; then
     echo "Direction: $DIRECTION"
 fi
+if [ -n "$RESUME_ARG" ]; then
+    echo "Resume mode: enabled (latest checkpoint)"
+fi
+if [ -n "$CHECKPOINT_PATH_ARG" ]; then
+    echo "Checkpoint path: $CHECKPOINT_PATH_ARG"
+fi
 
-# Run the training script with experiment name
+# Run the training script with experiment name and resume arguments
 echo "Python script is starting execution..."
-srun python train.py --hpc --exp-name "$EXP_NAME"
+srun python train.py --hpc --exp-name "$EXP_NAME" $RESUME_ARG $CHECKPOINT_PATH_ARG
 
 echo "Training completed!"
