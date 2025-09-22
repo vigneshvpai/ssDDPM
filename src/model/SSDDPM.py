@@ -91,14 +91,23 @@ class SSDDPM(L.LightningModule):
 
     def _get_y_hat_t_minus_1(self, S0_hat, D_hat, b_values):
         # Get dimensions dynamically
-        batch_size, n_bvals, height, width = S0_hat.shape  # S0_hat: (B, 9, H, W)
+        batch_size, height, width = S0_hat.shape  # S0_hat: (B, H, W)
+        n_bvals = b_values.shape[1]  # Get n_bvals from b_values
+
+        # Expand S0_hat and D_hat to include n_bvals dimension
+        # S0_hat: (B, H, W) -> (B, 1, H, W)
+        S0_hat_expanded = S0_hat.unsqueeze(1)
+        # D_hat: (B, H, W) -> (B, 1, H, W)
+        D_hat_expanded = D_hat.unsqueeze(1)
 
         # Reshape b_values to broadcast properly
         # b_values: (batch_size, n_bvals) -> (batch_size, n_bvals, 1, 1)
         b_values_reshaped = b_values.view(batch_size, n_bvals, 1, 1)
 
         # Apply the mono-exponential model: S(b) = S0 * exp(-b * ADC)
-        y_hat_t_minus_1 = S0_hat * torch.exp(-b_values_reshaped * D_hat)
+        y_hat_t_minus_1 = S0_hat_expanded * torch.exp(
+            -b_values_reshaped * D_hat_expanded
+        )
 
         return y_hat_t_minus_1
 
@@ -156,7 +165,7 @@ class SSDDPM(L.LightningModule):
             axes_flat = axes.flatten()
 
             for i in range(self.n_bvals):
-                b_value_image = single_image[0, i, :, :].float().numpy()
+                b_value_image = single_image[0, i, :, :].float().numpy().T[::-1, :]
                 axes_flat[i].imshow(b_value_image, cmap="gray")
                 axes_flat[i].set_title(
                     f"B-value: {int(single_b_values[0, i])}", fontsize=8
@@ -320,14 +329,14 @@ class SSDDPM(L.LightningModule):
                 y_hat_t, residual, beta_t, alpha_cumprod_t, mode="inference"
             )
 
-            # # Step 5: Ŝ_0, D̂ ← f_ADC(y'_t-1)
-            # S0_hat, D_hat = self.adc_model(y_prime_t_minus_1, b_values)
+            # Step 5: Ŝ_0, D̂ ← f_ADC(y'_t-1)
+            S0_hat, D_hat = self.adc_model(y_prime_t_minus_1, b_values)
 
-            # # Step 6: ŷ_t-1 ← Ŝ_0 * e^(-b * D̂)
-            # y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
+            # Step 6: ŷ_t-1 ← Ŝ_0 * e^(-b * D̂)
+            y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
 
             # Update for next iteration
-            y_hat_t = y_prime_t_minus_1
+            y_hat_t = y_hat_t_minus_1
 
         # Calculate total time
         total_time = time.time() - start_time
