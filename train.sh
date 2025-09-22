@@ -12,27 +12,31 @@ unset SLURM_EXPORT_ENV
 module load python
 conda activate thesis
 
-# Parse arguments
-if [ $# -lt 1 ]; then
-    echo "Usage: $0 <experiment_name> [direction] [--resume] [--checkpoint-path <path>]"
-    echo "  experiment_name: Name of the experiment"
-    echo "  direction: Optional direction (x, y, z). If not provided, uses parent folder files"
-    echo "  --resume: Resume training from latest checkpoint"
-    echo "  --checkpoint-path <path>: Resume training from specific checkpoint file"
-    exit 1
-fi
-
-EXP_NAME="$1"
-DIRECTION="$2"
-
-# Initialize resume arguments
+# Initialize variables
+EXP_NAME=""
+DIRECTION=""
 RESUME_ARG=""
 CHECKPOINT_PATH_ARG=""
 
-# Parse additional arguments starting from position 3
-shift 2  # Remove first two arguments (exp_name and direction)
+# Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --exp-name)
+            if [[ -z "$2" ]]; then
+                echo "Error: --exp-name requires a value"
+                exit 1
+            fi
+            EXP_NAME="$2"
+            shift 2
+            ;;
+        --direction)
+            if [[ -z "$2" ]]; then
+                echo "Error: --direction requires a value"
+                exit 1
+            fi
+            DIRECTION="$2"
+            shift 2
+            ;;
         --resume)
             RESUME_ARG="--resume"
             shift
@@ -47,11 +51,22 @@ while [[ $# -gt 0 ]]; do
             ;;
         *)
             echo "Error: Unknown argument '$1'"
-            echo "Usage: $0 <experiment_name> [direction] [--resume] [--checkpoint-path <path>]"
+            echo "Usage: $0 --exp-name <experiment_name> [--direction <direction>] [--resume] [--checkpoint-path <path>]"
+            echo "  --exp-name: Name of the experiment (required)"
+            echo "  --direction: Optional direction (x, y, z). If not provided, uses parent folder files"
+            echo "  --resume: Resume training from latest checkpoint"
+            echo "  --checkpoint-path <path>: Resume training from specific checkpoint file"
             exit 1
             ;;
     esac
 done
+
+# Validate required arguments
+if [[ -z "$EXP_NAME" ]]; then
+    echo "Error: --exp-name is required"
+    echo "Usage: $0 --exp-name <experiment_name> [--direction <direction>] [--resume] [--checkpoint-path <path>]"
+    exit 1
+fi
 
 # Determine JSON file source directory
 if [ -n "$DIRECTION" ]; then
