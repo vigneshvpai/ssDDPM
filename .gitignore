@@ -220,3 +220,6 @@ val_images/
 
 # SLURM job output files
 *.sh.o*
+
+# Ignore noise_residual notebook
+noise_residual.ipynb
