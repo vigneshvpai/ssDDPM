@@ -1,4 +1,5 @@
 import os
+import pprint
 
 
 class Config:
@@ -7,15 +8,27 @@ class Config:
     # -------------------------
     ORIGINAL_DATA_ROOT = "/home/vault/mfdp/mfdp118h/data"
     PT_DATA_ROOT = "/home/vault/mfdp/mfdp118h/pt_data"
-    TMPDIR = os.environ.get("TMPDIR")
-    HPC_DATA_ROOT = os.path.join(TMPDIR, "pt_data") if TMPDIR else None
+    PT_DATA_ROOT_SLICEWISE = "/home/vault/mfdp/mfdp118h/pt_data_slicewise"
+    TMPDIR = os.environ.get("TMPDIR", "")
+    HPC_DATA_ROOT = os.path.join(TMPDIR, "pt_data")
 
-    TRAIN_SPLIT_JSON = os.path.join("src", "data", "dataset_split", "train.json")
-    VAL_SPLIT_JSON = os.path.join("src", "data", "dataset_split", "val.json")
-    TEST_SPLIT_JSON = os.path.join("src", "data", "dataset_split", "test.json")
-    TEST_NIFTI_JSON_PATH = os.path.join(
-        "src", "data", "dataset_split", "test_nifti.json"
+    TRAIN_JSON = "train.json"
+    VAL_JSON = "val.json"
+    TEST_JSON = "test.json"
+
+    TRAIN_SPLIT_JSON = os.path.join(
+        "src", "data", "dataset_split_slicewise", "x", TRAIN_JSON
     )
+    VAL_SPLIT_JSON = os.path.join(
+        "src", "data", "dataset_split_slicewise", "x", VAL_JSON
+    )
+    TEST_SPLIT_JSON = os.path.join(
+        "src", "data", "dataset_split_slicewise", "x", TEST_JSON
+    )
+
+    HPC_TRAIN_JSON = os.path.join(TMPDIR, TRAIN_JSON)
+    HPC_VAL_JSON = os.path.join(TMPDIR, VAL_JSON)
+    HPC_TEST_JSON = os.path.join(TMPDIR, TEST_JSON)
 
     # -------------------------
     # Data Shape Configs
@@ -26,49 +39,108 @@ class Config:
     # -------------------------
     # DataLoader Configs
     # -------------------------
-    BATCH_SIZE = 2
-    NUM_WORKERS = 8
+    BATCH_SIZE = 72
+    NUM_WORKERS = 12
+
+    # -------------------------
+    # DWI Configs
+    # -------------------------
+    DWI_CONFIG = {
+        "num_dirs": 3,
+        "n_bvals": 9,
+        "n_slices": 25,
+    }
 
     # -------------------------
     # SSDDPM Configs
     # -------------------------
     SSDDPM_CONFIG = {
         # -------------------------
-        # Scheduler Configs
+        # Epochs Configs
+        # -------------------------
+        "max_epochs": 256,  # MAX EPOCHS
+        "log_every_n_steps": 8,
+        # -------------------------
+        # Noise Scheduler Configs
         # -------------------------
         "SCHEDULER_CONFIG": {
-            "num_train_timesteps": 250,  # T = 250
+            "num_train_timesteps": 1000,  # T = 250
             "beta_start": 1e-7,  # β1 = 1e-7
             "beta_end": 2e-6,  # βT = 2e-6
+            # "beta_start": 1e-4,  # β1 = 1e-4 (standard)
+            # "beta_end": 0.02,  # βT = 0.02 (standard)
+            # "beta_start": 1e-5,  # 10x your current start
+            # "beta_end": 0.005,  # 2500x your current end, but 4x less than standard
+            # "beta_start": 1e-6,  # 10x your current (not 1000x)
+            # "beta_end": 1e-5,  # 5x your current (not 10,000x)
             "beta_schedule": "linear",  # Linear noise schedule
         },
         # -------------------------
         # Optimizer Configs
         # -------------------------
         "OPTIMIZER_CONFIG": {
-            "lr": 1e-4,
+            "lr": 1e-5,
             "betas": (0.9, 0.999),
             "eps": 1e-8,
         },
         # -------------------------
         # Model Configs
         # -------------------------
-        "in_channels": 625,
-        "out_channels": 625,
-        "lambda_reg": 1,
-        "num_inference_steps": 250,
+        "in_channels": DWI_CONFIG["n_bvals"],
+        "out_channels": DWI_CONFIG["n_bvals"],
+        # -------------------------
+        # Loss Configs
+        # -------------------------
+        "lambda_adc": 0.25,
+        "lambda_recon": 0.25,
+        # -------------------------
+        # Inference Configs
+        # -------------------------
+        "num_inference_steps": 500,
     }
 
     # -------------------------
-    # ADC Configs
+    # Logger Configs
     # -------------------------
-    ADC_CONFIG = {
-        "adc_type": "avg",  # avg or dir
-        "num_dirs": 3,  # only used if adc_type == "dir"
-        "n_bvals": 25,
+    LOGGER_CONFIG = {
+        "log_hyperparameters": True,  # Log hyperparameters
+        "save_dir": "lightning_logs",
+        "enable_progress_bar": False,
     }
 
     # -------------------------
-    # Training Configs
+    # Checkpoint Configs
     # -------------------------
-    MAX_EPOCHS = 10
+    CHECKPOINT_CONFIG = {
+        "save_dir": "checkpoints",
+        "filename": "ssddpm-{epoch:02d}-val_loss={val_total_loss:.4f}",
+        "monitor": "val_total_loss",
+        "mode": "min",
+        "save_top_k": 2,
+        "every_n_epochs": (SSDDPM_CONFIG["max_epochs"] - 1) // 3,
+        # "every_n_epochs": 1,
+    }
+
+    @classmethod
+    def summary(cls):
+        summary_dict = {
+            "ORIGINAL_DATA_ROOT": cls.ORIGINAL_DATA_ROOT,
+            "PT_DATA_ROOT": cls.PT_DATA_ROOT,
+            "TMPDIR": cls.TMPDIR,
+            "HPC_DATA_ROOT": cls.HPC_DATA_ROOT,
+            "TRAIN_SPLIT_JSON": cls.TRAIN_SPLIT_JSON,
+            "VAL_SPLIT_JSON": cls.VAL_SPLIT_JSON,
+            "TEST_SPLIT_JSON": cls.TEST_SPLIT_JSON,
+            "HPC_TRAIN_JSON": cls.HPC_TRAIN_JSON,
+            "HPC_VAL_JSON": cls.HPC_VAL_JSON,
+            "HPC_TEST_JSON": cls.HPC_TEST_JSON,
+            "EXPECTED_SHAPE": cls.EXPECTED_SHAPE,
+            "UNET_COMPATIBLE_SHAPE": cls.UNET_COMPATIBLE_SHAPE,
+            "BATCH_SIZE": cls.BATCH_SIZE,
+            "NUM_WORKERS": cls.NUM_WORKERS,
+            "SSDDPM_CONFIG": cls.SSDDPM_CONFIG,
+            "DWI_CONFIG": cls.DWI_CONFIG,
+            "LOGGER_CONFIG": cls.LOGGER_CONFIG,
+            "CHECKPOINT_CONFIG": cls.CHECKPOINT_CONFIG,
+        }
+        return pprint.pformat(summary_dict, indent=2)

@@ -4,8 +4,9 @@ from src.config.config import Config
 
 
 class Preprocess:
-    def __init__(self, pt_data_root=Config.PT_DATA_ROOT):
-        self.pt_data_root = pt_data_root
+    def __init__(self):
+        self.num_dirs = Config.DWI_CONFIG["num_dirs"]
+        self.n_bvals = Config.DWI_CONFIG["n_bvals"]
 
     def normalize_to_b0(self, image):
         """
@@ -18,28 +19,21 @@ class Preprocess:
         min_val = image.min()
         max_val = image.max()
         scale = (max_val - min_val) if (max_val - min_val) > 0 else 1.0
-        image_norm = (image - min_val) / scale
-        return image_norm, min_val, max_val
 
-    def flatten_slices_and_bvals(self, image):
-        """
-        Flatten the slices and b-values dimensions into a single dimension.
-        Converts image from (width, height, slices, bvalues) to (slices * bvalues, height, width).
-        Args:
-            image (torch.Tensor): The input image tensor.
-        Returns:
-            torch.Tensor: The reshaped image tensor with shape (slices * bvalues, height, width).
-        """
-        # Expecting image shape: (width, height, slices, bvalues)
-        if image.ndim != 4:
+        # In-place operations
+        image.sub_(min_val)  # image = image - min_val
+        image.div_(scale)  # image = image / scale
+
+        return image, min_val, max_val
+
+    def reorder_bvals(self, image):
+        # Expecting image shape: (width, height, bvalues)
+        if image.ndim != 3:
             raise ValueError(
-                f"Expected image of shape (width, height, slices, bvalues), got {image.shape}"
+                f"Expected image of shape (width, height, bvalues), got {image.shape}"
             )
-        # Permute to (slices, bvalues, height, width)
-        image = image.permute(2, 3, 1, 0)
-        # Reshape to (slices * bvalues, height, width)
-        slices, bvalues, height, width = image.shape
-        image = image.reshape(slices * bvalues, height, width)
+        # Permute to (bvalues, height, width)
+        image = image.permute(2, 0, 1)
 
         return image
 
@@ -47,7 +41,7 @@ class Preprocess:
         """
         Pad the image tensor with zeros to make width and height match target_shape.
         Args:
-            image (torch.Tensor): Image tensor of shape (width, height, slices, bvals).
+            image (torch.Tensor): Image tensor of shape (width, height, bvals).
             target_shape (tuple): (target_height, target_width)
         Returns:
             torch.Tensor: Zero-padded image tensor.
@@ -56,7 +50,7 @@ class Preprocess:
             target_shape = Config.UNET_COMPATIBLE_SHAPE
 
         # image shape: (width, height, slices, bvals)
-        w, h, s, b = image.shape
+        w, h, b = image.shape
         target_h, target_w = target_shape
 
         pad_h = max(target_h - h, 0)
@@ -69,20 +63,14 @@ class Preprocess:
         pad_right_h = pad_h - pad_left_h
 
         # For padding width and height (first two dimensions)
-        pad = (0, 0, 0, 0, pad_left_h, pad_right_h, pad_left_w, pad_right_w)
+        pad = (0, 0, pad_left_h, pad_right_h, pad_left_w, pad_right_w)
+        # Note: torch.nn.functional.pad() always creates new memory
         image_padded = torch.nn.functional.pad(image, pad)
         return image_padded
 
     def preprocess(self, image):
-        """
-        Preprocess a sample by normalizing to b0, reshaping the image, and padding to U-Net compatible size.
-        Args:
-            sample (dict): A sample dict with key 'image'.
-        Returns:
-            torch.Tensor: The preprocessed and padded image tensor.
-        """
-        image_padded = self.pad_to_unet_compatible(image)
-        image_norm, min_val, max_val = self.normalize_to_b0(image_padded)
-        image_reshaped = self.flatten_slices_and_bvals(image_norm)
+        image = self.pad_to_unet_compatible(image)
+        image, min_val, max_val = self.normalize_to_b0(image)  # Now in-place
+        image = self.reorder_bvals(image)
 
-        return image_reshaped, min_val, max_val
+        return image, min_val, max_val

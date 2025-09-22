@@ -15,10 +15,12 @@ class DWIDataset(Dataset):
     def __init__(
         self,
         split_json_path=None,
+        data_root=None,
         transform=None,
         preprocess_fn=None,
     ):
         self.split_json_path = split_json_path
+        self.data_root = data_root
         self.transform = transform
         self.preprocess_fn = preprocess_fn
 
@@ -31,7 +33,15 @@ class DWIDataset(Dataset):
 
     def __getitem__(self, idx):
         sample_info = self.samples[idx]
-        path = sample_info["path"]
+        path = os.path.join(self.data_root, sample_info["path"])
+
+        # Extract original filename for saving
+        original_filename = os.path.basename(sample_info["path"])
+        # Remove extension if it exists
+        if original_filename.endswith(".nii.gz"):
+            original_filename = original_filename[:-7]  # Remove .nii.gz
+        elif original_filename.endswith(".pt"):
+            original_filename = original_filename[:-3]  # Remove .pt
 
         affine = None
         if path.endswith(".pt"):
@@ -43,20 +53,45 @@ class DWIDataset(Dataset):
             data_nii = nii_img.get_fdata(dtype=np.float32)
             # Get the affine matrix
             affine = nii_img.affine
-            image = torch.from_numpy(data_nii)
+            # Create tensor directly with correct dtype to avoid conversion
+            image = torch.from_numpy(data_nii).float()
 
-        b_values = torch.tensor(sample_info["bval"])
-        b_values = b_values.repeat(image.shape[3])
+        # Create b_values tensor more efficiently
+        b_values = torch.tensor(sample_info["bval"], dtype=torch.float32)
 
-        # Convert to torch.Tensor if not already
+        # Convert to torch.Tensor if not already - use in-place conversion
         if not isinstance(image, torch.Tensor):
-            image = torch.from_numpy(image)
+            image = torch.from_numpy(image).float()
+        elif image.dtype != torch.float32:
+            image = image.float()  # In-place dtype conversion
 
         if self.preprocess_fn is not None:
             image, min_val, max_val = self.preprocess_fn(image)
         if self.transform:
             image = self.transform(image)
 
-        other_info = {"affine": affine, "min_val": min_val, "max_val": max_val}
+        # Create comprehensive metadata dictionary
+        other_info = {
+            "original_filename": original_filename,
+            "direction": sample_info["direction"],
+            "slice": sample_info["slice"],
+        }
 
-        return image, b_values, other_info
+        # Add preprocessing info if available
+        if self.preprocess_fn is not None:
+            other_info.update(
+                {
+                    "min_val": min_val,
+                    "max_val": max_val,
+                }
+            )
+
+        # Add affine matrix if available
+        if affine is not None:
+            other_info["affine"] = affine
+
+        return (
+            image,
+            b_values,
+            other_info,
+        )
