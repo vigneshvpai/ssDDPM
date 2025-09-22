@@ -92,7 +92,6 @@ class Config:
         # Loss Configs
         # -------------------------
         "lambda_adc": 0.25,
-        "lambda_recon": 0.25,
         # -------------------------
         # Inference Configs
         # -------------------------

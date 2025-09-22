@@ -2,14 +2,11 @@ import time
 from diffusers import UNet2DModel, DDPMScheduler
 import lightning as L
 import torch
-import torch.nn as nn
 from src.model.ADC import ADC
 from src.config.config import Config
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import os
-import gc
-import torch
 
 
 class SSDDPM(L.LightningModule):
@@ -37,7 +34,6 @@ class SSDDPM(L.LightningModule):
 
         self.scheduler = DDPMScheduler(**Config.SSDDPM_CONFIG["SCHEDULER_CONFIG"])
         self.lambda_adc = Config.SSDDPM_CONFIG["lambda_adc"]
-        self.lambda_recon = Config.SSDDPM_CONFIG["lambda_recon"]
         self.num_inference_steps = Config.SSDDPM_CONFIG["num_inference_steps"]
         self.max_epochs = Config.SSDDPM_CONFIG["max_epochs"]
         self.n_slices = Config.DWI_CONFIG["n_slices"]
@@ -94,15 +90,15 @@ class SSDDPM(L.LightningModule):
         return y_prime_t_minus_1
 
     def _get_y_hat_t_minus_1(self, S0_hat, D_hat, b_values):
-        # Repeat each slice 25 times to match b_values shape
-        S0_hat_expanded = S0_hat.repeat_interleave(25, dim=1)  # Shape: (2, 625, H, W)
-        D_hat_expanded = D_hat.repeat_interleave(25, dim=1)  # Shape: (2, 625, H, W)
-        # Reshape b_values to broadcast properly
-        b_values_reshaped = b_values.view(2, 625, 1, 1)  # Shape: (2, 625, 1, 1)
+        # Get dimensions dynamically
+        batch_size, n_bvals, height, width = S0_hat.shape  # S0_hat: (B, 9, H, W)
 
-        y_hat_t_minus_1 = S0_hat_expanded * torch.exp(
-            -b_values_reshaped * D_hat_expanded
-        )  # Step 9: ŷ_{t-1} ← Ŝ₀ e^(-b D̂)
+        # Reshape b_values to broadcast properly
+        # b_values: (batch_size, n_bvals) -> (batch_size, n_bvals, 1, 1)
+        b_values_reshaped = b_values.view(batch_size, n_bvals, 1, 1)
+
+        # Apply the mono-exponential model: S(b) = S0 * exp(-b * ADC)
+        y_hat_t_minus_1 = S0_hat * torch.exp(-b_values_reshaped * D_hat)
 
         return y_hat_t_minus_1
 
@@ -178,12 +174,6 @@ class SSDDPM(L.LightningModule):
             del single_image, single_b_values, b_value_image
             del fig, axes, axes_flat
 
-        # Final cleanup
-        del images_cpu, b_values_cpu
-        torch.cuda.empty_cache()  # Clear GPU cache
-
-        gc.collect()  # Force garbage collection
-
     def compute_loss(self, batch, mode="train"):
         images, b_values, other_info = batch  # Step 1: Sample batch y₀ ~ Y
 
@@ -206,48 +196,34 @@ class SSDDPM(L.LightningModule):
             batch_size=Config.BATCH_SIZE,
         )
 
-        # y_prime_t_minus_1 = self._get_y_prime_t_minus_1(
-        #     noisy_images, residual, betas, alphas_cumprod
-        # )
+        y_prime_t_minus_1 = self._get_y_prime_t_minus_1(
+            noisy_images, residual, betas, alphas_cumprod
+        )
 
-        # S0_original, D_original = self.adc_model(
-        #     images, b_values
-        # )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
+        S0_hat, D_hat = self.adc_model(
+            y_prime_t_minus_1, b_values
+        )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
 
-        # S0_hat, D_hat = self.adc_model(
-        #     y_prime_t_minus_1, b_values
-        # )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
+        y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
 
-        # # y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
+        adc_loss = torch.nn.functional.mse_loss(
+            y_hat_t_minus_1, y_prime_t_minus_1
+        )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
+        self.log(
+            f"{mode}_adc_loss",
+            adc_loss,
+            on_epoch=True,
+            sync_dist=True,
+            batch_size=Config.BATCH_SIZE,
+        )
 
-        # # adc_loss = torch.nn.functional.mse_loss(
-        # #     y_hat_t_minus_1, y_prime_t_minus_1
-        # # )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
-
-        # recon_loss = torch.nn.functional.mse_loss(S0_original, S0_hat)
-        # adc_loss = torch.nn.functional.mse_loss(D_original, D_hat)
-
-        # self.log(
-        #     f"{mode}_recon_loss",
-        #     recon_loss,
-        #     on_epoch=True,
-        #     sync_dist=True,
-        #     batch_size=Config.BATCH_SIZE,
-        # )
-
-        # self.log(
-        #     f"{mode}_adc_loss",
-        #     adc_loss,
-        #     on_epoch=True,
-        #     sync_dist=True,
-        #     batch_size=Config.BATCH_SIZE,
-        # )
-
-        loss = noise_loss  # Total loss: noise loss
+        total_loss = (
+            noise_loss + self.lambda_adc * adc_loss
+        )  # Total loss: noise loss + ADC loss
 
         self.log(
             f"{mode}_total_loss",
-            loss,
+            total_loss,
             on_epoch=True,
             sync_dist=True,
             batch_size=Config.BATCH_SIZE,
@@ -280,6 +256,14 @@ class SSDDPM(L.LightningModule):
                 prefix=mode,
                 save_dir=f"{mode}_images/{self.run_name}/residual_images",
             )
+            self._log_specific_slice(
+                y_hat_t_minus_1,
+                b_values,
+                other_info,
+                step_or_epoch=self.current_epoch,
+                prefix=mode,
+                save_dir=f"{mode}_images/{self.run_name}/y_hat_t_minus_1",
+            )
 
             denoised_images = self.inference(noisy_images, b_values)
             self._log_specific_slice(
@@ -291,7 +275,7 @@ class SSDDPM(L.LightningModule):
                 save_dir=f"{mode}_images/{self.run_name}/denoised_images",
             )
 
-        return noise_loss
+        return total_loss
 
     @torch.no_grad()
     def inference(self, y_hat_t, b_values):
