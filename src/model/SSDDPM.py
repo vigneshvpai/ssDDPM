@@ -254,14 +254,14 @@ class SSDDPM(L.LightningModule):
                 prefix=mode,
                 save_dir=f"{mode}_images/{self.run_name}/original_images",
             )
-            self._log_specific_slice(
-                noisy_images,
-                b_values,
-                other_info,
-                step_or_epoch=self.current_epoch,
-                prefix=mode,
-                save_dir=f"{mode}_images/{self.run_name}/noisy_images",
-            )
+            # self._log_specific_slice(
+            #     noisy_images,
+            #     b_values,
+            #     other_info,
+            #     step_or_epoch=self.current_epoch,
+            #     prefix=mode,
+            #     save_dir=f"{mode}_images/{self.run_name}/noisy_images",
+            # )
             self._log_specific_slice(
                 residual,
                 b_values,
@@ -270,14 +270,14 @@ class SSDDPM(L.LightningModule):
                 prefix=mode,
                 save_dir=f"{mode}_images/{self.run_name}/residual_images",
             )
-            self._log_specific_slice(
-                y_hat_t_minus_1,
-                b_values,
-                other_info,
-                step_or_epoch=self.current_epoch,
-                prefix=mode,
-                save_dir=f"{mode}_images/{self.run_name}/y_hat_t_minus_1",
-            )
+            # self._log_specific_slice(
+            #     y_hat_t_minus_1,
+            #     b_values,
+            #     other_info,
+            #     step_or_epoch=self.current_epoch,
+            #     prefix=mode,
+            #     save_dir=f"{mode}_images/{self.run_name}/y_hat_t_minus_1",
+            # )
 
             denoised_images = self.inference(noisy_images, b_values)
             self._log_specific_slice(
