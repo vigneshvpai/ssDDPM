@@ -67,12 +67,6 @@ class Config:
             "num_train_timesteps": 1000,  # T = 250
             "beta_start": 1e-7,  # β1 = 1e-7
             "beta_end": 2e-6,  # βT = 2e-6
-            # "beta_start": 1e-4,  # β1 = 1e-4 (standard)
-            # "beta_end": 0.02,  # βT = 0.02 (standard)
-            # "beta_start": 1e-5,  # 10x your current start
-            # "beta_end": 0.005,  # 2500x your current end, but 4x less than standard
-            # "beta_start": 1e-6,  # 10x your current (not 1000x)
-            # "beta_end": 1e-5,  # 5x your current (not 10,000x)
             "beta_schedule": "linear",  # Linear noise schedule
         },
         # -------------------------

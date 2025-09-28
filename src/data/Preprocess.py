@@ -4,11 +4,8 @@ from src.config.config import Config
 
 
 class Preprocess:
-    def __init__(self):
-        self.num_dirs = Config.DWI_CONFIG["num_dirs"]
-        self.n_bvals = Config.DWI_CONFIG["n_bvals"]
-
-    def normalize_to_b0(self, image):
+    @staticmethod
+    def normalize_to_b0(image):
         """
         Normalize the image to the 0-1 range globally.
         Args:
@@ -26,7 +23,8 @@ class Preprocess:
 
         return image, min_val, max_val
 
-    def reorder_bvals(self, image):
+    @staticmethod
+    def reorder_bvals(image):
         # Expecting image shape: (width, height, bvalues)
         if image.ndim != 3:
             raise ValueError(
@@ -37,7 +35,8 @@ class Preprocess:
 
         return image
 
-    def pad_to_unet_compatible(self, image, target_shape=None):
+    @staticmethod
+    def pad_to_unet_compatible(image, target_shape=None):
         """
         Pad the image tensor with zeros to make width and height match target_shape.
         Args:
@@ -68,9 +67,10 @@ class Preprocess:
         image_padded = torch.nn.functional.pad(image, pad)
         return image_padded
 
-    def preprocess(self, image):
-        image = self.pad_to_unet_compatible(image)
-        image, min_val, max_val = self.normalize_to_b0(image)  # Now in-place
-        image = self.reorder_bvals(image)
+    @staticmethod
+    def preprocess(image):
+        image = Preprocess.pad_to_unet_compatible(image)
+        image, min_val, max_val = Preprocess.normalize_to_b0(image)  # Now in-place
+        image = Preprocess.reorder_bvals(image)
 
         return image, min_val, max_val

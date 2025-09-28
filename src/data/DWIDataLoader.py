@@ -24,7 +24,7 @@ class DWIDataLoader(L.LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.transform = transform
-        self.preprocess_fn = Preprocess().preprocess
+        self.preprocess_fn = Preprocess.preprocess
 
     def setup(self, stage=None):
         self.train_dataset = DWIDataset(

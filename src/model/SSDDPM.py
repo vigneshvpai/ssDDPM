@@ -7,6 +7,7 @@ from src.config.config import Config
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import os
+from src.data.Preprocess import Preprocess
 
 
 class SSDDPM(L.LightningModule):
@@ -87,6 +88,8 @@ class SSDDPM(L.LightningModule):
                 noisy_images - (betas / torch.sqrt(1 - alphas_cumprod)) * residual
             )
 
+        y_prime_t_minus_1, _, _ = Preprocess.normalize_to_b0(y_prime_t_minus_1)
+
         return y_prime_t_minus_1
 
     def _get_y_hat_t_minus_1(self, S0_hat, D_hat, b_values):
@@ -108,6 +111,8 @@ class SSDDPM(L.LightningModule):
         y_hat_t_minus_1 = S0_hat_expanded * torch.exp(
             -b_values_reshaped * D_hat_expanded
         )
+
+        y_hat_t_minus_1, _, _ = Preprocess.normalize_to_b0(y_hat_t_minus_1)
 
         return y_hat_t_minus_1
 
@@ -283,15 +288,26 @@ class SSDDPM(L.LightningModule):
                 prefix=mode,
                 save_dir=f"{mode}_images/{self.run_name}/denoised_images",
             )
+            del denoised_images
+
+        del (
+            noise,
+            steps,
+            noisy_images,
+            residual,
+            betas,
+            alphas_cumprod,
+            y_prime_t_minus_1,
+            S0_hat,
+            D_hat,
+            y_hat_t_minus_1,
+        )
 
         return total_loss
 
     @torch.no_grad()
     def inference(self, y_hat_t, b_values):
         self.eval()
-
-        # Store original timesteps
-        original_timesteps = self.scheduler.config.num_train_timesteps
 
         # Set the scheduler timesteps for inference
         self.scheduler.set_timesteps(self.num_inference_steps)
@@ -338,15 +354,22 @@ class SSDDPM(L.LightningModule):
             # Update for next iteration
             y_hat_t = y_hat_t_minus_1
 
+            del (
+                timesteps,
+                beta_t,
+                alpha_cumprod_t,
+                residual,
+                y_prime_t_minus_1,
+                S0_hat,
+                D_hat,
+            )
+
         # Calculate total time
         total_time = time.time() - start_time
 
         print(
             f"Inference completed! Total time: {total_time:.2f} seconds ({total_time/60:.2f} minutes)"
         )
-
-        # Reset to original timesteps
-        self.scheduler.set_timesteps(original_timesteps)
 
         # Return ŷ_0
         return y_hat_t
