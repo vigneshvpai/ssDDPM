@@ -17,11 +17,9 @@ class Preprocess:
         max_val = image.max()
         scale = (max_val - min_val) if (max_val - min_val) > 0 else 1.0
 
-        # In-place operations
-        image.sub_(min_val)  # image = image - min_val
-        image.div_(scale)  # image = image / scale
+        normalized_image = (image - min_val) / scale
 
-        return image, min_val, max_val
+        return normalized_image, min_val, max_val
 
     @staticmethod
     def reorder_bvals(image):
@@ -70,7 +68,7 @@ class Preprocess:
     @staticmethod
     def preprocess(image):
         image = Preprocess.pad_to_unet_compatible(image)
-        image, min_val, max_val = Preprocess.normalize_to_b0(image)  # Now in-place
+        image, min_val, max_val = Preprocess.normalize_to_b0(image)
         image = Preprocess.reorder_bvals(image)
 
         return image, min_val, max_val
