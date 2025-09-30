@@ -34,7 +34,7 @@ class Config:
     # Data Shape Configs
     # -------------------------
     EXPECTED_SHAPE = (108, 134, 25, 25)
-    UNET_COMPATIBLE_SHAPE = (144, 128)
+    UNET_COMPATIBLE_SHAPE = (128, 144)
 
     # -------------------------
     # DataLoader Configs
@@ -85,7 +85,7 @@ class Config:
         # -------------------------
         # Loss Configs
         # -------------------------
-        "lambda_adc": 0.25,
+        "lambda_adc": 0.5,
         # -------------------------
         # Inference Configs
         # -------------------------

@@ -42,7 +42,7 @@ class Postprocess:
         Reverse the pad_to_unet_compatible operation.
         Removes padding to restore original dimensions.
         Args:
-            image (torch.Tensor): Image tensor of shape (width, height, slices, bvals).
+            image (torch.Tensor): Image tensor of shape (width, height, bvals).
             original_shape (tuple): (original_width, original_height) - defaults to EXPECTED_SHAPE
         Returns:
             torch.Tensor: Unpadded image tensor.
@@ -53,8 +53,8 @@ class Postprocess:
                 Config.EXPECTED_SHAPE[1],
             )  # (108, 134)
 
-        # image shape: (width, height, slices, bvals)
-        w, h, s, b = image.shape
+        # image shape: (width, height, bvals)
+        w, h, b = image.shape
         original_w, original_h = original_shape
 
         # Calculate padding that was added
@@ -74,9 +74,9 @@ class Postprocess:
 
         # Remove padding by slicing
         # Remove from width dimension (first dimension)
-        image = image[pad_left_w : w - pad_right_w, :, :, :]
+        image = image[pad_left_w : w - pad_right_w, :, :]
         # Remove from height dimension (second dimension)
-        image = image[:, pad_left_h : h - pad_right_h, :, :]
+        image = image[:, pad_left_h : h - pad_right_h, :]
 
         return image
 

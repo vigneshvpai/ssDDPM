@@ -88,8 +88,6 @@ class SSDDPM(L.LightningModule):
                 noisy_images - (betas / torch.sqrt(1 - alphas_cumprod)) * residual
             )
 
-        y_prime_t_minus_1, _, _ = Preprocess.normalize_to_b0(y_prime_t_minus_1)
-
         return y_prime_t_minus_1
 
     def _get_y_hat_t_minus_1(self, S0_hat, D_hat, b_values):
@@ -111,8 +109,6 @@ class SSDDPM(L.LightningModule):
         y_hat_t_minus_1 = S0_hat_expanded * torch.exp(
             -b_values_reshaped * D_hat_expanded
         )
-
-        y_hat_t_minus_1, _, _ = Preprocess.normalize_to_b0(y_hat_t_minus_1)
 
         return y_hat_t_minus_1
 
@@ -220,8 +216,10 @@ class SSDDPM(L.LightningModule):
 
         y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
 
+        eps = 1e-8
+
         adc_loss = torch.nn.functional.mse_loss(
-            y_hat_t_minus_1, y_prime_t_minus_1
+            torch.log(y_hat_t_minus_1 + eps), torch.log(y_prime_t_minus_1 + eps)
         )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
         self.log(
             f"{mode}_adc_loss",
@@ -243,52 +241,52 @@ class SSDDPM(L.LightningModule):
             batch_size=Config.BATCH_SIZE,
         )
 
-        if mode == "val" and (
-            self.current_epoch % Config.CHECKPOINT_CONFIG["every_n_epochs"] == 0
-        ):
-            self._log_specific_slice(
-                images,
-                b_values,
-                other_info,
-                step_or_epoch=self.current_epoch,
-                prefix=mode,
-                save_dir=f"{mode}_images/{self.run_name}/original_images",
-            )
-            # self._log_specific_slice(
-            #     noisy_images,
-            #     b_values,
-            #     other_info,
-            #     step_or_epoch=self.current_epoch,
-            #     prefix=mode,
-            #     save_dir=f"{mode}_images/{self.run_name}/noisy_images",
-            # )
-            self._log_specific_slice(
-                residual,
-                b_values,
-                other_info,
-                step_or_epoch=self.current_epoch,
-                prefix=mode,
-                save_dir=f"{mode}_images/{self.run_name}/residual_images",
-            )
-            # self._log_specific_slice(
-            #     y_hat_t_minus_1,
-            #     b_values,
-            #     other_info,
-            #     step_or_epoch=self.current_epoch,
-            #     prefix=mode,
-            #     save_dir=f"{mode}_images/{self.run_name}/y_hat_t_minus_1",
-            # )
-
-            denoised_images = self.inference(noisy_images, b_values)
-            self._log_specific_slice(
-                denoised_images,
-                b_values,
-                other_info,
-                step_or_epoch=self.current_epoch,
-                prefix=mode,
-                save_dir=f"{mode}_images/{self.run_name}/denoised_images",
-            )
-            del denoised_images
+        # if mode == "val" and (
+        #     self.current_epoch % Config.CHECKPOINT_CONFIG["every_n_epochs"] == 0
+        # ):
+        # self._log_specific_slice(
+        #     images,
+        #     b_values,
+        #     other_info,
+        #     step_or_epoch=self.current_epoch,
+        #     prefix=mode,
+        #     save_dir=f"{mode}_images/{self.run_name}/original_images",
+        # )
+        # self._log_specific_slice(
+        #     noisy_images,
+        #     b_values,
+        #     other_info,
+        #     step_or_epoch=self.current_epoch,
+        #     prefix=mode,
+        #     save_dir=f"{mode}_images/{self.run_name}/noisy_images",
+        # )
+        # self._log_specific_slice(
+        #     residual,
+        #     b_values,
+        #     other_info,
+        #     step_or_epoch=self.current_epoch,
+        #     prefix=mode,
+        #     save_dir=f"{mode}_images/{self.run_name}/residual_images",
+        # )
+        # self._log_specific_slice(
+        #     y_hat_t_minus_1,
+        #     b_values,
+        #     other_info,
+        #     step_or_epoch=self.current_epoch,
+        #     prefix=mode,
+        #     save_dir=f"{mode}_images/{self.run_name}/y_hat_t_minus_1",
+        # )
+        # if self.current_epoch == self.max_epochs - 1:
+        #     denoised_images = self.inference(noisy_images, b_values)
+        #     self._log_specific_slice(
+        #         denoised_images,
+        #         b_values,
+        #         other_info,
+        #         step_or_epoch=self.current_epoch,
+        #         prefix=mode,
+        #         save_dir=f"{mode}_images/{self.run_name}/denoised_images",
+        #     )
+        #     del denoised_images
 
         del (
             noise,
