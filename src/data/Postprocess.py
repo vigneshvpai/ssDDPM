@@ -42,19 +42,24 @@ class Postprocess:
         Reverse the pad_to_unet_compatible operation.
         Removes padding to restore original dimensions.
         Args:
-            image (torch.Tensor): Image tensor of shape (width, height, bvals).
+            image (torch.Tensor): Image tensor of shape (batch_size, bvalues, width, height) or (bvalues, width, height).
             original_shape (tuple): (original_width, original_height) - defaults to EXPECTED_SHAPE
         Returns:
             torch.Tensor: Unpadded image tensor.
         """
         if original_shape is None:
             original_shape = (
-                Config.EXPECTED_SHAPE[0],
-                Config.EXPECTED_SHAPE[1],
+                Config.EXPECTED_SHAPE[0],  # width = 108
+                Config.EXPECTED_SHAPE[1],  # height = 134
             )  # (108, 134)
 
-        # image shape: (width, height, bvals)
-        w, h, b = image.shape
+        # Handle batch dimension
+        has_batch = image.ndim == 4
+        if has_batch:
+            batch_size, b, w, h = image.shape  # (batch_size, bvalues, width, height)
+        else:
+            b, w, h = image.shape  # (bvalues, width, height)
+
         original_w, original_h = original_shape
 
         # Calculate padding that was added
@@ -66,17 +71,21 @@ class Postprocess:
                 f"Image is smaller than original shape: {image.shape} vs {original_shape}"
             )
 
-        # Calculate the padding that was applied
+        # Calculate the padding that was applied (same logic as pad_to_unet_compatible)
         pad_left_w = pad_w // 2
         pad_right_w = pad_w - pad_left_w
         pad_left_h = pad_h // 2
         pad_right_h = pad_h - pad_left_h
 
         # Remove padding by slicing
-        # Remove from width dimension (first dimension)
-        image = image[pad_left_w : w - pad_right_w, :, :]
-        # Remove from height dimension (second dimension)
-        image = image[:, pad_left_h : h - pad_right_h, :]
+        if has_batch:
+            # For (batch_size, bvalues, width, height)
+            image = image[
+                :, :, pad_left_w : w - pad_right_w, pad_left_h : h - pad_right_h
+            ]
+        else:
+            # For (bvalues, width, height)
+            image = image[:, pad_left_w : w - pad_right_w, pad_left_h : h - pad_right_h]
 
         return image
 
