@@ -8,6 +8,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import os
 from src.data.Preprocess import Preprocess
+from src.data.Postprocess import Postprocess
 
 
 class SSDDPM(L.LightningModule):
@@ -210,16 +211,22 @@ class SSDDPM(L.LightningModule):
             noisy_images, residual, betas, alphas_cumprod
         )
 
+        y_prime_t_minus_1 = Postprocess.unpad_from_unet_compatible(y_prime_t_minus_1)
+        y_prime_t_minus_1 = Postprocess.denormalize_from_0_1(
+            y_prime_t_minus_1, other_info["min_val"], other_info["max_val"]
+        )
+
         S0_hat, D_hat = self.adc_model(
             y_prime_t_minus_1, b_values
         )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
 
         y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
 
-        eps = 1e-8
+        y_prime_t_minus_1, _, _ = Preprocess.normalize_to_0_1_batch(y_prime_t_minus_1)
+        y_hat_t_minus_1, _, _ = Preprocess.normalize_to_0_1_batch(y_hat_t_minus_1)
 
         adc_loss = torch.nn.functional.mse_loss(
-            torch.log(y_hat_t_minus_1 + eps), torch.log(y_prime_t_minus_1 + eps)
+            y_hat_t_minus_1, y_prime_t_minus_1
         )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
         self.log(
             f"{mode}_adc_loss",

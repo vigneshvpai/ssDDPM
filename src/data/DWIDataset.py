@@ -66,7 +66,7 @@ class DWIDataset(Dataset):
             image = image.float()  # In-place dtype conversion
 
         if self.preprocess_fn is not None:
-            image, min_val, max_val = self.preprocess_fn(image)
+            image = self.preprocess_fn(image)
         if self.transform:
             image = self.transform(image)
 
@@ -76,15 +76,6 @@ class DWIDataset(Dataset):
             "direction": sample_info["direction"],
             "slice": sample_info["slice"],
         }
-
-        # Add preprocessing info if available
-        if self.preprocess_fn is not None:
-            other_info.update(
-                {
-                    "min_val": min_val,
-                    "max_val": max_val,
-                }
-            )
 
         # Add affine matrix if available
         if affine is not None:

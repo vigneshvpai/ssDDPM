@@ -90,13 +90,15 @@ class Postprocess:
         return image
 
     @staticmethod
-    def denormalize_from_b0(image, original_min=None, original_max=None):
+    def denormalize_from_0_1(image, original_min=None, original_max=None):
         """
         Reverse normalization to b0 using original min and max values.
         Args:
-            image (torch.Tensor): Normalized image tensor.
-            original_min (float or torch.Tensor): Minimum value used during normalization.
-            original_max (float or torch.Tensor): Maximum value used during normalization.
+            image (torch.Tensor): Normalized image tensor of shape (batch_size, bvalues, height, width).
+            original_min (float, torch.Tensor, or dict): Minimum value(s) used during normalization.
+                                                       Can be scalar, tensor, or dict with 'min_val' key.
+            original_max (float, torch.Tensor, or dict): Maximum value(s) used during normalization.
+                                                       Can be scalar, tensor, or dict with 'max_val' key.
         Returns:
             torch.Tensor: Denormalized image tensor.
         """
@@ -104,6 +106,44 @@ class Postprocess:
             raise ValueError(
                 "original_min and original_max must be provided for denormalization."
             )
+
+        # Handle dict input (extract min_val and max_val)
+        if isinstance(original_min, dict) and "min_val" in original_min:
+            original_min = original_min["min_val"]
+        if isinstance(original_max, dict) and "max_val" in original_max:
+            original_max = original_max["max_val"]
+
+        # Ensure original_min and original_max are tensors
+        if not isinstance(original_min, torch.Tensor):
+            original_min = torch.tensor(original_min)
+        if not isinstance(original_max, torch.Tensor):
+            original_max = torch.tensor(original_max)
+
+        # Handle batch dimension
+        if image.ndim == 4:  # (batch_size, bvalues, height, width)
+            batch_size = image.shape[0]
+
+            # Reshape min/max to broadcast across batch and spatial dimensions
+            # original_min/max shape: (batch_size,) -> (batch_size, 1, 1, 1)
+            if original_min.shape == (batch_size,):
+                original_min = original_min.view(batch_size, 1, 1, 1)
+            elif original_min.numel() == 1:
+                # Single value for entire batch
+                original_min = original_min.view(1, 1, 1, 1)
+            else:
+                raise ValueError(
+                    f"original_min shape {original_min.shape} incompatible with batch_size {batch_size}"
+                )
+
+            if original_max.shape == (batch_size,):
+                original_max = original_max.view(batch_size, 1, 1, 1)
+            elif original_max.numel() == 1:
+                # Single value for entire batch
+                original_max = original_max.view(1, 1, 1, 1)
+            else:
+                raise ValueError(
+                    f"original_max shape {original_max.shape} incompatible with batch_size {batch_size}"
+                )
 
         # Undo normalization: x = x_norm * (max - min) + min
         return image * (original_max - original_min) + original_min
