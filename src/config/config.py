@@ -73,7 +73,7 @@ class Config:
         # Optimizer Configs
         # -------------------------
         "OPTIMIZER_CONFIG": {
-            "lr": 1e-5,
+            "lr": 1e-6,
             "betas": (0.9, 0.999),
             "eps": 1e-8,
         },
@@ -85,11 +85,11 @@ class Config:
         # -------------------------
         # Loss Configs
         # -------------------------
-        "lambda_adc": 0.5,
+        "lambda_adc": 0,
         # -------------------------
         # Inference Configs
         # -------------------------
-        "num_inference_steps": 500,
+        "num_inference_steps": 1000,
     }
 
     # -------------------------

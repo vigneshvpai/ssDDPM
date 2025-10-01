@@ -188,6 +188,9 @@ class SSDDPM(L.LightningModule):
     def compute_loss(self, batch, mode="train"):
         images, b_values, other_info = batch  # Step 1: Sample batch y₀ ~ Y
 
+        images, min_val, max_val = Preprocess.normalize_to_0_1(images)
+        images = Preprocess.pad_to_unet_compatible(images)
+
         noise, steps = self._get_noise_and_timesteps(images)
 
         noisy_images = self.scheduler.add_noise(
@@ -198,7 +201,10 @@ class SSDDPM(L.LightningModule):
 
         betas, alphas_cumprod = self._get_beta_and_alpha_cumprod(steps)
 
-        noise_loss = torch.nn.functional.mse_loss(residual, noise)  # ||ê_t - ε||²₂
+        noise_loss = torch.nn.functional.mse_loss(
+            Postprocess.unpad_from_unet_compatible(residual),
+            Postprocess.unpad_from_unet_compatible(noise),
+        )  # ||ê_t - ε||²₂
         self.log(
             f"{mode}_noise_loss",
             noise_loss,
@@ -213,8 +219,11 @@ class SSDDPM(L.LightningModule):
 
         y_prime_t_minus_1 = Postprocess.unpad_from_unet_compatible(y_prime_t_minus_1)
         y_prime_t_minus_1 = Postprocess.denormalize_from_0_1(
-            y_prime_t_minus_1, other_info["min_val"], other_info["max_val"]
+            y_prime_t_minus_1, min_val, max_val
         )
+        min_val = y_prime_t_minus_1.min()
+        if min_val < 0:
+            y_prime_t_minus_1 = y_prime_t_minus_1 + torch.abs(min_val)
 
         S0_hat, D_hat = self.adc_model(
             y_prime_t_minus_1, b_values
@@ -222,11 +231,9 @@ class SSDDPM(L.LightningModule):
 
         y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
 
-        y_prime_t_minus_1, _, _ = Preprocess.normalize_to_0_1_batch(y_prime_t_minus_1)
-        y_hat_t_minus_1, _, _ = Preprocess.normalize_to_0_1_batch(y_hat_t_minus_1)
-
         adc_loss = torch.nn.functional.mse_loss(
-            y_hat_t_minus_1, y_prime_t_minus_1
+            Preprocess.normalize_to_0_1(y_hat_t_minus_1)[0],
+            Preprocess.normalize_to_0_1(y_prime_t_minus_1)[0],
         )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
         self.log(
             f"{mode}_adc_loss",
@@ -248,52 +255,61 @@ class SSDDPM(L.LightningModule):
             batch_size=Config.BATCH_SIZE,
         )
 
-        # if mode == "val" and (
-        #     self.current_epoch % Config.CHECKPOINT_CONFIG["every_n_epochs"] == 0
-        # ):
-        # self._log_specific_slice(
-        #     images,
-        #     b_values,
-        #     other_info,
-        #     step_or_epoch=self.current_epoch,
-        #     prefix=mode,
-        #     save_dir=f"{mode}_images/{self.run_name}/original_images",
-        # )
-        # self._log_specific_slice(
-        #     noisy_images,
-        #     b_values,
-        #     other_info,
-        #     step_or_epoch=self.current_epoch,
-        #     prefix=mode,
-        #     save_dir=f"{mode}_images/{self.run_name}/noisy_images",
-        # )
-        # self._log_specific_slice(
-        #     residual,
-        #     b_values,
-        #     other_info,
-        #     step_or_epoch=self.current_epoch,
-        #     prefix=mode,
-        #     save_dir=f"{mode}_images/{self.run_name}/residual_images",
-        # )
-        # self._log_specific_slice(
-        #     y_hat_t_minus_1,
-        #     b_values,
-        #     other_info,
-        #     step_or_epoch=self.current_epoch,
-        #     prefix=mode,
-        #     save_dir=f"{mode}_images/{self.run_name}/y_hat_t_minus_1",
-        # )
-        # if self.current_epoch == self.max_epochs - 1:
-        #     denoised_images = self.inference(noisy_images, b_values)
-        #     self._log_specific_slice(
-        #         denoised_images,
-        #         b_values,
-        #         other_info,
-        #         step_or_epoch=self.current_epoch,
-        #         prefix=mode,
-        #         save_dir=f"{mode}_images/{self.run_name}/denoised_images",
-        #     )
-        #     del denoised_images
+        if mode == "val" and (
+            self.current_epoch % Config.CHECKPOINT_CONFIG["every_n_epochs"] == 0
+        ):
+            # if mode == "val":
+            self._log_specific_slice(
+                images,
+                b_values,
+                other_info,
+                step_or_epoch=self.current_epoch,
+                prefix=mode,
+                save_dir=f"{mode}_images/{self.run_name}/original_images",
+            )
+            self._log_specific_slice(
+                noisy_images,
+                b_values,
+                other_info,
+                step_or_epoch=self.current_epoch,
+                prefix=mode,
+                save_dir=f"{mode}_images/{self.run_name}/noisy_images",
+            )
+            self._log_specific_slice(
+                residual,
+                b_values,
+                other_info,
+                step_or_epoch=self.current_epoch,
+                prefix=mode,
+                save_dir=f"{mode}_images/{self.run_name}/residual_images",
+            )
+            self._log_specific_slice(
+                y_prime_t_minus_1,
+                b_values,
+                other_info,
+                step_or_epoch=self.current_epoch,
+                prefix=mode,
+                save_dir=f"{mode}_images/{self.run_name}/y_prime_t_minus_1",
+            )
+            self._log_specific_slice(
+                y_hat_t_minus_1,
+                b_values,
+                other_info,
+                step_or_epoch=self.current_epoch,
+                prefix=mode,
+                save_dir=f"{mode}_images/{self.run_name}/y_hat_t_minus_1",
+            )
+            # if self.current_epoch == self.max_epochs - 1:
+            #     denoised_images = self.inference(noisy_images, b_values)
+            #     self._log_specific_slice(
+            #         denoised_images,
+            #         b_values,
+            #         other_info,
+            #         step_or_epoch=self.current_epoch,
+            #         prefix=mode,
+            #         save_dir=f"{mode}_images/{self.run_name}/denoised_images",
+            #     )
+            #     del denoised_images
 
         del (
             noise,
