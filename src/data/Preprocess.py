@@ -22,6 +22,26 @@ class Preprocess:
         return normalized_image, min_val, max_val
 
     @staticmethod
+    def normalize_to_minus_1_1(image: torch.Tensor):
+        """
+        Normalize the image to the [-1, 1] range based on global min and max.
+
+        Args:
+            image (torch.Tensor): Input image tensor.
+        Returns:
+            torch.Tensor: Normalized image in [-1, 1].
+            float: Original min value (for denormalization).
+            float: Original max value (for denormalization).
+        """
+        min_val = image.min()
+        max_val = image.max()
+        scale = (max_val - min_val) if (max_val - min_val) > 0 else 1.0
+
+        normalized_image = (image - min_val) / scale * 2 - 1
+
+        return normalized_image, min_val, max_val
+
+    @staticmethod
     def normalize_to_b0(image):
         """
         Normalize the image to the b0 value (first b-value).

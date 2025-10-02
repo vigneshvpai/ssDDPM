@@ -147,3 +147,17 @@ class Postprocess:
 
         # Undo normalization: x = x_norm * (max - min) + min
         return image * (original_max - original_min) + original_min
+
+    @staticmethod
+    def denormalize_from_minus_1_1(image: torch.Tensor, min_val, max_val):
+        """
+        Denormalize an image from [-1, 1] back to [min_val, max_val].
+
+        Args:
+            image (torch.Tensor): Normalized image in [-1, 1].
+            min_val (float): Original min.
+            max_val (float): Original max.
+        Returns:
+            torch.Tensor: Denormalized image.
+        """
+        return ((image + 1) / 2) * (max_val - min_val) + min_val
