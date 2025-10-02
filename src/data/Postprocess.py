@@ -149,15 +149,9 @@ class Postprocess:
         return image * (original_max - original_min) + original_min
 
     @staticmethod
-    def denormalize_from_minus_1_1(image: torch.Tensor, min_val, max_val):
+    def denormalize_from_minus_1_1(images_norm, min_val, max_val):
         """
-        Denormalize an image from [-1, 1] back to [min_val, max_val].
-
-        Args:
-            image (torch.Tensor): Normalized image in [-1, 1].
-            min_val (float): Original min.
-            max_val (float): Original max.
-        Returns:
-            torch.Tensor: Denormalized image.
+        images_norm: (B, 9, H, W)
+        min_val, max_val: (B, 1, 1, 1) from normalization
         """
-        return ((image + 1) / 2) * (max_val - min_val) + min_val
+        return (images_norm + 1) / 2 * (max_val - min_val) + min_val

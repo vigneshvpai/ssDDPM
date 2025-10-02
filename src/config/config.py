@@ -73,7 +73,7 @@ class Config:
         # Optimizer Configs
         # -------------------------
         "OPTIMIZER_CONFIG": {
-            "lr": 1e-6,
+            "lr": 1e-4,
             "betas": (0.9, 0.999),
             "eps": 1e-8,
         },

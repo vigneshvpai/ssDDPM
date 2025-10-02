@@ -2,6 +2,7 @@ import time
 from diffusers import UNet2DModel, DDPMScheduler
 import lightning as L
 import torch
+import numpy as np
 from src.model.ADC import ADC
 from src.config.config import Config
 from tqdm import tqdm
@@ -89,7 +90,7 @@ class SSDDPM(L.LightningModule):
                 noisy_images - (betas / torch.sqrt(1 - alphas_cumprod)) * residual
             )
 
-        return y_prime_t_minus_1
+        return torch.clamp(y_prime_t_minus_1, -1.0, 1.0)
 
     def _get_y_hat_t_minus_1(self, S0_hat, D_hat, b_values):
         # Get dimensions dynamically
@@ -122,9 +123,12 @@ class SSDDPM(L.LightningModule):
         prefix="train",
         save_dir="train_images",
     ):
-        # Convert to CPU once at the beginning to avoid GPU memory accumulation
         images_cpu = images.cpu().detach()
         b_values_cpu = b_values.cpu().detach()
+
+        # Detect if images are normalized or in true signal range
+        image_min, image_max = images_cpu.min(), images_cpu.max()
+        is_normalized = image_min >= -1.1 and image_max <= 1.1  # Allow small tolerance
 
         slice_values = other_info["slice"]
         middle_slice_mask = slice_values == (self.n_slices // 2)
@@ -141,12 +145,11 @@ class SSDDPM(L.LightningModule):
         os.makedirs(pt_files_dir, exist_ok=True)
 
         for _, image_idx in enumerate(middle_slice_indices):
-            # Use CPU tensors to avoid GPU memory accumulation
             single_image = images_cpu[image_idx : image_idx + 1]
             single_b_values = b_values_cpu[image_idx : image_idx + 1]
             single_info = {key: other_info[key][image_idx] for key in other_info}
 
-            # Save with explicit cleanup
+            # Save metadata including range info
             pt_filename = os.path.join(
                 pt_files_dir, f"{single_info['original_filename']}.pt"
             )
@@ -157,50 +160,70 @@ class SSDDPM(L.LightningModule):
                     "other_info": single_info,
                     "step_or_epoch": step_or_epoch,
                     "prefix": prefix,
+                    "is_normalized": is_normalized,  # Save range info
+                    "image_range": (float(image_min), float(image_max)),
                 },
                 pt_filename,
             )
 
-            # Create plot
+            # Create plot with adaptive scaling
             fig, axes = plt.subplots(3, 3, figsize=(15, 15))
             plt.subplots_adjust(wspace=0.05, hspace=0.05)
             axes_flat = axes.flatten()
 
             for i in range(self.n_bvals):
                 b_value_image = single_image[0, i, :, :].float().numpy().T[::-1, :]
-                axes_flat[i].imshow(b_value_image, cmap="gray")
+
+                # Adaptive display scaling
+                if is_normalized:
+                    # For normalized images, use fixed [-1, 1] range
+                    vmin, vmax = -1, 1
+                    title_suffix = " (norm)"
+                else:
+                    # For true signals, use percentiles to avoid outlier effects
+                    vmin = np.percentile(b_value_image, 1)
+                    vmax = np.percentile(b_value_image, 99)
+                    title_suffix = " (raw)"
+
+                im = axes_flat[i].imshow(
+                    b_value_image, cmap="gray", vmin=vmin, vmax=vmax
+                )
                 axes_flat[i].set_title(
-                    f"B-value: {int(single_b_values[0, i])}", fontsize=8
+                    f"B-value: {int(single_b_values[0, i])}{title_suffix}", fontsize=8
                 )
                 axes_flat[i].axis("off")
+
+                # Optional: Add colorbar for reference
+                # plt.colorbar(im, ax=axes_flat[i], fraction=0.046)
 
             plt.savefig(
                 os.path.join(plots_dir, f"{single_info['original_filename']}.png"),
                 dpi=150,
                 bbox_inches="tight",
             )
-            plt.close(fig)  # Explicitly close the figure
+            plt.close(fig)
 
             # Explicit cleanup
             del single_image, single_b_values, b_value_image
             del fig, axes, axes_flat
 
     def compute_loss(self, batch, mode="train"):
-        images, b_values, other_info = batch  # Step 1: Sample batch y₀ ~ Y
+        original_images, b_values, other_info = batch  # Step 1: Sample batch y₀ ~ Y
 
-        images, min_val, max_val = Preprocess.normalize_to_0_1(images)
-        images = Preprocess.pad_to_unet_compatible(images)
+        images_normalized, min_val, max_val = Preprocess.normalize_to_minus_1_1(
+            original_images
+        )
+        images_normalized_padded = Preprocess.pad_to_unet_compatible(images_normalized)
 
-        noise, steps = self._get_noise_and_timesteps(images)
+        noise, steps = self._get_noise_and_timesteps(images_normalized_padded)
 
-        noisy_images = self.scheduler.add_noise(
-            images, noise, steps
+        y_t_normalized_padded = self.scheduler.add_noise(
+            images_normalized_padded, noise, steps
         )  # Step 4: y_t = √ā_t y₀ + √1 - ā_t ε
 
-        residual = self.model(noisy_images, steps).sample  # Step 5: ê_t = f₀(y_t, t)
-
-        betas, alphas_cumprod = self._get_beta_and_alpha_cumprod(steps)
-
+        residual = self.model(
+            y_t_normalized_padded, steps
+        ).sample  # Step 5: ê_t = f₀(y_t, t)
         noise_loss = torch.nn.functional.mse_loss(
             Postprocess.unpad_from_unet_compatible(residual),
             Postprocess.unpad_from_unet_compatible(noise),
@@ -213,17 +236,17 @@ class SSDDPM(L.LightningModule):
             batch_size=Config.BATCH_SIZE,
         )
 
-        y_prime_t_minus_1 = self._get_y_prime_t_minus_1(
-            noisy_images, residual, betas, alphas_cumprod
-        )
+        betas, alphas_cumprod = self._get_beta_and_alpha_cumprod(steps)
 
-        y_prime_t_minus_1 = Postprocess.unpad_from_unet_compatible(y_prime_t_minus_1)
-        y_prime_t_minus_1 = Postprocess.denormalize_from_0_1(
-            y_prime_t_minus_1, min_val, max_val
+        y_prime_t_minus_1_normalized_padded = self._get_y_prime_t_minus_1(
+            y_t_normalized_padded, residual, betas, alphas_cumprod
         )
-        min_val = y_prime_t_minus_1.min()
-        if min_val < 0:
-            y_prime_t_minus_1 = y_prime_t_minus_1 + torch.abs(min_val)
+        y_prime_t_minus_1_normalized = Postprocess.unpad_from_unet_compatible(
+            y_prime_t_minus_1_normalized_padded
+        )
+        y_prime_t_minus_1 = Postprocess.denormalize_from_minus_1_1(
+            y_prime_t_minus_1_normalized, min_val, max_val
+        )
 
         S0_hat, D_hat = self.adc_model(
             y_prime_t_minus_1, b_values
@@ -231,9 +254,14 @@ class SSDDPM(L.LightningModule):
 
         y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
 
+        # Normalize both to [-1,1] for comparable loss scaling
+        eps = 1e-8
+        y_hat_norm = 2 * (y_hat_t_minus_1 - min_val) / (max_val - min_val + eps) - 1
+        y_prime_norm = 2 * (y_prime_t_minus_1 - min_val) / (max_val - min_val + eps) - 1
+
         adc_loss = torch.nn.functional.mse_loss(
-            Preprocess.normalize_to_0_1(y_hat_t_minus_1)[0],
-            Preprocess.normalize_to_0_1(y_prime_t_minus_1)[0],
+            y_hat_norm,
+            y_prime_norm,
         )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
         self.log(
             f"{mode}_adc_loss",
@@ -255,26 +283,27 @@ class SSDDPM(L.LightningModule):
             batch_size=Config.BATCH_SIZE,
         )
 
+        loss_ratio = (self.lambda_adc * adc_loss) / (noise_loss + 1e-8)
+        self.log(
+            f"{mode}_loss_ratio",
+            loss_ratio,
+            on_epoch=True,
+            sync_dist=True,
+            batch_size=Config.BATCH_SIZE,
+        )
+
         if mode == "val" and (
             self.current_epoch % Config.CHECKPOINT_CONFIG["every_n_epochs"] == 0
         ):
-            # if mode == "val":
-            self._log_specific_slice(
-                images,
-                b_values,
-                other_info,
-                step_or_epoch=self.current_epoch,
-                prefix=mode,
-                save_dir=f"{mode}_images/{self.run_name}/original_images",
-            )
-            self._log_specific_slice(
-                noisy_images,
-                b_values,
-                other_info,
-                step_or_epoch=self.current_epoch,
-                prefix=mode,
-                save_dir=f"{mode}_images/{self.run_name}/noisy_images",
-            )
+            if self.current_epoch == 0:
+                self._log_specific_slice(
+                    original_images,
+                    b_values,
+                    other_info,
+                    step_or_epoch=self.current_epoch,
+                    prefix=mode,
+                    save_dir=f"{mode}_images/{self.run_name}/original_images",
+                )
             self._log_specific_slice(
                 residual,
                 b_values,
@@ -299,7 +328,7 @@ class SSDDPM(L.LightningModule):
                 prefix=mode,
                 save_dir=f"{mode}_images/{self.run_name}/y_hat_t_minus_1",
             )
-            # if self.current_epoch == self.max_epochs - 1:
+            # if self.current_epoch != 0:
             #     denoised_images = self.inference(noisy_images, b_values)
             #     self._log_specific_slice(
             #         denoised_images,
@@ -309,20 +338,6 @@ class SSDDPM(L.LightningModule):
             #         prefix=mode,
             #         save_dir=f"{mode}_images/{self.run_name}/denoised_images",
             #     )
-            #     del denoised_images
-
-        del (
-            noise,
-            steps,
-            noisy_images,
-            residual,
-            betas,
-            alphas_cumprod,
-            y_prime_t_minus_1,
-            S0_hat,
-            D_hat,
-            y_hat_t_minus_1,
-        )
 
         return total_loss
 
