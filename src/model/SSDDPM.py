@@ -93,13 +93,13 @@ class SSDDPM(L.LightningModule):
 
     def _get_y_hat_t_minus_1(self, S0_hat, D_hat, b_values):
         # Get dimensions dynamically
-        batch_size, height, width = S0_hat.shape  # S0_hat: (B, H, W)
+        batch_size, width, height = S0_hat.shape  # S0_hat: (B, H, W)
         n_bvals = b_values.shape[1]  # Get n_bvals from b_values
 
         # Expand S0_hat and D_hat to include n_bvals dimension
-        # S0_hat: (B, H, W) -> (B, 1, H, W)
+        # S0_hat: (B, W, H) -> (B, 1, W, H)
         S0_hat_expanded = S0_hat.unsqueeze(1)
-        # D_hat: (B, H, W) -> (B, 1, H, W)
+        # D_hat: (B, W, H) -> (B, 1, W, H)
         D_hat_expanded = D_hat.unsqueeze(1)
 
         # Reshape b_values to broadcast properly
