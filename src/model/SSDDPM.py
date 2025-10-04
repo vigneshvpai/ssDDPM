@@ -236,61 +236,61 @@ class SSDDPM(L.LightningModule):
             batch_size=Config.BATCH_SIZE,
         )
 
-        betas, alphas_cumprod = self._get_beta_and_alpha_cumprod(steps)
+        # betas, alphas_cumprod = self._get_beta_and_alpha_cumprod(steps)
 
-        y_prime_t_minus_1_normalized_padded = self._get_y_prime_t_minus_1(
-            y_t_normalized_padded, residual, betas, alphas_cumprod
-        )
-        y_prime_t_minus_1_normalized = Postprocess.unpad_from_unet_compatible(
-            y_prime_t_minus_1_normalized_padded
-        )
-        y_prime_t_minus_1 = Postprocess.denormalize_from_minus_1_1(
-            y_prime_t_minus_1_normalized, min_val, max_val
-        )
+        # y_prime_t_minus_1_normalized_padded = self._get_y_prime_t_minus_1(
+        #     y_t_normalized_padded, residual, betas, alphas_cumprod
+        # )
+        # y_prime_t_minus_1_normalized = Postprocess.unpad_from_unet_compatible(
+        #     y_prime_t_minus_1_normalized_padded
+        # )
+        # y_prime_t_minus_1 = Postprocess.denormalize_from_minus_1_1(
+        #     y_prime_t_minus_1_normalized, min_val, max_val
+        # )
 
-        S0_hat, D_hat = self.adc_model(
-            y_prime_t_minus_1, b_values
-        )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
+        # S0_hat, D_hat = self.adc_model(
+        #     y_prime_t_minus_1, b_values
+        # )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
 
-        y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
+        # y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
 
-        # Normalize both to [-1,1] for comparable loss scaling
-        eps = 1e-8
-        y_hat_norm = 2 * (y_hat_t_minus_1 - min_val) / (max_val - min_val + eps) - 1
-        y_prime_norm = 2 * (y_prime_t_minus_1 - min_val) / (max_val - min_val + eps) - 1
+        # # Normalize both to [-1,1] for comparable loss scaling
+        # eps = 1e-8
+        # y_hat_norm = 2 * (y_hat_t_minus_1 - min_val) / (max_val - min_val + eps) - 1
+        # y_prime_norm = 2 * (y_prime_t_minus_1 - min_val) / (max_val - min_val + eps) - 1
 
-        adc_loss = torch.nn.functional.mse_loss(
-            y_hat_norm,
-            y_prime_norm,
-        )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
-        self.log(
-            f"{mode}_adc_loss",
-            adc_loss,
-            on_epoch=True,
-            sync_dist=True,
-            batch_size=Config.BATCH_SIZE,
-        )
+        # adc_loss = torch.nn.functional.mse_loss(
+        #     y_hat_norm,
+        #     y_prime_norm,
+        # )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
+        # self.log(
+        #     f"{mode}_adc_loss",
+        #     adc_loss,
+        #     on_epoch=True,
+        #     sync_dist=True,
+        #     batch_size=Config.BATCH_SIZE,
+        # )
 
-        total_loss = (
-            noise_loss + self.lambda_adc * adc_loss
-        )  # Total loss: noise loss + ADC loss
+        # total_loss = (
+        #     noise_loss + self.lambda_adc * adc_loss
+        # )  # Total loss: noise loss + ADC loss
 
-        self.log(
-            f"{mode}_total_loss",
-            total_loss,
-            on_epoch=True,
-            sync_dist=True,
-            batch_size=Config.BATCH_SIZE,
-        )
+        # self.log(
+        #     f"{mode}_total_loss",
+        #     total_loss,
+        #     on_epoch=True,
+        #     sync_dist=True,
+        #     batch_size=Config.BATCH_SIZE,
+        # )
 
-        loss_ratio = (self.lambda_adc * adc_loss) / (noise_loss + 1e-8)
-        self.log(
-            f"{mode}_loss_ratio",
-            loss_ratio,
-            on_epoch=True,
-            sync_dist=True,
-            batch_size=Config.BATCH_SIZE,
-        )
+        # loss_ratio = (self.lambda_adc * adc_loss) / (noise_loss + 1e-8)
+        # self.log(
+        #     f"{mode}_loss_ratio",
+        #     loss_ratio,
+        #     on_epoch=True,
+        #     sync_dist=True,
+        #     batch_size=Config.BATCH_SIZE,
+        # )
 
         if mode == "val" and (
             self.current_epoch % Config.CHECKPOINT_CONFIG["every_n_epochs"] == 0
@@ -312,22 +312,22 @@ class SSDDPM(L.LightningModule):
                 prefix=mode,
                 save_dir=f"{mode}_images/{self.run_name}/residual_images",
             )
-            self._log_specific_slice(
-                y_prime_t_minus_1,
-                b_values,
-                other_info,
-                step_or_epoch=self.current_epoch,
-                prefix=mode,
-                save_dir=f"{mode}_images/{self.run_name}/y_prime_t_minus_1",
-            )
-            self._log_specific_slice(
-                y_hat_t_minus_1,
-                b_values,
-                other_info,
-                step_or_epoch=self.current_epoch,
-                prefix=mode,
-                save_dir=f"{mode}_images/{self.run_name}/y_hat_t_minus_1",
-            )
+            # self._log_specific_slice(
+            #     y_prime_t_minus_1,
+            #     b_values,
+            #     other_info,
+            #     step_or_epoch=self.current_epoch,
+            #     prefix=mode,
+            #     save_dir=f"{mode}_images/{self.run_name}/y_prime_t_minus_1",
+            # )
+            # self._log_specific_slice(
+            #     y_hat_t_minus_1,
+            #     b_values,
+            #     other_info,
+            #     step_or_epoch=self.current_epoch,
+            #     prefix=mode,
+            #     save_dir=f"{mode}_images/{self.run_name}/y_hat_t_minus_1",
+            # )
             # if self.current_epoch != 0:
             #     denoised_images = self.inference(noisy_images, b_values)
             #     self._log_specific_slice(
@@ -339,7 +339,7 @@ class SSDDPM(L.LightningModule):
             #         save_dir=f"{mode}_images/{self.run_name}/denoised_images",
             #     )
 
-        return total_loss
+        return noise_loss
 
     @torch.no_grad()
     def inference(self, y_hat_t, b_values):
