@@ -275,13 +275,15 @@ class SSDDPM(L.LightningModule):
         #     noise_loss + self.lambda_adc * adc_loss
         # )  # Total loss: noise loss + ADC loss
 
-        # self.log(
-        #     f"{mode}_total_loss",
-        #     total_loss,
-        #     on_epoch=True,
-        #     sync_dist=True,
-        #     batch_size=Config.BATCH_SIZE,
-        # )
+        total_loss = noise_loss
+
+        self.log(
+            f"{mode}_total_loss",
+            total_loss,
+            on_epoch=True,
+            sync_dist=True,
+            batch_size=Config.BATCH_SIZE,
+        )
 
         # loss_ratio = (self.lambda_adc * adc_loss) / (noise_loss + 1e-8)
         # self.log(
@@ -339,7 +341,7 @@ class SSDDPM(L.LightningModule):
             #         save_dir=f"{mode}_images/{self.run_name}/denoised_images",
             #     )
 
-        return noise_loss
+        return total_loss
 
     @torch.no_grad()
     def inference(self, y_hat_t, b_values):

@@ -72,6 +72,28 @@ class Preprocess:
         return image
 
     @staticmethod
+    def filter_bvals_by_indices(image, indices):
+        """
+        Filter b-values from the image tensor using specified indices.
+        Args:
+            image (torch.Tensor): Image tensor of shape (batch_size, bvalues, width, height)
+                                 or (bvalues, width, height).
+            indices (list or torch.Tensor): List or tensor of indices to keep.
+        Returns:
+            torch.Tensor: Filtered image tensor with only the specified b-values.
+        """
+        if image.ndim == 3:
+            # Single image: (bvalues, width, height)
+            return image[indices, :, :]
+        elif image.ndim == 4:
+            # Batched image: (batch_size, bvalues, width, height)
+            return image[:, indices, :, :]
+        else:
+            raise ValueError(
+                f"Expected 3D or 4D tensor, got {image.ndim}D tensor with shape {image.shape}"
+            )
+
+    @staticmethod
     def pad_to_unet_compatible(image, target_shape=None):
         """
         Pad the image tensor with zeros to make height and width match target_shape.
@@ -141,5 +163,6 @@ class Preprocess:
         # image, min_val, max_val = Preprocess.normalize_to_0_1(image)
         # image = Preprocess.pad_to_unet_compatible(image)
         image = Preprocess.reorder_bvals(image)
+        # image = Preprocess.filter_bvals_by_indices(image, [2, 5, 7])
 
         return image
