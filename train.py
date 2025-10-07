@@ -137,6 +137,11 @@ def main():
     # Train the model
     trainer.fit(model, datamodule=data_module, ckpt_path=latest_checkpoint)
 
+    # Save the final model checkpoint at the end of training
+    final_checkpoint_path = os.path.join(checkpoint_dir, "final_model.ckpt")
+    trainer.save_checkpoint(final_checkpoint_path)
+    print(f"Final model checkpoint saved to: {final_checkpoint_path}")
+
 
 if __name__ == "__main__":
     main()

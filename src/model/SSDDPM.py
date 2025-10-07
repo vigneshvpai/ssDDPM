@@ -90,7 +90,7 @@ class SSDDPM(L.LightningModule):
                 noisy_images - (betas / torch.sqrt(1 - alphas_cumprod)) * residual
             )
 
-        return torch.clamp(y_prime_t_minus_1, -1.0, 1.0)
+        return y_prime_t_minus_1
 
     def _get_y_hat_t_minus_1(self, S0_hat, D_hat, b_values):
         # Get dimensions dynamically
@@ -167,7 +167,10 @@ class SSDDPM(L.LightningModule):
             )
 
             # Create plot with adaptive scaling
-            fig, axes = plt.subplots(3, 3, figsize=(15, 15))
+            if self.n_bvals == 3:
+                fig, axes = plt.subplots(1, 3, figsize=(12, 4))
+            else:
+                fig, axes = plt.subplots(3, 3, figsize=(15, 15))
             plt.subplots_adjust(wspace=0.05, hspace=0.05)
             axes_flat = axes.flatten()
 
@@ -255,10 +258,8 @@ class SSDDPM(L.LightningModule):
         # y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
 
         # # Normalize both to [-1,1] for comparable loss scaling
-        # eps = 1e-8
-        # y_hat_norm = 2 * (y_hat_t_minus_1 - min_val) / (max_val - min_val + eps) - 1
-        # y_prime_norm = 2 * (y_prime_t_minus_1 - min_val) / (max_val - min_val + eps) - 1
-
+        # y_prime_norm, _, _ = Preprocess.normalize_to_minus_1_1(y_prime_t_minus_1)
+        # y_hat_norm, _, _ = Preprocess.normalize_to_minus_1_1(y_hat_t_minus_1)
         # adc_loss = torch.nn.functional.mse_loss(
         #     y_hat_norm,
         #     y_prime_norm,

@@ -66,7 +66,7 @@ class DWIDataset(Dataset):
             image = image.float()  # In-place dtype conversion
 
         if self.preprocess_fn is not None:
-            image = self.preprocess_fn(image)
+            image, b_values = self.preprocess_fn(image, b_values)
         if self.transform:
             image = self.transform(image)
 
