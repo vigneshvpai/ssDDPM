@@ -5,21 +5,28 @@ from src.config.config import Config
 
 class Preprocess:
     @staticmethod
-    def normalize_to_0_1(image):
+    def normalize_to_0_1(images: torch.Tensor):
         """
-        Normalize the image to the 0-1 range globally.
+        Normalize each image in the batch to the 0-1 range, per sample.
         Args:
-            image (torch.Tensor): The input image tensor.
+            images (torch.Tensor): The input image tensor of shape (B, ...).
         Returns:
-            torch.Tensor: The image scaled to 0-1.
+            torch.Tensor: The images scaled to 0-1 per sample.
+            torch.Tensor: min values per sample.
+            torch.Tensor: max values per sample.
         """
-        min_val = image.min()
-        max_val = image.max()
-        scale = (max_val - min_val) if (max_val - min_val) > 0 else 1.0
+        # Flatten all but batch dimension to compute min/max per sample
+        min_val = images.view(images.shape[0], -1).min(dim=1)[0]  # (B,)
+        max_val = images.view(images.shape[0], -1).max(dim=1)[0]  # (B,)
 
-        normalized_image = (image - min_val) / scale
+        # Reshape for broadcasting
+        min_val = min_val.view(-1, *[1] * (images.ndim - 1))
+        max_val = max_val.view(-1, *[1] * (images.ndim - 1))
 
-        return normalized_image, min_val, max_val
+        scale = (max_val - min_val).clamp(min=1e-8)
+        normalized_images = (images - min_val) / scale
+
+        return normalized_images, min_val, max_val
 
     @staticmethod
     def normalize_to_minus_1_1(images: torch.Tensor):

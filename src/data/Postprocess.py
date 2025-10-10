@@ -90,6 +90,19 @@ class Postprocess:
         return image
 
     @staticmethod
+    def denormalize_from_0_1(images_norm, min_val, max_val):
+        """
+        Denormalize images from 0-1 range back to original scale.
+        Args:
+            images_norm (torch.Tensor): Normalized images, shape (B, ...).
+            min_val (torch.Tensor): Minimum values per sample, shape (B, 1, ...).
+            max_val (torch.Tensor): Maximum values per sample, shape (B, 1, ...).
+        Returns:
+            torch.Tensor: Denormalized images.
+        """
+        return images_norm * (max_val - min_val) + min_val
+
+    @staticmethod
     def denormalize_from_minus_1_1(images_norm, min_val, max_val):
         """
         images_norm: (B, 9, H, W)
