@@ -81,7 +81,7 @@ class Config:
         # Model Configs
         # -------------------------
         "in_channels": DWI_CONFIG["n_bvals"],
-        "out_channels": DWI_CONFIG["n_bvals"],
+        "out_channels": 1,
         # -------------------------
         # Loss Configs
         # -------------------------

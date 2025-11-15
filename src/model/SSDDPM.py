@@ -75,9 +75,9 @@ class SSDDPM(L.LightningModule):
         return betas, alphas_cumprod
 
     def _get_y_prime_t_minus_1(
-        self, noisy_images, residual, betas, alphas_cumprod, mode="train"
+        self, noisy_images, residual, betas, alphas_cumprod, mode="deterministic"
     ):
-        if mode == "train":
+        if mode == "stochastic":
             epsilon_zero = torch.randn_like(noisy_images)  # Step 6: ε₀ ~ N(0, I)
 
             y_prime_t_minus_1 = (1 / torch.sqrt(1 - betas)) * (
@@ -85,7 +85,7 @@ class SSDDPM(L.LightningModule):
             ) + torch.sqrt(
                 betas
             ) * epsilon_zero  # Step 7: y'_{t-1} = (1 / √1 - β_t) (y_t - (β_t / √1 - ā_t) ê_t) + √β_t ε₀
-        else:
+        elif mode == "deterministic":
             y_prime_t_minus_1 = (1 / torch.sqrt(1 - betas)) * (
                 noisy_images - (betas / torch.sqrt(1 - alphas_cumprod)) * residual
             )
@@ -228,8 +228,8 @@ class SSDDPM(L.LightningModule):
             y_t_normalized_padded, steps
         ).sample  # Step 5: ê_t = f₀(y_t, t)
         noise_loss = torch.nn.functional.mse_loss(
-            Postprocess.unpad_from_unet_compatible(residual),
-            Postprocess.unpad_from_unet_compatible(noise),
+            residual,
+            noise,
         )  # ||ê_t - ε||²₂
         self.log(
             f"{mode}_noise_loss",
@@ -239,44 +239,53 @@ class SSDDPM(L.LightningModule):
             batch_size=Config.BATCH_SIZE,
         )
 
-        # betas, alphas_cumprod = self._get_beta_and_alpha_cumprod(steps)
+        # Upto this point, the implementation is correct.
 
-        # y_prime_t_minus_1_normalized_padded = self._get_y_prime_t_minus_1(
-        #     y_t_normalized_padded, residual, betas, alphas_cumprod
-        # )
-        # y_prime_t_minus_1_normalized = Postprocess.unpad_from_unet_compatible(
-        #     y_prime_t_minus_1_normalized_padded
-        # )
-        # y_prime_t_minus_1 = Postprocess.denormalize_from_minus_1_1(
-        #     y_prime_t_minus_1_normalized, min_val, max_val
-        # )
+        betas, alphas_cumprod = self._get_beta_and_alpha_cumprod(steps)
 
-        # S0_hat, D_hat = self.adc_model(
-        #     y_prime_t_minus_1, b_values
-        # )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
+        y_prime_t_minus_1_unstable_padded = self._get_y_prime_t_minus_1(
+            y_t_normalized_padded, residual, betas, alphas_cumprod
+        )
+        y_prime_t_minus_1_unstable = Postprocess.unpad_from_unet_compatible(
+            y_prime_t_minus_1_unstable_padded
+        )
+        y_prime_t_minus_1 = Postprocess.denormalize_from_minus_1_1(
+            y_prime_t_minus_1_unstable, min_val, max_val
+        )  # This is unstable because intermediate values can be outside the [-1, 1] range.
 
-        # y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
+        eps = 1e-6
+        y_prime_t_minus_1 = torch.clamp(y_prime_t_minus_1, eps)  # Now it's stable.
+
+        y_prime_t_minus_1_b0_normalized, b0_image = Preprocess.normalize_to_b0(
+            y_prime_t_minus_1
+        )
+
+        S0_hat, D_hat = self.adc_model(
+            y_prime_t_minus_1_b0_normalized, b_values
+        )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
+
+        y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
 
         # # Normalize both to [-1,1] for comparable loss scaling
         # y_prime_norm, _, _ = Preprocess.normalize_to_minus_1_1(y_prime_t_minus_1)
         # y_hat_norm, _, _ = Preprocess.normalize_to_minus_1_1(y_hat_t_minus_1)
-        # adc_loss = torch.nn.functional.mse_loss(
-        #     y_hat_norm,
-        #     y_prime_norm,
-        # )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
-        # self.log(
-        #     f"{mode}_adc_loss",
-        #     adc_loss,
-        #     on_epoch=True,
-        #     sync_dist=True,
-        #     batch_size=Config.BATCH_SIZE,
-        # )
+        # No need to normalize because we want ADC in true signal range.
 
-        # total_loss = (
-        #     noise_loss + self.lambda_adc * adc_loss
-        # )  # Total loss: noise loss + ADC loss
+        adc_loss = torch.nn.functional.mse_loss(
+            y_hat_t_minus_1,
+            y_prime_t_minus_1_b0_normalized,
+        )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
+        self.log(
+            f"{mode}_adc_loss",
+            adc_loss,
+            on_epoch=True,
+            sync_dist=True,
+            batch_size=Config.BATCH_SIZE,
+        )
 
-        total_loss = noise_loss
+        total_loss = (
+            noise_loss + self.lambda_adc * adc_loss
+        )  # Total loss: noise loss + ADC loss
 
         self.log(
             f"{mode}_total_loss",
@@ -285,15 +294,6 @@ class SSDDPM(L.LightningModule):
             sync_dist=True,
             batch_size=Config.BATCH_SIZE,
         )
-
-        # loss_ratio = (self.lambda_adc * adc_loss) / (noise_loss + 1e-8)
-        # self.log(
-        #     f"{mode}_loss_ratio",
-        #     loss_ratio,
-        #     on_epoch=True,
-        #     sync_dist=True,
-        #     batch_size=Config.BATCH_SIZE,
-        # )
 
         if mode == "val" and (
             self.current_epoch % Config.CHECKPOINT_CONFIG["every_n_epochs"] == 0
