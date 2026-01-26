@@ -239,53 +239,47 @@ class SSDDPM(L.LightningModule):
             batch_size=Config.BATCH_SIZE,
         )
 
-        # Upto this point, the implementation is correct.
+        # betas, alphas_cumprod = self._get_beta_and_alpha_cumprod(steps)
 
-        betas, alphas_cumprod = self._get_beta_and_alpha_cumprod(steps)
+        # y_prime_t_minus_1_unstable_padded = self._get_y_prime_t_minus_1(
+        #     y_t_normalized_padded, residual, betas, alphas_cumprod
+        # )
+        # y_prime_t_minus_1_unstable = Postprocess.unpad_from_unet_compatible(
+        #     y_prime_t_minus_1_unstable_padded
+        # )
+        # y_prime_t_minus_1 = Postprocess.denormalize_from_minus_1_1(
+        #     y_prime_t_minus_1_unstable, min_val, max_val
+        # )  # This is unstable because intermediate values can be outside the [-1, 1] range.
 
-        y_prime_t_minus_1_unstable_padded = self._get_y_prime_t_minus_1(
-            y_t_normalized_padded, residual, betas, alphas_cumprod
-        )
-        y_prime_t_minus_1_unstable = Postprocess.unpad_from_unet_compatible(
-            y_prime_t_minus_1_unstable_padded
-        )
-        y_prime_t_minus_1 = Postprocess.denormalize_from_minus_1_1(
-            y_prime_t_minus_1_unstable, min_val, max_val
-        )  # This is unstable because intermediate values can be outside the [-1, 1] range.
+        # eps = 1e-6
+        # y_prime_t_minus_1 = torch.clamp(y_prime_t_minus_1, eps)  # Now it's stable.
 
-        eps = 1e-6
-        y_prime_t_minus_1 = torch.clamp(y_prime_t_minus_1, eps)  # Now it's stable.
+        # y_prime_t_minus_1, b0_image = Preprocess.normalize_to_b0(y_prime_t_minus_1)
 
-        y_prime_t_minus_1_b0_normalized, b0_image = Preprocess.normalize_to_b0(
-            y_prime_t_minus_1
-        )
+        # S0_hat, D_hat = self.adc_model(
+        #     y_prime_t_minus_1, b_values
+        # )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
 
-        S0_hat, D_hat = self.adc_model(
-            y_prime_t_minus_1_b0_normalized, b_values
-        )  # Step 8: Ŝ₀, D̂ ← f_ADC(y'_{t-1})
-
-        y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
+        # y_hat_t_minus_1 = self._get_y_hat_t_minus_1(S0_hat, D_hat, b_values)
 
         # # Normalize both to [-1,1] for comparable loss scaling
         # y_prime_norm, _, _ = Preprocess.normalize_to_minus_1_1(y_prime_t_minus_1)
         # y_hat_norm, _, _ = Preprocess.normalize_to_minus_1_1(y_hat_t_minus_1)
         # No need to normalize because we want ADC in true signal range.
 
-        adc_loss = torch.nn.functional.mse_loss(
-            y_hat_t_minus_1,
-            y_prime_t_minus_1_b0_normalized,
-        )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
-        self.log(
-            f"{mode}_adc_loss",
-            adc_loss,
-            on_epoch=True,
-            sync_dist=True,
-            batch_size=Config.BATCH_SIZE,
-        )
+        # adc_loss = torch.nn.functional.mse_loss(
+        #     y_hat_t_minus_1,
+        #     y_prime_t_minus_1,
+        # )  # Self-supervised: ||ŷ_{t-1} - f₀(ŷ_{t-1}, t)||²₂
+        # self.log(
+        #     f"{mode}_adc_loss",
+        #     adc_loss,
+        #     on_epoch=True,
+        #     sync_dist=True,
+        #     batch_size=Config.BATCH_SIZE,
+        # )
 
-        total_loss = (
-            noise_loss + self.lambda_adc * adc_loss
-        )  # Total loss: noise loss + ADC loss
+        total_loss = noise_loss  # Total loss: noise loss + ADC loss
 
         self.log(
             f"{mode}_total_loss",
@@ -342,7 +336,7 @@ class SSDDPM(L.LightningModule):
             #         save_dir=f"{mode}_images/{self.run_name}/denoised_images",
             #     )
 
-        return total_loss
+        return noise_loss
 
     @torch.no_grad()
     def inference(self, y_hat_t, b_values):

@@ -170,7 +170,7 @@ class Preprocess:
         # image, min_val, max_val = Preprocess.normalize_to_0_1(image)
         # image = Preprocess.pad_to_unet_compatible(image)
         image = Preprocess.reorder_bvals(image)
-        image = Preprocess.filter_bvals_by_indices(image, [2, 5, 7])
-        b_values = b_values[[2, 5, 7]]
+        # image = Preprocess.filter_bvals_by_indices(image, [2, 5, 7])
+        # b_values = b_values[[2, 5, 7]]
 
         return image, b_values

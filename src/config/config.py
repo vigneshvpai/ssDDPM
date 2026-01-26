@@ -47,7 +47,7 @@ class Config:
     # -------------------------
     DWI_CONFIG = {
         "num_dirs": 3,
-        "n_bvals": 3,
+        "n_bvals": 9,
         "n_slices": 25,
     }
 
@@ -81,7 +81,7 @@ class Config:
         # Model Configs
         # -------------------------
         "in_channels": DWI_CONFIG["n_bvals"],
-        "out_channels": 1,
+        "out_channels": DWI_CONFIG["n_bvals"],
         # -------------------------
         # Loss Configs
         # -------------------------

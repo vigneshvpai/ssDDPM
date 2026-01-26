@@ -224,3 +224,4 @@ val_images/
 # Ignore noise_residual notebook
 noise_residual.ipynb
 denoise.ipynb
+inference_frames*
